@@ -60,7 +60,7 @@ char *dfststr="tst";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalsound 2021/12/03"};
+char progid[80]={"normalsound 2022/10/12"};
 char progname[256];
 
 int arg=0;

@@ -56,7 +56,7 @@ char *ststr=NULL;
 char *dfststr="tst";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound"};
+char progid[80]={"interleavesound 2022/10/12"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -650,4 +650,3 @@ void write_snd_record(char *progname, struct RadarParm *prm, struct FitData *fit
 
   fclose(out);
 }
-
