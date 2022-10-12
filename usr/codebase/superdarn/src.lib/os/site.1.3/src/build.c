@@ -34,48 +34,12 @@
 #include "site.h"
 #include "siteglobal.h"
 
-#include "site.fhe.h"
-#include "site.fhw.h"
 #include "site.cve.h"
 #include "site.cvw.h"
-#include "site.tst.h"
 
 int SiteBuild(int stid) {
   switch (stid) {
      
-  case 0:
-    sitelib.start=SiteTstStart;
-    sitelib.setupradar=SiteTstSetupRadar;
-    sitelib.startscan=SiteTstStartScan;
-    sitelib.startintt=SiteTstStartIntt;
-    sitelib.fclr=SiteTstFCLR;
-    sitelib.tmseq=SiteTstTimeSeq;
-    sitelib.integrate=SiteTstIntegrate;
-    sitelib.endscan=SiteTstEndScan;
-    sitelib.exit=SiteTstExit;
-    break;
-  case 205:
-    sitelib.start=SiteFheStart;
-    sitelib.setupradar=SiteFheSetupRadar;
-    sitelib.startscan=SiteFheStartScan;
-    sitelib.startintt=SiteFheStartIntt;
-    sitelib.fclr=SiteFheFCLR;
-    sitelib.tmseq=SiteFheTimeSeq;
-    sitelib.integrate=SiteFheIntegrate;
-    sitelib.endscan=SiteFheEndScan;
-    sitelib.exit=SiteFheExit;
-    break;
-  case 204:
-    sitelib.start=SiteFhwStart;
-    sitelib.setupradar=SiteFhwSetupRadar;
-    sitelib.startscan=SiteFhwStartScan;
-    sitelib.startintt=SiteFhwStartIntt;
-    sitelib.fclr=SiteFhwFCLR;
-    sitelib.tmseq=SiteFhwTimeSeq;
-    sitelib.integrate=SiteFhwIntegrate;
-    sitelib.endscan=SiteFhwEndScan;
-    sitelib.exit=SiteFhwExit;
-    break;
   case 207:
     sitelib.start=SiteCveStart;
     sitelib.setupradar=SiteCveSetupRadar;
