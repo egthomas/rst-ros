@@ -416,8 +416,9 @@ int main(int argc,char *argv[]) {
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       
-      FitACF(prm,raw,fblk,fit);
-  
+      FitACF(prm,raw,fblk,fit,site,tdiff,-999);
+      FitSetAlgorithm(fit,"fitacf2");
+ 
       /* write out data here */
       
       msg.num   = 0;

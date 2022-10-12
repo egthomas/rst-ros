@@ -352,8 +352,9 @@ int main(int argc,char *argv[]) {
       OpsBuildPrm(prm,ptab,lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
-      FitACF(prm,raw,fblk,fit);
-      
+      FitACF(prm,raw,fblk,fit,site,tdiff,-999);
+      FitSetAlgorithm(fit,"fitacf2");
+
       /* write out data here */
       msg.num=0;
       msg.tsize=0;
@@ -433,7 +434,7 @@ int main(int argc,char *argv[]) {
       		OpsBuildPrm(prm,ptab,lags);
       		OpsBuildIQ(iq,&badtr);
       		OpsBuildRaw(raw);
-      		FitACF(prm,raw,fblk,fit);
+      		FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
       		/* write out data here */
      			msg.num=0;
