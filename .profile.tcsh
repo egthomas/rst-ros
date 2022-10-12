@@ -7,6 +7,7 @@ setenv VISUAL "vim"
 setenv EDITOR "$VISUAL"
 setenv PATH "${PATH}:/opt/local/bin:/usr/bin/:${HOME}/bin:${HOME}/script"
 
+source $RSTPATH/.profile/ros.tcsh
 source $RSTPATH/.profile/rst.tcsh
 source $RSTPATH/.profile/base.tcsh
 source $RSTPATH/.profile/general.tcsh
