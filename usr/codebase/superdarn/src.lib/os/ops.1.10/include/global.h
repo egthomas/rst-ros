@@ -20,6 +20,7 @@ extern struct RawData *raw;
 extern struct FitData *fit;
 extern struct FitBlock *fblk;
 extern struct RadarSite *site;
+extern struct RadarTdiff *tdiff;
 extern struct FreqTable *ftable;
 extern struct RShellTable rstable;
 extern struct RadarNetwork *network;

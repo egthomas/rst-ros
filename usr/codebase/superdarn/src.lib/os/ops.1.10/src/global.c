@@ -37,6 +37,7 @@ struct RawData *raw;
 struct FitData *fit;
 struct FitBlock *fblk;
 struct RadarSite *site;
+struct RadarTdiff *tdiff;
 struct FreqTable *ftable;
 struct RadarNetwork *network;
 struct Radar *radar;

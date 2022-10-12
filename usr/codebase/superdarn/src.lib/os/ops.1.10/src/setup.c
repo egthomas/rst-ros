@@ -83,6 +83,14 @@ int OpsStart(char *ststr) {
 
   RadarLoadHardware(envstr,network);
 
+  envstr=getenv("SD_TDIFFPATH");
+  if (envstr==NULL) {
+    fprintf(stderr,"Environment variable 'SD_TDIFFPATH' must be defined.\n");
+    exit(-1);
+  }
+
+  RadarLoadTdiff(envstr,network);
+
   stid=RadarGetID(network,ststr);
 
   radar=RadarGetRadar(network,stid);
