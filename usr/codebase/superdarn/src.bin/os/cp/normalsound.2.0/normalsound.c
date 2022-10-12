@@ -251,8 +251,10 @@ int main(int argc,char *argv[])
   snd_dir = getenv("SD_SND_PATH");
   if (snd_dir == NULL)
     sprintf(data_path,"/data/ros/snd/");
-  else
+  else {
     memcpy(data_path,snd_dir,strlen(snd_dir));
+    data_path[strlen(snd_dir)] = 0;
+  }
 
   sprintf(snd_filename,"%s/sounder_%s.dat", data_path, ststr);
   fprintf(stderr,"Checking Sounder File: %s\n",snd_filename);
@@ -671,8 +673,7 @@ void write_snd_record(char *progname, struct RadarParm *prm, struct FitData *fit
     sprintf(data_path,"/data/ros/snd/");
   else {
     memcpy(data_path,snd_dir,strlen(snd_dir));
-    data_path[strlen(snd_dir)] = '/';
-    data_path[strlen(snd_dir)+1] = 0;
+    data_path[strlen(snd_dir)] = 0;
   }
 
   /* make up the filename */
