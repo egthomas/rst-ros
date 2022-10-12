@@ -1,0 +1,38 @@
+20211007
+
++ latest attempt
+
+
+20200626
+
++ second attempt, not actually sure if the first attempt failed or not...
+
+
+
+20197023
+
++ Added the line below to profile.superdarn-rst.linux.bash:
+
+  export SD_SND_PATH="/data/ros/snd"
+
+
++ Created file $SD_SND_PATH/interleave_sounder.dat
+
+8
+10500
+11500
+12500
+13500
+14500
+15500
+16500
+17500
+
+20201012
+
++ Updated to latest github version
+
++ Created files $SD_SND_PATH/sounder_cv[ew].dat
+  cve file is copy of previous
+  cvw file has frequencies offset by 100 kHz from cve
+
