@@ -134,6 +134,7 @@ int operate(pid_t parent,int sock) {
       TCPIPMsgRecv(sock, tsgbuf->rep, sizeof(unsigned char)*tsgbuf->len);
       TCPIPMsgRecv(sock, tsgbuf->code, sizeof(unsigned char)*tsgbuf->len);
       n=0;
+      tlen=0;
       for (n=0;n<tprm.len;n++) tlen+=tsgbuf->rep[n]; 
 
       break;
