@@ -36,6 +36,7 @@
 
 struct OptionData opt;
 unsigned char vb;
+int tfreq=11800;
 
 int operate(pid_t parent,int sock) {
 
@@ -50,9 +51,12 @@ int operate(pid_t parent,int sock) {
   struct TRTimes badtrdat;
 
   int rnum,cnum,s;
-  int tfreq=11800;
   float noise=0.5;
   int index=0;
+
+  int32 temp_int32,data_length;
+  char entry_name[80];
+  char entry_type,return_type;
 
   int tlen=0,n;
 
@@ -79,8 +83,21 @@ int operate(pid_t parent,int sock) {
 
     case SET_RADAR_CHAN:
       if (vb) fprintf(stderr,"SET_RADAR_CHAN\n");
-      TCPIPMsgRecv(sock,&rnum,sizeof(int));
-      TCPIPMsgRecv(sock,&cnum,sizeof(int));
+      TCPIPMsgRecv(sock, &rnum, sizeof(int));
+      TCPIPMsgRecv(sock, &cnum, sizeof(int));
+      break;
+
+    case QUERY_INI_SETTINGS:
+      if (vb) fprintf(stderr,"QUERY_INI_SETTINGS\n");
+      TCPIPMsgRecv(sock, &data_length, sizeof(int32));
+      TCPIPMsgRecv(sock, &entry_name, data_length*sizeof(char));
+      TCPIPMsgRecv(sock, &entry_type, sizeof(char));
+      return_type='b';
+      TCPIPMsgSend(sock, &return_type, sizeof(char));
+      data_length=1;
+      TCPIPMsgSend(sock, &data_length, sizeof(int32));
+      temp_int32=0;
+      TCPIPMsgSend(sock, &temp_int32, data_length*sizeof(int32));
       break;
 
     case GET_PARAMETERS:
@@ -95,14 +112,14 @@ int operate(pid_t parent,int sock) {
 
     case REQUEST_CLEAR_FREQ_SEARCH:
       if (vb) fprintf(stderr,"REQUEST_CLEAR_FREQ_SEARCH\n");
-
-      TCPIPMsgRecv(sock, &fprm,sizeof(struct CLRFreqPRM));
+      TCPIPMsgRecv(sock, &fprm, sizeof(struct CLRFreqPRM));
+      tfreq=fprm.start;
       break;
 
     case REQUEST_ASSIGNED_FREQ:
       if (vb) fprintf(stderr,"REQUEST_ASSIGNED_FREQ\n");
-      TCPIPMsgSend(sock, &tfreq,sizeof(int));
-      TCPIPMsgSend(sock, &noise,sizeof(float));
+      TCPIPMsgSend(sock, &tfreq, sizeof(int));
+      TCPIPMsgSend(sock, &noise, sizeof(float));
       break;
 
     case REGISTER_SEQ:
