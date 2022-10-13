@@ -673,7 +673,8 @@ void write_snd_record(char *progname, struct RadarParm *prm, struct FitData *fit
     sprintf(data_path,"/data/ros/snd/");
   else {
     memcpy(data_path,snd_dir,strlen(snd_dir));
-    data_path[strlen(snd_dir)] = 0;
+    data_path[strlen(snd_dir)] = '/';
+    data_path[strlen(snd_dir)+1] = 0;
   }
 
   /* make up the filename */
