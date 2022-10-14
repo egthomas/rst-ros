@@ -267,7 +267,7 @@ int main(int argc,char *argv[]) {
 
   envstr=getenv("SD_RADAR");
   if (envstr==NULL) {
-    fprintf(stderr,"Environment variable 'SD_RADARNAME' must be defined.\n");
+    fprintf(stderr,"Environment variable 'SD_RADAR' must be defined.\n");
     exit(-1);
   }
 
