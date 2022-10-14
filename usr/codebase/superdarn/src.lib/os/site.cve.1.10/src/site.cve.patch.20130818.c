@@ -81,7 +81,7 @@ int SiteCveStart()
   cancel_count  = 0;
 
   sock = 0;
-  strcpy(server,"127.0.0.1");
+  strcpy(server,"192.168.7.5");
   port = 45000;
   rnum = 1; /* Radar number to register */
   cnum = 1; /* Channel number to register */
