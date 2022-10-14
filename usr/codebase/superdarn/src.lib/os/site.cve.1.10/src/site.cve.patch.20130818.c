@@ -81,7 +81,7 @@ int SiteCveStart()
   cancel_count  = 0;
 
   sock = 0;
-  strcpy(server,"192.168.7.5");
+  strcpy(server,"127.0.0.1");
   port = 45000;
   rnum = 1; /* Radar number to register */
   cnum = 1; /* Channel number to register */
@@ -291,7 +291,7 @@ int SiteCveFCLR(int stfreq,int edfreq)
   TCPIPMsgRecv(sock,&noise, sizeof(float));  
   TCPIPMsgRecv(sock,&rmsg, sizeof(struct ROSMsg)); 
   if (debug) {
-    fprintf(stderr,"REQUEST_ASSIGNED_FREQ:type=%c\n",rmsg.status);
+    fprintf(stderr,"REQUEST_ASSIGNED_FREQ:type=%c\n",rmsg.type);
     fprintf(stderr,"REQUEST_ASSIGNED_FREQ:status=%d\n",rmsg.status);
   }
 

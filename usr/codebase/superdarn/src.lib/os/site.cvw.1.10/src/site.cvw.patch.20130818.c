@@ -288,7 +288,7 @@ int SiteCvwFCLR(int stfreq,int edfreq)
   TCPIPMsgRecv(sock,&noise, sizeof(float));  
   TCPIPMsgRecv(sock,&rmsg, sizeof(struct ROSMsg)); 
   if (debug) {
-    fprintf(stderr,"REQUEST_ASSIGNED_FREQ:type=%c\n",rmsg.status);
+    fprintf(stderr,"REQUEST_ASSIGNED_FREQ:type=%c\n",rmsg.type);
     fprintf(stderr,"REQUEST_ASSIGNED_FREQ:status=%d\n",rmsg.status);
   }
 
