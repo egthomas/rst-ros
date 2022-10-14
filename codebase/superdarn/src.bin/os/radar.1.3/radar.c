@@ -52,7 +52,6 @@ int operate(pid_t parent,int sock) {
 
   int rnum,cnum,s;
   float noise=0.5;
-  int index=0;
 
   int32 temp_int32,data_length;
   char entry_name[80];
