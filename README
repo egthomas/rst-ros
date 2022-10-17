@@ -1,0 +1,111 @@
+RST Radar Operating Software (ROS)
+==================================
+R.J.Barnes  (original developer)
+J.D.Spaleta (original developer)
+SuperDARN Data Analysis Working Group (RST developers)
+E.G.Thomas  (merged ROS back into RST)
+
+Version Log
+===========
+
+1.25    Final release of QNX4 ROS
+2.0     Beta release of Linux ROS
+3.1     First release of ROS 3
+X.0     First release of joint RST (4.7-develop) + ROS (3.1-cv)
+
+
+
+Introduction
+------------
+
+The RST Radar Operating Software (ROS) is the software used to
+operate the SuperDARN radar network. The software is distributed in
+the form of source code and data tables for Linux platforms.
+
+This package does not include the hardware interface software, instead
+it contains a "dummy" radar task that simulates the responses of the radar
+hardware.
+
+Note the ROS code in this package is based on the RST 3.1 software used
+at the Christmas Valley radars, and does not include the ROS 3.6+ updates
+in use at the Fort Hays or other MSI-style radars.
+
+Features
+--------
+
+The RST/ROS package includes the following software:
+
++ radar          - A radar simulator
++ errlog         - The error logger
++ fitacfwrite    - Stores fitacf data files
++ rawacfwrite    - Stores rawacf data files
++ iqwrite        - Stores iqdat data files
++ rtserver       - Real-time data server for TCP/IP clients
++ shellserver    - Provides an interface between the control program
+                   and the interactive shell
++ radarshell     - The interactive radar shell that allows control program
+                   parameters to be changed
++ scheduler      - The radar scheduler
+
+The package also includes control programs, site libraries, and all
+of the RST data processing and plotting functionality (e.g., dmapdump,
+make_fit, time_plot, etc.).
+
+Installation
+------------
+
+First install the required libraries for the RST:
+
+    https://radar-software-toolkit-rst.readthedocs.io/en/latest/user_guide/linux_install/#ubuntu
+
+Install the NASA CDF library:
+
+    https://radar-software-toolkit-rst.readthedocs.io/en/latest/user_guide/linux_install/#cdf-library
+
+Load the RST-ROS environment variables by adding the following lines
+to ".bashrc":
+
+    export RSTPATH="/home/radar_user/rst-ros"
+    source $RSTPATH/.profile.bash
+
+Refresh the profile to make sure the environment variables are up to date.
+
+Next compile the build architecture by typing:
+
+    make.build
+
+To compile all of the RST-ROS software type:
+
+    make.code
+
+To recompile individual pieces of the software type:
+
+    make.code [lib or bin] [optional search string]
+    (e.g., make.code bin normalscan)
+
+Logs of the compilation process are stored in the "log" sub-directory.
+
+
+Data Directories
+----------------
+
+The directories in which data and log files are recorded are defined by
+environment variables (in .profile/ros.bash). By default the following
+directories are used:
+
+/data/ros/rawacf       - rawacf files
+/data/ros/iqdat        - iqdat files
+/data/ros/fitacf       - fitacf files
+/data/ros/snd          - snd files
+/data/ros/errlog       - error logs
+/data/ros/scdlog       - scheduler logs
+
+
+Running the radar
+-----------------
+
+Two scripts control the operation of the radar:
+
+start.radar   - starts the supporting tasks and scheduler process
+stop.radar    - stops all radar tasks
+
