@@ -56,7 +56,7 @@ char *ststr=NULL;
 char *dfststr="tst";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2022/10/12"};
+char progid[80]={"interleavesound 2022/10/17"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -497,22 +497,8 @@ int main(int argc,char *argv[]) {
       tmpbuf=RadarParmFlatten(prm,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,PRM_TYPE,0);
 
-      tmpbuf=IQFlatten(iq,prm->nave,&tmpsze);
-      RMsgSndAdd(&msg,tmpsze,tmpbuf,IQ_TYPE,0);
-
-      RMsgSndAdd(&msg,sizeof(unsigned int)*2*iq->tbadtr,
-             (unsigned char *) badtr,BADTR_TYPE,0);
-
-      RMsgSndAdd(&msg,strlen(sharedmemory)+1,
-             (unsigned char *) sharedmemory,IQS_TYPE,0);
-
-      tmpbuf=RawFlatten(raw,prm->nrang,prm->mplgs,&tmpsze);
-      RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0);
-
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *) progname,NME_TYPE,0);
 
       RMsgSndSend(task[RT_TASK].sock,&msg);
       for (n=0;n<msg.num;n++) {
