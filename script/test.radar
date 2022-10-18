@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# dummy radar server
+radar &
+
+# critical tasks
+
+errlog -name cve -lp 44000 &
+errlog -name cvw -lp 54000 &
+echo "Waiting for errlog to start"
+sleep 1
+
+shellserver -sh RadarShellA -cp 44001 -sp 45001 &
+shellserver -sh RadarShellB -cp 54001 -sp 55001 &
+sleep 1
+# support tasks
+
+iqwrite -lp 44101 -ep 44000 &
+iqwrite -lp 54101 -ep 54000 &
+rawacfwrite -lp 44102 -ep 44000 &
+rawacfwrite -lp 54102 -ep 54000 &
+fitacfwrite -lp 44103 -ep 44000 &
+fitacfwrite -lp 54103 -ep 54000 &
+sleep 2
+echo "Ready for Control Programs"
+rtserver -rp 44104 -ep 44000 -tp 1024 &
+sleep 2
+rtserver -rp 54104 -ep 54000 -tp 1025 &
+sleep 2
+schedule -l /data/ros/scdlogs/cve.scdlog /data/ros/scd/cve.scd &
+sleep 2
+schedule -l /data/ros/scdlogs/cvw.scdlog /data/ros/scd/cvw.scd &

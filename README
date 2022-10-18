@@ -1,5 +1,5 @@
-RST Radar Operating Software (ROS)
-==================================
+RST Radar Operating Software (RST-ROS)
+======================================
 R.J.Barnes  (original developer)
 J.D.Spaleta (original developer)
 SuperDARN Data Analysis Working Group (RST developers)
@@ -18,7 +18,7 @@ X.0     First release of joint RST (4.7-develop) + ROS (3.1-cv)
 Introduction
 ------------
 
-The RST Radar Operating Software (ROS) is the software used to
+The RST Radar Operating Software (RST-ROS) is the software used to
 operate the SuperDARN radar network. The software is distributed in
 the form of source code and data tables for Linux platforms.
 
@@ -33,7 +33,7 @@ in use at the Fort Hays or other MSI-style radars.
 Features
 --------
 
-The RST/ROS package includes the following software:
+The RST-ROS package includes the following software:
 
 + radar          - A radar simulator
 + errlog         - The error logger
@@ -109,3 +109,8 @@ Two scripts control the operation of the radar:
 start.radar   - starts the supporting tasks and scheduler process
 stop.radar    - stops all radar tasks
 
+Three scripts are available for testing the operation of the radar:
+
+test.radar    - tests the operation of both radars
+test.east     - tests the operation of the east radar
+test.west     - tests the operation of the west radar
