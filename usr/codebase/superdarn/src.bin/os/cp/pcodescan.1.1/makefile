@@ -20,12 +20,12 @@ LIBS= -lsite.1 -lsite.cve.1 -lsite.cvw.1 \
       -lerrlog.1 -lfreq.1 -lacfex.1 -lacf.1 -lfit.1 -lraw.1 -lfitacf.1 -lcfit.1 -lrscan.1 -liqdata.1 -ltsg.1 \
       -lradar.1 -ldmap.1 -lopt.1 -lrtime.1 -lrcnv.1 -lelevation.1
 
-
+LFLAGS=-rdynamic
 
 ifeq ($(SYSTEM),linux)
-  SLIB=-lm -lrt -lz
+  SLIB=-lm -lrt -lz -ldl
 else
-  SLIB=-lm -lz
+  SLIB=-lm -lz -ldl
 endif
 
 include $(MAKEBIN).$(SYSTEM)

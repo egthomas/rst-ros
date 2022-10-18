@@ -196,11 +196,11 @@ int main(int argc,char *argv[]) {
 	/* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
 	OpsStart(ststr);
 
-	/* rst/usr/codebase/superdarn/src.lib/os/site.1.3/src/build.c */
+	/* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
 	/* NOTE: the function just assigns the remaing functions starting with
 	 *       'Site' to the appropriate site specific functions, i.e.,
 	 *       SiteStart() is SiteCveStart() for cve, etc. */
-	status=SiteBuild(stid);
+	status=SiteBuild(ststr);
 
 	if (status==-1) {
 		fprintf(stderr,"Could not identify station.\n");

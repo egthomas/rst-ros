@@ -282,7 +282,7 @@ int main(int argc,char *argv[]) {
 	/* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
 	OpsStart(ststr);
 		
-	status=SiteBuild(stid);
+	status=SiteBuild(ststr);
 	
 	if (status==-1) {
 		fprintf(stderr,"Could not identify station.\n");

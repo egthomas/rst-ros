@@ -221,7 +221,7 @@ int main(int argc,char *argv[]) {
   printf("Station String: %s\n",ststr);
   OpsStart(ststr);
 
-  status=SiteBuild(stid);
+  status=SiteBuild(ststr);
 
   if (status==-1) {
     fprintf(stderr,"Could not identify station.\n");

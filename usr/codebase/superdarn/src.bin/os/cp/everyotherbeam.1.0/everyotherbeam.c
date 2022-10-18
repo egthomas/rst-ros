@@ -238,10 +238,8 @@ int main(int argc,char *argv[]) {
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
     
-  /* rst/usr/codebase/superdarn/src.lib/os/site.1.3/src/build.c */
-  /* note that stid is a global variable set in the previous function...
-      rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/global.c */
-  if ((status = SiteBuild(stid)) == -1) {
+  /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
+  if ((status = SiteBuild(ststr)) == -1) {
     fprintf(stderr,"Could not identify station.\n");
     exit(1);
   }

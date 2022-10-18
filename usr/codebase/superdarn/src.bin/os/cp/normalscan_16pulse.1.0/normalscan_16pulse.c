@@ -333,7 +333,7 @@ int main(int argc,char *argv[])
 
   OpsStart(ststr);
 
-  status=SiteBuild(stid);
+  status=SiteBuild(ststr);
   if (status==-1) {
     fprintf(stderr,"Could not identify station.\n");
     exit(1);
