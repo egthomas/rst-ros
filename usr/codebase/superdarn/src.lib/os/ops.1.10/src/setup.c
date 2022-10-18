@@ -177,4 +177,4 @@ void OpsSetupShell() {
   RadarShellAdd(&rstable,"rxrise",var_LONG,&rxrise);
   RadarShellAdd(&rstable,"cp",var_LONG,&cp);
   RadarShellAdd(&rstable,"combf",var_STRING,combf);
-};
+}
