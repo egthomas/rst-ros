@@ -138,6 +138,12 @@ int operate(pid_t parent,int sock) {
   return 0;
 }
 
+int rst_opterr(char *txt) {
+  fprintf(stderr,"Option not recognized: %s\n",txt);
+  fprintf(stderr,"Please try: errlog --help\n");
+  return(-1);
+}
+
 int main(int argc,char *argv[]) {
   
   int port=DEF_PORT,arg=0;
@@ -168,7 +174,11 @@ int main(int argc,char *argv[]) {
 
   OptionAdd(&opt,"lp",'i',&port);
 
-  arg=OptionProcess(1,argc,argv,&opt,NULL);
+  arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
+
+  if (arg==-1) {
+    exit(-1);
+  }
 
   if (help==1) {
     OptionPrintInfo(stdout,hlpstr);
