@@ -184,6 +184,12 @@ int SiteCvwSetupRadar()
 
 int SiteCvwStartScan()
 {
+  struct ROSMsg smsg,rmsg;
+
+  smsg.type = SET_ACTIVE;
+  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+
   return 0;
 }
 
@@ -805,10 +811,6 @@ int SiteCvwEndScan(int bsc,int bus, unsigned sleepus)
     usleep(sleepus);
     gettimeofday(&tick,NULL);
   }
-
-  smsg.type = SET_ACTIVE;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
 
   return 0;
 }
