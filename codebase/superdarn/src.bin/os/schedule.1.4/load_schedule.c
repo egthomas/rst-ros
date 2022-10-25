@@ -34,8 +34,7 @@ int parse_schedule_line(char *line,struct scd_blk *ptr) {
     return 1;
   } else if (strcmp(token,"path")==0) {
     /* the path variable */
-    if ((token=strtok(NULL,""))==NULL) return -1; /* command */
-    strcpy(ptr->path,token);
+    return -1;
   } else {
     /* extract time data */
     year=atoi(token);
