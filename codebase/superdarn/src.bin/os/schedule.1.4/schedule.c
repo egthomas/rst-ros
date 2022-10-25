@@ -71,6 +71,7 @@ int main(int argc,char *argv[]) {
   unsigned char version=0;
 
   char logtxt[256];
+  char *path;
 
   FILE *fp;
   int tick=0;
@@ -136,16 +137,26 @@ int main(int argc,char *argv[]) {
   schedule.pid=-1;
   schedule.cnt=0;
   strcpy(schedule.command,"Null");
-  strcpy(schedule.path,"/");
+
+  path = getenv("USR_BINPATH");
+  if (path == NULL) {
+    log_info(0,"USR_BINPATH not found");
+    strcpy(schedule.path,"/");
+  } else {
+    strcpy(schedule.path,path);
+  }
+
   fp=fopen(schedule.name,"r");
   if (fp==NULL) {
     log_info(0,"Schedule file not found");
     exit(-1);
   }
+
   if (load_schedule(fp,&schedule) !=0) {
     log_info(0,"Error reading schedule file");
     exit(-1);
   }
+
   fclose(fp);
   schedule.cnt=set_schedule(&schedule);
   sleep(1);
