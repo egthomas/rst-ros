@@ -12,4 +12,5 @@ export SD_FIT_PATH="/data/ros/fitacf"
 export SD_IQ_PATH="/data/ros/iqdat"
 export SD_ERRLOG_PATH="/data/ros/errlog"
 export SD_SND_PATH="/data/ros/snd"
+export SD_SITE_PATH="${RSTPATH}/tables/superdarn/site"
 
