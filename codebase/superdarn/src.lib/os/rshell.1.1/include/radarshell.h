@@ -14,7 +14,7 @@
 #ifndef _RADARSHELL_H
 #define _RADARSHELL_H
 
-#define STR_MAX 128 
+#define STR_MAX 128
 
 enum {  /* variable types */
   var_SHORT,
@@ -26,7 +26,7 @@ enum {  /* variable types */
 };
 
 struct RShellEntry {
-  char *name; 
+  char *name;
   int type;
   void *data;
 };
@@ -48,20 +48,13 @@ int RShellBufferAlloc(struct RShellBuffer *ptr,void *buf,int sze);
 void *RShellBufferRead(struct RShellBuffer *ptr,int num);
 void RShellBufferFree(struct RShellBuffer *ptr);
 
-
-
 int RadarShell(int sock,struct RShellTable *rptr);
 int RadarShellAdd(struct RShellTable *rptr,
-		  char *name,int type,void *data);
+                  char *name,int type,void *data);
 void RadarShellFree(struct RShellTable *rptr);
 struct RShellEntry *RadarShellRead(struct RShellTable *rptr,int num);
 struct RShellEntry *RadarShellFind(struct RShellTable *rptr,char *name);
 
 int RadarShellParse(struct RShellTable *rptr,char *name,...);
-
-
-
-
-
 
 #endif

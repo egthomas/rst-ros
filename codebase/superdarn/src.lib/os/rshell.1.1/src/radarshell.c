@@ -32,20 +32,22 @@
 #define SHELL_REPLY 'r'
 
 #include "radarshell.h"
- 
+
+
 struct RShellBuffer *RShellBufferMake() {
 
   struct RShellBuffer *ptr=NULL;
   ptr=malloc(sizeof(struct RShellBuffer));
-  
+
   if (ptr==NULL) return NULL;
   ptr->buf=0;
   ptr->off=NULL;
   ptr->num=0;
   ptr->len=0;
-  return ptr; 
+  return ptr;
 
 }
+
 
 int RShellBufferAlloc(struct RShellBuffer *ptr,void *buf,int sze) {
   void *tmp;
@@ -56,7 +58,7 @@ int RShellBufferAlloc(struct RShellBuffer *ptr,void *buf,int sze) {
     if (tmp !=NULL) ptr->buf=tmp;
     else return -1;
   }
-  
+
   if (ptr->off==NULL) ptr->off=malloc(sizeof(size_t));
   else {
     tmp=realloc(ptr->off,(ptr->num+1)*sizeof(size_t));
@@ -71,6 +73,7 @@ int RShellBufferAlloc(struct RShellBuffer *ptr,void *buf,int sze) {
   return 0;
 }
 
+
 void *RShellBufferRead(struct RShellBuffer *ptr,int num) {
   if (ptr==NULL) return NULL;
   if (ptr->buf==NULL) return NULL;
@@ -79,13 +82,12 @@ void *RShellBufferRead(struct RShellBuffer *ptr,int num) {
   return ptr->buf+ptr->off[num];
 }
 
-  
+
 void RShellBufferFree(struct RShellBuffer *ptr) {
   if (ptr->buf !=NULL) free(ptr->buf);
   if (ptr->off !=NULL) free(ptr->off);
   free(ptr);
 }
-
 
 
 int RadarShell(int sock,struct RShellTable *ptr) {
@@ -101,7 +103,7 @@ int RadarShell(int sock,struct RShellTable *ptr) {
   smsg=SHELL_POLL;
   s=TCPIPMsgSend(sock,&smsg,sizeof(int));
   if (s !=sizeof(int)) return -1;
-  
+
   s=TCPIPMsgRecv(sock,&rmsg,sizeof(int));
   if (s !=sizeof(int)) return -1;
 
@@ -137,10 +139,10 @@ int RadarShell(int sock,struct RShellTable *ptr) {
     default:
       break;
      
-    }        
+    }
 
   }
-  
+
   if (rmsg==SHELL_SEND) {
     s=TCPIPMsgSend(sock,&buf->num,sizeof(int));
     s=TCPIPMsgSend(sock,&buf->len,sizeof(size_t));
@@ -157,53 +159,51 @@ int RadarShell(int sock,struct RShellTable *ptr) {
     s=TCPIPMsgRecv(sock,buf->buf,buf->len);
     /* unpack here */
 
-   for (n=0;n<ptr->num;n++) {
-     data=RShellBufferRead(buf,3*n+2);
+    for (n=0;n<ptr->num;n++) {
+      data=RShellBufferRead(buf,3*n+2);
 
-     switch (ptr->ptr[n].type) {
-     case var_SHORT:
-       *((short int *) ptr->ptr[n].data)=*((short int *) data);
-       break;
-     case var_INT:
-       *((int *) ptr->ptr[n].data)=*((int *) data);
-       break;
-     case var_LONG:
-       *((int *) ptr->ptr[n].data)=*((int *) data);
-       break;
-     case var_FLOAT:
-       *((float *) ptr->ptr[n].data)=*((float *) data);
-       break;
-     case var_DOUBLE:
-       *((double *) ptr->ptr[n].data)=*((double *) data);
-       break;
-    case var_STRING:
-      strncpy((char *) ptr->ptr[n].data,(char *) data,STR_MAX);
+      switch (ptr->ptr[n].type) {
+        case var_SHORT:
+          *((short int *) ptr->ptr[n].data)=*((short int *) data);
+          break;
+        case var_INT:
+          *((int *) ptr->ptr[n].data)=*((int *) data);
+          break;
+        case var_LONG:
+          *((int *) ptr->ptr[n].data)=*((int *) data);
+          break;
+        case var_FLOAT:
+          *((float *) ptr->ptr[n].data)=*((float *) data);
+          break;
+        case var_DOUBLE:
+          *((double *) ptr->ptr[n].data)=*((double *) data);
+          break;
+        case var_STRING:
+          strncpy((char *) ptr->ptr[n].data,(char *) data,STR_MAX);
+          break;
+        default:
+          break;
+      }
 
-	 break;
-       default:
-	 break;
-     }
-
-   }
+    }
 
   }
   RShellBufferFree(buf);
 
   return 0;
 }
- 
 
 
 int RadarShellAdd(struct RShellTable *rptr,
-	      char *name,int type,void *data) {
-  
+                  char *name,int type,void *data) {
+
   if (rptr->ptr !=NULL) {
     rptr->ptr=realloc(rptr->ptr,sizeof(struct RShellEntry)*(rptr->num+1));
     if (rptr->ptr==NULL) return -1;
   } else {
     rptr->ptr=malloc(sizeof(struct RShellEntry));
     if (rptr->ptr==NULL) return -1;
-    rptr->num=0; 
+    rptr->num=0;
   }
 
   rptr->ptr[rptr->num].name=malloc(strlen(name)+1);
@@ -213,6 +213,7 @@ int RadarShellAdd(struct RShellTable *rptr,
   rptr->num++;
   return 0;
 }
+
 
 void RadarShellFree(struct RShellTable *rptr) {
   if (rptr->ptr !=NULL) {
@@ -224,12 +225,12 @@ void RadarShellFree(struct RShellTable *rptr) {
   rptr->num=0;
 }
 
+
 struct RShellEntry *RadarShellRead(struct RShellTable *rptr,int num) {
   if (rptr==NULL) return NULL;
   if (num>=rptr->num) return NULL;
   return &rptr->ptr[num];
 }
-
 
 
 struct RShellEntry *RadarShellFind(struct RShellTable *rptr,char *name) {
@@ -239,13 +240,12 @@ struct RShellEntry *RadarShellFind(struct RShellTable *rptr,char *name) {
   if (rptr->num==0) return NULL;
 
   for (num=0;num<rptr->num;num++) 
-    if (strcmp(rptr->ptr[num].name,name)==0) break;    
+    if (strcmp(rptr->ptr[num].name,name)==0) break;
 
   if (num>=rptr->num) return NULL;
   return &rptr->ptr[num];
 }
 
-  
 
 int RadarShellParse(struct RShellTable *rptr,char *name,...) {
   int status=0;
@@ -269,7 +269,7 @@ int RadarShellParse(struct RShellTable *rptr,char *name,...) {
 
     vtype=strtok(NULL,DELIM);
     if (vtype==NULL) break;
-    
+
     type=var_STRING;
     if (strcmp(vtype,"s")==0) type=var_SHORT;
     if (strcmp(vtype,"i")==0) type=var_INT;
@@ -277,26 +277,14 @@ int RadarShellParse(struct RShellTable *rptr,char *name,...) {
     if (strcmp(vtype,"f")==0) type=var_FLOAT;
     if (strcmp(vtype,"d")==0) type=var_DOUBLE;
     data=va_arg(ap,void *);
-  
+
     if (data !=NULL) status=RadarShellAdd(rptr,vname,type,data);
-    
+
     if (status !=0) return -1;
-    
+
     vname=strtok(NULL,DELIM);
   }
   va_end(ap);
   return 0;
 }
-
-  
-  
-
-
-
-
-
-
-
-
-
 
