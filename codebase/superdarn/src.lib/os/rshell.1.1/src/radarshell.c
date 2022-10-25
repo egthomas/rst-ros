@@ -45,7 +45,6 @@ struct RShellBuffer *RShellBufferMake() {
   ptr->num=0;
   ptr->len=0;
   return ptr;
-
 }
 
 
@@ -138,9 +137,7 @@ int RadarShell(int sock,struct RShellTable *ptr) {
       break;
     default:
       break;
-     
     }
-
   }
 
   if (rmsg==SHELL_SEND) {

@@ -31,12 +31,10 @@ int dport=44002;
 
 struct TCPIPMsgHost server;
 
-
 int num=0;
 size_t *offset=NULL;
 size_t size=0;
 char *buffer=NULL;
-
 
 int arg=0;
 struct OptionData opt;
@@ -54,7 +52,7 @@ int main(int argc,char *argv[]) {
   unsigned char version=0;
   int smsg,rmsg;
   int s;
- 
+
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
@@ -92,7 +90,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"===========\n\n");
   fprintf(stdout,"Connecting to: %s %d \n\n",server.host,server.port);
 
-  if ((server.sock=TCPIPMsgOpen(server.host,server.port))==-1) {    
+  if ((server.sock=TCPIPMsgOpen(server.host,server.port))==-1) {
     fprintf(stderr,"Error connecting to shell.\n");
     exit(-1);
   }
@@ -102,14 +100,14 @@ int main(int argc,char *argv[]) {
   smsg=SHELL_SEND;
   s=TCPIPMsgSend(server.sock,&smsg,sizeof(int));
   if (s !=sizeof(int)) {
-     fprintf(stderr,"Communication error.\n");
-     exit(1);
+    fprintf(stderr,"Communication error.\n");
+    exit(1);
   }
 
   s=TCPIPMsgRecv(server.sock,&rmsg,sizeof(int));
   if (s !=sizeof(int)) {
-     fprintf(stderr,"Communication error.\n");
-     exit(1);
+    fprintf(stderr,"Communication error.\n");
+    exit(1);
   }
 
   if (rmsg !=SHELL_OK) {
@@ -149,15 +147,14 @@ int main(int argc,char *argv[]) {
 
   s=TCPIPMsgRecv(server.sock,buffer,size);
   if (s !=size) {
-     fprintf(stderr,"Communication error.\n");
-     exit(1);
+    fprintf(stderr,"Communication error.\n");
+    exit(1);
   }
 
- 
+
   /* enter the shell */
-  
+
   s=shell(num,size,offset,buffer);
-  
 
   s=0;
 
@@ -169,14 +166,14 @@ int main(int argc,char *argv[]) {
   smsg=SHELL_REPLY;
   s=TCPIPMsgSend(server.sock,&smsg,sizeof(int));
   if (s !=sizeof(int)) {
-     fprintf(stderr,"Communication error.\n");
-     exit(1);
+    fprintf(stderr,"Communication error.\n");
+    exit(1);
   }
 
   s=TCPIPMsgRecv(server.sock,&rmsg,sizeof(int));
   if (s !=sizeof(int)) {
-     fprintf(stderr,"Communication error.\n");
-     exit(1);
+    fprintf(stderr,"Communication error.\n");
+    exit(1);
   }
 
   if (rmsg !=SHELL_OK) {
@@ -192,8 +189,8 @@ int main(int argc,char *argv[]) {
 
   s=TCPIPMsgSend(server.sock,&size,sizeof(size_t));
   if (s !=sizeof(size_t)) {
-     fprintf(stderr,"Communication error.\n");
-     exit(1);
+    fprintf(stderr,"Communication error.\n");
+    exit(1);
   }
 
   s=TCPIPMsgSend(server.sock,offset,sizeof(size_t)*num);
@@ -204,8 +201,8 @@ int main(int argc,char *argv[]) {
 
   s=TCPIPMsgSend(server.sock,buffer,size);
   if (s !=size) {
-     fprintf(stderr,"Communication error.\n");
-     exit(1);
+    fprintf(stderr,"Communication error.\n");
+    exit(1);
   }
 
   return 0;

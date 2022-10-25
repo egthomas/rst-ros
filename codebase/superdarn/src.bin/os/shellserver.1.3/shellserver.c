@@ -10,7 +10,7 @@
  
 */
 
- 
+
 #include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -44,7 +44,6 @@
 #define SHELL_ERROR 'e'
 
 
-
 struct OptionData opt;
 
 char *shmemd="RadarShell";
@@ -67,10 +66,12 @@ void rootendprog(int signum) {
   exit(0);
 }
 
+
 void childendprog(int signum) {
   ShMemFree(shm,shmem,BUF_SIZE,1,shmemfd);
   exit(0);
 }
+
 
 int operateCP(pid_t parent,int sock) {
 
@@ -79,7 +80,7 @@ int operateCP(pid_t parent,int sock) {
   struct membuf *ptr;
 
   signal(SIGINT,childendprog);
-  
+
   shm=ShMemAlloc(shmem,BUF_SIZE,O_RDWR,0,&shmemfd);
 
   ptr=(struct membuf *) shm;
@@ -126,9 +127,9 @@ int operateCP(pid_t parent,int sock) {
   ptr->cpstate=0;
   ShMemFree(shm,shmem,BUF_SIZE,0,shmemfd);
 
-  
   return 0;
 }
+
 
 int operateRS(pid_t parent,int sock) {
 
@@ -143,12 +144,12 @@ int operateRS(pid_t parent,int sock) {
 
   ptr=(struct membuf *) shm;
   ptr->rsstate=0;
-  
+
   while(1) {
 
     s=TCPIPMsgRecv(sock,&rmsg,sizeof(int));
     if (s !=sizeof(int)) break;
-     
+
     if (rmsg==SHELL_SEND) {
       ptr->rsstate=1;
       while (ptr->cpstate !=2) {
@@ -156,7 +157,7 @@ int operateRS(pid_t parent,int sock) {
         usleep(50000);
       }
       if (ptr->cpstate==0) {
-	smsg=SHELL_ERROR;
+        smsg=SHELL_ERROR;
         s=TCPIPMsgSend(sock,&smsg,sizeof(int));
         if (s !=sizeof(int)) break;
         break;
@@ -172,8 +173,8 @@ int operateRS(pid_t parent,int sock) {
       if (s !=sizeof(size_t)*ptr->num) break;
       s=TCPIPMsgSend(sock,ptr->buffer,ptr->size);
       if (s !=ptr->size) break;
-      ptr->rsstate=0; 
-     
+      ptr->rsstate=0;
+
     } else if (rmsg==SHELL_REPLY) {
       if (ptr->cpstate==0) {
         smsg=SHELL_ERROR;
@@ -205,22 +206,21 @@ int operateRS(pid_t parent,int sock) {
   return 0;
 }
 
+
 int rst_opterr(char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
   fprintf(stderr,"Please try: shellserver --help\n");
   return(-1);
 }
 
+
 int main(int argc,char *argv[]) {
-  
+
   int arg,n;
   int port[2]={DEF_CPPORT,DEF_RSPORT};
   int sock[2];
 
   int sc_reuseaddr=1,temp;
-
-
-
 
   unsigned char help=0;
   unsigned char option=0;
@@ -240,7 +240,7 @@ int main(int argc,char *argv[]) {
   int msgsock=0;
 
   struct membuf *ptr;
-  
+
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
@@ -273,7 +273,7 @@ int main(int argc,char *argv[]) {
 
   if (shmem==NULL) shmem=shmemd;
 
-  signal(SIGCHLD,SIG_IGN); 
+  signal(SIGCHLD,SIG_IGN);
   signal(SIGPIPE,SIG_IGN);
 
   signal(SIGINT, rootendprog);
@@ -287,7 +287,7 @@ int main(int argc,char *argv[]) {
   ptr->size=0;
 
   root=getpid();
-  
+
   for (n=0;n<2;n++) {
 
     sock[n]=socket(AF_INET,SOCK_STREAM,0); /* create our listening socket */
@@ -298,65 +298,64 @@ int main(int argc,char *argv[]) {
 
     /* set socket options */
     temp=setsockopt(sock[n],SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
-                 sizeof(sc_reuseaddr));
-
+                    sizeof(sc_reuseaddr));
 
     /* name and bind socket to an address and port number */
 
     server[n].sin_family=AF_INET;
     server[n].sin_addr.s_addr=INADDR_ANY;
-    if (port[n] !=0) server[n].sin_port=htons(port[n]); 
+    if (port[n] !=0) server[n].sin_port=htons(port[n]);
     else server[n].sin_port=0;
-  
+
     if (bind(sock[n],(struct sockaddr *) &server[n],sizeof(server[n]))) {
-       perror("binding stream socket");
-       exit(1);
+      perror("binding stream socket");
+      exit(1);
     }
 
     length[n]=sizeof(server[n]);
     if (getsockname(sock[n],(struct sockaddr *) &server[n],&length[n])) {
-       perror("getting socket name");
-       exit(1);
+      perror("getting socket name");
+      exit(1);
     }
 
     listen(sock[n],5); /* mark our socket willing to accept connections */
   }
+
   do {
-    
+
     /* block until someone wants to attach to us */
 
-   FD_ZERO(&ready);
-   for (n=0;n<2;n++) FD_SET(sock[n],&ready);
-   if (select(sock[1]+1,&ready,0,0,NULL) < 0) { 
-     perror("while testing for connections");
-     continue;
-   }
-     
-   /* Accept the connection from control program client */
-   if (FD_ISSET(sock[0],&ready)) {
+    FD_ZERO(&ready);
+    for (n=0;n<2;n++) FD_SET(sock[n],&ready);
+    if (select(sock[1]+1,&ready,0,0,NULL) < 0) {
+      perror("while testing for connections");
+      continue;
+    }
 
-     fprintf(stdout,"Accepting a new control program connection.\n");
-     clength=sizeof(client);
-     msgsock=accept(sock[0],(struct sockaddr *) &client,&clength);
-        
-     if (msgsock==-1) {
-       perror("accept"); 
-       continue;
-     }
+    /* Accept the connection from control program client */
+    if (FD_ISSET(sock[0],&ready)) {
 
+      fprintf(stdout,"Accepting a new control program connection.\n");
+      clength=sizeof(client);
+      msgsock=accept(sock[0],(struct sockaddr *) &client,&clength);
 
-     if (fork() == 0) {
-       close(sock[0]);
-       operateCP(root,msgsock);
-       exit(0);
-     }
-     close(msgsock);
-   }
+      if (msgsock==-1) {
+        perror("accept");
+        continue;
+      }
 
-   if (FD_ISSET(sock[1],&ready)) {
-       fprintf(stdout,"Accepting a new radar shell connection.\n");
-       clength=sizeof(client);
-       msgsock=accept(sock[1],(struct sockaddr *) &client,&clength);
+      if (fork() == 0) {
+        close(sock[0]);
+        operateCP(root,msgsock);
+        exit(0);
+      }
+      close(msgsock);
+    }
+
+    if (FD_ISSET(sock[1],&ready)) {
+      fprintf(stdout,"Accepting a new radar shell connection.\n");
+      clength=sizeof(client);
+      msgsock=accept(sock[1],(struct sockaddr *) &client,&clength);
 
       if (msgsock==-1) {
         perror("accept");
@@ -375,28 +374,4 @@ int main(int argc,char *argv[]) {
   return 0;
 
 }
-   
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
