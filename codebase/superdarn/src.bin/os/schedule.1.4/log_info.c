@@ -23,16 +23,16 @@ void log_info(int flg,char *str) {
   char logpath[256];
   time_t ltime;
   struct tm *time_of_day;
- 
-  time(&ltime);  
+
+  time(&ltime);
   time_of_day=gmtime(&ltime);
 
-  date=asctime(time_of_day);  
+  date=asctime(time_of_day);
   date[strlen(date)-1]=':';
   if (flg==0) fprintf(stderr,date);
   fprintf(stderr,str);
   fprintf(stderr,"\n");
-  
+
   sprintf(logpath,"%s.%.4d%.2d%.2d",logname,1900+
           time_of_day->tm_year,time_of_day->tm_mon+1,
           time_of_day->tm_mday);
@@ -44,13 +44,4 @@ void log_info(int flg,char *str) {
     fclose(fp);
   }
 }
-
-
-
-
-
-
-
-
-
 

@@ -10,7 +10,7 @@
  
 */
 
- 
+
 #include <time.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -42,17 +42,20 @@ struct scd_blk save_sched;
 char *logname=NULL;
 char dlogname[]="scdlog";
 
+
 void child_handler(int signum) {
   pid_t pid;
   if (schedule.pid !=-1) pid=wait(NULL);
   schedule.pid=-1;
 }
 
+
 int rst_opterr(char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
   fprintf(stderr,"Please try: schedule --help\n");
   return(-1);
 }
+
 
 int main(int argc,char *argv[]) {
 
@@ -74,8 +77,7 @@ int main(int argc,char *argv[]) {
 
   sigset_t set;
   struct sigaction act;
-  struct sigaction oldact; 
-
+  struct sigaction oldact;
 
   schedule.refresh=10*60;
 
@@ -133,9 +135,9 @@ int main(int argc,char *argv[]) {
   schedule.num=0;
   schedule.pid=-1;
   schedule.cnt=0;
-  strcpy(schedule.command,"Null"); 
+  strcpy(schedule.command,"Null");
   strcpy(schedule.path,"/");
-  fp=fopen(schedule.name,"r");  
+  fp=fopen(schedule.name,"r");
   if (fp==NULL) {
     log_info(0,"Schedule file not found");
     exit(-1);
@@ -151,80 +153,54 @@ int main(int argc,char *argv[]) {
   print_schedule(&schedule);
 
   do {
-      if (schedule.pid ==-1) {
-        log_info(0,"Control program not running - Failed or Died\n");
-        log_info(0," Waiting 5 seconds and trying to restart\n");
-        sleep(5);
-        check_program(&schedule,schedule.cnt-1);
-      }
+    if (schedule.pid ==-1) {
+      log_info(0,"Control program not running - Failed or Died\n");
+      log_info(0," Waiting 5 seconds and trying to restart\n");
+      sleep(5);
+      check_program(&schedule,schedule.cnt-1);
+    }
 
-      if (test_refresh(&schedule) != 0) {
-        struct stat nstat1, nstat2;
-        log_info(0, "Waiting for schedule file.");
+    if (test_refresh(&schedule) != 0) {
+      struct stat nstat1, nstat2;
+      log_info(0, "Waiting for schedule file.");
+      stat(schedule.name, &nstat1);
+      sleep(10);
+      stat(schedule.name, &nstat2);
+      while (nstat1.st_mtime != nstat2.st_mtime) {
+        log_info(0, "File is being modified.");
         stat(schedule.name, &nstat1);
         sleep(10);
         stat(schedule.name, &nstat2);
-        while (nstat1.st_mtime != nstat2.st_mtime) {
-          log_info(0, "File is being modified.");
-          stat(schedule.name, &nstat1);
-          sleep(10);
-          stat(schedule.name, &nstat2);
-        }
-        log_info(0, "Refreshing schedule");
-        fp = fopen(schedule.name, "r");
-        if (fp == NULL) {
-           sprintf(logtxt, "Schedule file %s not found", schedule.name);
-           log_info(0, logtxt);
-        } else {
-          memcpy(&save_sched, &schedule, sizeof(schedule));
-          if (load_schedule(fp, &schedule) != 0) {
-            log_info(0, "Error reading updated schedule file");
-            memcpy(&schedule, &save_sched, sizeof(schedule));
-          }
-          fclose(fp);
-        }
-        schedule.cnt = set_schedule(&schedule);
-
-        check_program(&schedule, schedule.cnt - 1);
-        print_schedule(&schedule);
       }
-
-      if (test_schedule(&schedule) !=0) {
-        check_program(&schedule,schedule.cnt);
-        schedule.cnt=set_schedule(&schedule);
+      log_info(0, "Refreshing schedule");
+      fp = fopen(schedule.name, "r");
+      if (fp == NULL) {
+        sprintf(logtxt, "Schedule file %s not found", schedule.name);
+        log_info(0, logtxt);
+      } else {
+        memcpy(&save_sched, &schedule, sizeof(schedule));
+        if (load_schedule(fp, &schedule) != 0) {
+          log_info(0, "Error reading updated schedule file");
+          memcpy(&schedule, &save_sched, sizeof(schedule));
+        }
+        fclose(fp);
       }
-      sleep(1);
-      tick++;
-      tick=tick % 10;
+      schedule.cnt = set_schedule(&schedule);
+
+      check_program(&schedule, schedule.cnt - 1);
+      print_schedule(&schedule);
+    }
+
+    if (test_schedule(&schedule) !=0) {
+      check_program(&schedule,schedule.cnt);
+      schedule.cnt=set_schedule(&schedule);
+    }
+    sleep(1);
+    tick++;
+    tick=tick % 10;
 
   } while(1);
 
- 
   return 0;
-
 }
-   
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

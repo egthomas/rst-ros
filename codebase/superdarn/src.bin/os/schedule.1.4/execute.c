@@ -31,18 +31,18 @@ void terminate_signal_handler(int sig_number) { /* null handler for time out */
   resetflg=1;
 }
 
+
 void terminate(pid_t prog_id) {
-  
-  
+
   sigset_t set;
   struct sigaction act;
-  struct sigaction oldact; 
+  struct sigaction oldact;
 
   struct itimerval timer;
 
   sigemptyset(&set);
   sigaddset(&set,SIGALRM);
- 
+
   act.sa_flags=0;
   act.sa_mask=set;
   act.sa_handler=terminate_signal_handler;
@@ -59,7 +59,7 @@ void terminate(pid_t prog_id) {
 
   kill(prog_id,SIGUSR1);
   waitpid(prog_id,NULL,0);
-  
+
   if (resetflg==1) {  
     fprintf(stderr,"killing task.\n");
     kill(prog_id,SIGKILL);
@@ -74,7 +74,6 @@ void terminate(pid_t prog_id) {
   sigaction(SIGALRM,&oldact,NULL);
 
 }
-   
 
 
 int execute(char *path,char *prog) {
@@ -92,15 +91,11 @@ int execute(char *path,char *prog) {
   for (i=1;(argv[i]=strtok(NULL," ")) !=NULL;i++);
   pid=fork();
 
-  if (pid==0) { 
+  if (pid==0) {
     s=execv(name,argv);
     exit(0);
   }
-  return pid;   
+  return pid;
 
 }
-  
-  
-
-
 

@@ -32,7 +32,7 @@ int test_refresh(struct scd_blk *ptr) {
   int yr,mo,dy,hr,mt,sc,us;
   int nowsec,now,rc;
   TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
-  
+
   nowsec=hr*3600+mt*60+sc;
   now=nowsec/ptr->refresh;
 
@@ -46,18 +46,14 @@ int test_refresh(struct scd_blk *ptr) {
     return 1;
   }
 
-
   /* okay check whether we're on a refresh boundary */
-  
+
   if (then==-1) then=now;
   if (then !=now) {
     tval=buf.st_mtime;
     then=now;
     return 1;
-  }   
+  }
 
- 
-
-  
   return 0;
 }
