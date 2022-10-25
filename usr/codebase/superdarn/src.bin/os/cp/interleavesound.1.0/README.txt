@@ -28,7 +28,7 @@ is not used to adjust the radar operating frequency in real-time.
 
 The control program requires a radar-specific sounding file called
 "interleave_sounder.dat". By default, the control program will look
-for this file in the SD_SND_PATH directory. This file should
+for this file in the SD_SITE_PATH directory. This file should
 contain the following values (one per line):
 
 Number of sounder frequencies (maximum of 12)
@@ -48,4 +48,4 @@ power, spectral width, phi0, elevation) in dmap-format.
 
 Source:
 ======
-E.G. Thomas (20200625)
+E.G. Thomas (20221025)

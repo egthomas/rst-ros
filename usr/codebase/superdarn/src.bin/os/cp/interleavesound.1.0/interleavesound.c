@@ -56,7 +56,7 @@ char *ststr=NULL;
 char *dfststr="tst";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2022/10/17"};
+char progid[80]={"interleavesound 2022/10/25"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -159,8 +159,7 @@ int main(int argc,char *argv[]) {
   int snd_intt_us=500000;
   float snd_time, snd_intt, time_needed=1.25;
 
-  char *snd_dir;
-  char data_path[100];
+  char *path;
 
   snd_intt = snd_intt_sc + snd_intt_us*1e-6;
   /* ------------------------------------------------------- */
@@ -225,16 +224,13 @@ int main(int argc,char *argv[]) {
     return (-1);
   }
 
-  /* load the sounder frequencies from file if present */
-  snd_dir = getenv("SD_SND_PATH");
-  if (snd_dir == NULL)
-    sprintf(data_path,"/data/ros/snd/");
-  else {
-    memcpy(data_path,snd_dir,strlen(snd_dir));
-    data_path[strlen(snd_dir)] = 0;
+  /* load the sounder frequencies from file in site directory if present */
+  path = getenv("SD_SITE_PATH");
+  if (path == NULL) {
+    fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined.\n",path);
   }
 
-  sprintf(snd_filename,"%s/sounder_%s.dat", data_path, ststr);
+  sprintf(snd_filename,"%s/site.%s/sounder_%s.dat", path, ststr, ststr);
   fprintf(stderr,"Checking Sounder File: %s\n",snd_filename);
   snd_dat = fopen(snd_filename, "r");
   if (snd_dat != NULL) {
