@@ -256,7 +256,7 @@ int main(int argc,char *argv[])
   /* load the sounder frequencies from file in site directory if present */
   path = getenv("SD_SITE_PATH");
   if (path == NULL) {
-    fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined.\n",path);
+    fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined.\n");
   }
 
   sprintf(snd_filename,"%s/site.%s/sounder_%s.dat", path, ststr, ststr);
