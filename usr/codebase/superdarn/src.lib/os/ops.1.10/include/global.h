@@ -31,8 +31,6 @@ extern struct TSGprm tsgprm;
 
 extern struct RMsgBlock msg;
 
-extern struct RShellTable rstable;
-
 extern unsigned char command[128];
 
 extern int debug;
@@ -138,18 +136,5 @@ extern int nfrang;
 extern int stfrq;
 extern int frqrng;
 
-
-
 #endif
-
-
-
-
-
-
-
-
-
-
-
 

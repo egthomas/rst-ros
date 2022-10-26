@@ -31,8 +31,6 @@
 #define SHELL_SEND 's'
 #define SHELL_REPLY 'r'
 
-#include "radarshell.h"
-
 
 struct RShellBuffer *RShellBufferMake() {
 
