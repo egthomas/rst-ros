@@ -151,19 +151,19 @@ int main(int argc,char *argv[]) {
   unsigned char hlp=0;
 
   if (debug) {
-    printf("Size of int %u\n",sizeof(int));
-    printf("Size of long %u\n",sizeof(long));
-    printf("Size of long long %u\n",sizeof(long long));
-    printf("Size of struct TRTimes %u\n",sizeof(struct TRTimes));
-    printf("Size of struct SeqPRM %u\n",sizeof(struct SeqPRM));
-    printf("Size of struct RosData %u\n",sizeof(struct RosData));
-    printf("Size of struct DataPRM %u\n",sizeof(struct DataPRM));
-    printf("Size of Struct ControlPRM  %u\n",sizeof(struct ControlPRM));
-    printf("Size of Struct RadarPRM  %u\n",sizeof(struct RadarPRM));
-    printf("Size of Struct ROSMsg  %u\n",sizeof(struct ROSMsg));
-    printf("Size of Struct CLRFreq  %u\n",sizeof(struct CLRFreqPRM));
-    printf("Size of Struct TSGprm  %u\n",sizeof(struct TSGprm));
-    printf("Size of Struct SiteSettings  %u\n",sizeof(struct SiteSettings));
+    printf("Size of int %lu\n",sizeof(int));
+    printf("Size of long %lu\n",sizeof(long));
+    printf("Size of long long %lu\n",sizeof(long long));
+    printf("Size of struct TRTimes %lu\n",sizeof(struct TRTimes));
+    printf("Size of struct SeqPRM %lu\n",sizeof(struct SeqPRM));
+    printf("Size of struct RosData %lu\n",sizeof(struct RosData));
+    printf("Size of struct DataPRM %lu\n",sizeof(struct DataPRM));
+    printf("Size of Struct ControlPRM  %lu\n",sizeof(struct ControlPRM));
+    printf("Size of Struct RadarPRM  %lu\n",sizeof(struct RadarPRM));
+    printf("Size of Struct ROSMsg  %lu\n",sizeof(struct ROSMsg));
+    printf("Size of Struct CLRFreq  %lu\n",sizeof(struct CLRFreqPRM));
+    printf("Size of Struct TSGprm  %lu\n",sizeof(struct TSGprm));
+    printf("Size of Struct SiteSettings  %lu\n",sizeof(struct SiteSettings));
   }
 
   cp     = 1240;  /* CPID */
