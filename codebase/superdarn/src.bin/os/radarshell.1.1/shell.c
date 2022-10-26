@@ -64,7 +64,7 @@ int shell(int num,size_t size,size_t *offset,char *buffer) {
   while(n<buf.num) {
     RadarShellAdd(&rstable,RShellBufferRead(&buf,n),
                   *((int *) RShellBufferRead(&buf,n+1)),
-    RShellBufferRead(&buf,n+2));
+                  RShellBufferRead(&buf,n+2));
     n+=3;
   }
 
