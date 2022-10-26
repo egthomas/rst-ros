@@ -69,6 +69,12 @@ struct TCPIPMsgHost task[4]={
 															{"127.0.0.1",4,-1}  /* rtserver */
 														};
 
+int rst_opterr(char *txt) {
+  fprintf(stderr,"Option not recognized: %s\n",txt);
+  fprintf(stderr,"Please try: tauscan --help\n");
+  return(-1);
+}
+
 int main(int argc,char *argv[]) {
 
 	int i=0;
@@ -175,7 +181,11 @@ int main(int argc,char *argv[]) {
 	/* Process all of the command line options
 	 * Important: need to do this here because we need stid and ststr for
 	 *            calls to site specific programs */
-	arg=OptionProcess(1,argc,argv,&opt,NULL);  
+	arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
+
+    if (arg==-1) {
+      exit(-1);
+    }
 
 	if (ststr==NULL) ststr=dfststr;
 

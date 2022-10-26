@@ -83,6 +83,13 @@ struct TCPIPMsgHost task[4]={
                             };
 
 void usage(void);
+
+int rst_opterr(char *txt) {
+  fprintf(stderr,"Option not recognized: %s\n",txt);
+  fprintf(stderr,"Please try: rbspscan --help\n");
+  return(-1);
+}
+
 int main(int argc,char *argv[]) {
 
 	/*
@@ -214,7 +221,11 @@ int main(int argc,char *argv[]) {
 
 	/* Process all of the command line options
 			Important: need to do this here because we need stid and ststr */
-	arg=OptionProcess(1,argc,argv,&opt,NULL);
+	arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
+
+    if (arg==-1) {
+      exit(-1);
+    }
 
 	/* specify beams right here assuming the following: */
 	/* scnsc=120; scnus=0;    */
