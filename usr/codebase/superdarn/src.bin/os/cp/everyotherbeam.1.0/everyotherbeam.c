@@ -65,9 +65,6 @@ char progid[80] = {"everyotherbeam"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
-int baseport = 44100;
-struct TCPIPMsgHost errlog  = {"127.0.0.1",44100,-1};
-struct TCPIPMsgHost shell   = {"127.0.0.1",44101,-1};
 int tnum = 4;      
 struct TCPIPMsgHost task[4] = {
                               {"127.0.0.1",1,-1}, /* iqwrite */
@@ -227,14 +224,6 @@ int main(int argc,char *argv[]) {
 
   if (ststr == NULL) ststr = dfststr;
   
-  if ((errlog.sock = TCPIPMsgOpen(errlog.host,errlog.port)) == -1)
-    fprintf(stderr,"Error connecting to error log.\n");
-
-  if ((shell.sock = TCPIPMsgOpen(shell.host,shell.port)) == -1)
-    fprintf(stderr,"Error connecting to shell.\n");
-
-  for (n=0; n<tnum; n++) task[n].port += baseport;
-  
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
     
@@ -244,14 +233,6 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
   
-  /* dump beams to log file */
-  sprintf(progname,"everyotherbeam");
-  for (i=0; i<nintgs; i++){
-    sprintf(tempLog, "%3d", bms[i]);
-    strcat(logtxt, tempLog);  
-  }
-  ErrLog(errlog.sock,progname,logtxt);
-
   /* IMPORTANT: sbm and ebm are reset by this function */
   SiteStart();
 
@@ -260,7 +241,23 @@ int main(int argc,char *argv[]) {
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
   strncpy(combf,progid,80);   
-  
+
+  if ((errlog.sock = TCPIPMsgOpen(errlog.host,errlog.port)) == -1)
+    fprintf(stderr,"Error connecting to error log.\n");
+
+  if ((shell.sock = TCPIPMsgOpen(shell.host,shell.port)) == -1)
+    fprintf(stderr,"Error connecting to shell.\n");
+
+  for (n=0; n<tnum; n++) task[n].port += baseport;
+
+  /* dump beams to log file */
+  sprintf(progname,"everyotherbeam");
+  for (i=0; i<nintgs; i++){
+    sprintf(tempLog, "%3d", bms[i]);
+    strcat(logtxt, tempLog);  
+  }
+  ErrLog(errlog.sock,progname,logtxt);
+
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src */
   OpsSetupCommand(argc,argv);
   OpsSetupShell();

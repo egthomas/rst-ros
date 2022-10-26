@@ -46,7 +46,9 @@ struct TXStatus txstatus;
 struct SiteLibrary sitelib;
 int cancel_count=0;
 
-
+struct TCPIPMsgHost errlog={"127.0.0.1",44100,-1};
+struct TCPIPMsgHost shell={"127.0.0.1",44101,-1};
+int baseport=44100;
 
 
 int SiteStart() {

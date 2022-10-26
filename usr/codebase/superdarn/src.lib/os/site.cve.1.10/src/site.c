@@ -87,6 +87,10 @@ int SiteCveStart()
   cnum = 1; /* Channel number to register */
   backward = 0; /* Beam Scan Direction settings */
 
+  errlog.port = 44000;
+  shell.port = 44001;
+  baseport = 44100;
+
 /* Set invert to 0, there is no phase inversion between main and interf */
 /*  invert=0;*/
 

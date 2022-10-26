@@ -27,5 +27,8 @@ extern struct TXStatus txstatus;
 extern struct SiteLibrary sitelib;
 extern int cancel_count;
 
+extern struct TCPIPMsgHost errlog;
+extern struct TCPIPMsgHost shell;
+extern int baseport;
 
 #endif
