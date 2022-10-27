@@ -20,4 +20,4 @@ sleep 2
 echo "Ready for Control Programs"
 rtserver -rp 44104 -ep 44000 -tp 1024 &
 sleep 2
-schedule -l /data/ros/scdlogs/cve.scdlog /data/ros/scd/cve.scd &
+schedule -name cve /data/ros/scd/cve.scd &

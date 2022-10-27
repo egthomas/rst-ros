@@ -71,6 +71,8 @@ int main(int argc,char *argv[]) {
   unsigned char version=0;
 
   char logtxt[256];
+  char name[256];
+  char *radar=NULL;
   char *path;
 
   FILE *fp;
@@ -91,7 +93,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"t",'x',&tmtflg);
   OptionAdd(&opt,"m",'x',&mtflg);
 
-  OptionAdd(&opt,"l",'t',&logname);
+  OptionAdd(&opt,"name",'t',&radar);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -126,11 +128,26 @@ int main(int argc,char *argv[]) {
   act.sa_handler=child_handler;
   sigaction(SIGCHLD,&act,&oldact);
 
+  path = getenv("SD_SCDLOG_PATH");
+  if (path == NULL) {
+    fprintf(stderr,"SD_SCDLOG_PATH not found\n");
+    strcpy(name,"/");
+  } else {
+    strcpy(name,path);
+    strcat(name,"/");
+  }
+
+  if (radar !=NULL) {
+    strcat(name,radar);
+    strcat(name,".");
+  }
+  strcat(name,dlogname);
+  logname=name;
+
   if (dyflg) schedule.refresh=24*3600;
   if (hrflg) schedule.refresh=3600;
   if (tmtflg) schedule.refresh=10*60;
   if (mtflg) schedule.refresh=60;
-  if (logname==NULL) logname=dlogname;
   strcpy(schedule.name,argv[arg]);
 
   schedule.num=0;

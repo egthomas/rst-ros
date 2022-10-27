@@ -45,7 +45,7 @@ The RST-ROS package includes the following software:
                    and the interactive shell
 + radarshell     - The interactive radar shell that allows control program
                    parameters to be changed
-+ scheduler      - The radar scheduler
++ schedule       - The radar scheduler
 
 The package also includes control programs, site libraries, and all
 of the RST data processing and plotting functionality (e.g., dmapdump,
@@ -98,7 +98,7 @@ directories are used:
 /data/ros/fitacf       - fitacf files
 /data/ros/snd          - snd files
 /data/ros/errlog       - error logs
-/data/ros/scdlog       - scheduler logs
+/data/ros/scdlogs      - scheduler logs
 
 
 Running the radar

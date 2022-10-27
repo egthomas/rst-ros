@@ -27,6 +27,6 @@ echo "Ready for Control Programs"
 #sleep 2
 ##rtserver -rp 54104 -ep 54000 -tp 1025 &
 sleep 2 
-schedule -l /data/ros/scdlogs/cve.scdlog /data/ros/scd/cve.scd &
+schedule -name cve /data/ros/scd/cve.scd &
 sleep 2 
-schedule -l /data/ros/scdlogs/cvw.scdlog /data/ros/scd/cvw.scd &
+schedule -name cvw /data/ros/scd/cvw.scd &
