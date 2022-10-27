@@ -59,12 +59,6 @@ int arg=0;
 struct OptionData opt;
 
 int tnum=4;      
-struct TCPIPMsgHost task[4]={
-  {"127.0.0.1",1,-1}, /* iqwrite */
-  {"127.0.0.1",2,-1}, /* raw acfwrite */
-  {"127.0.0.1",3,-1}, /* fit acf write */
-  {"127.0.0.1",4,-1} /* rt server */
-};
 
 void usage(void);
 

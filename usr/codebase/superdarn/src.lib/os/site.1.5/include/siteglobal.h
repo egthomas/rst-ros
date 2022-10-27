@@ -29,6 +29,7 @@ extern int cancel_count;
 
 extern struct TCPIPMsgHost errlog;
 extern struct TCPIPMsgHost shell;
+extern struct TCPIPMsgHost task[4];
 extern int baseport;
 
 #endif

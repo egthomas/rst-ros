@@ -57,13 +57,7 @@ char progname[256];
 int arg=0;
 struct OptionData opt;
 
-int tnum=2;
-struct TCPIPMsgHost task[4]={
-  {"127.0.0.1",1,-1}, /* iqwrite */
-  {"127.0.0.1",2,-1}, /* rawacfwrite */
-  {"127.0.0.1",3,-1}, /* fitacfwrite */
-  {"127.0.0.1",4,-1}  /* rtserver */
-};
+int tnum=4;
 
 void usage(void);
 
