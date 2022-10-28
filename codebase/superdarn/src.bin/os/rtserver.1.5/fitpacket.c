@@ -28,19 +28,19 @@
 #include "fitwrite.h"
 
 
-
 unsigned char *fitpacket(struct RadarParm *prm,
-              struct FitData *fit,int *size) {
+                         struct FitData *fit,int *size) {
 
   int sze=0;
   unsigned char *buf;
   struct DataMap *data;
- 
+
   data=DataMapMake();
   RadarParmEncode(data,prm);
   FitEncode(data,prm,fit);
   buf=DataMapEncodeBuffer(data,&sze);
   if (size !=NULL) *size=sze;
   DataMapFree(data);
+
   return buf;
 }

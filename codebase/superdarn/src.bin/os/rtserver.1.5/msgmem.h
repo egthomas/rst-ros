@@ -1,5 +1,5 @@
 /* msgmem.h
-   =========
+   ========
    Author: R.J.Barnes
 */
 
@@ -10,9 +10,6 @@
  
 */
 
-int writeraw(char *buf,int sze); 
+int writeraw(char *buf,int sze);
 void readsock(fd_set *fdset,char *tmp_buf,int tmp_sze);
 int writesock();
-
-
-

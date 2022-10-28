@@ -22,13 +22,14 @@
 #include "rtypes.h"
 #include "errlog.h"
 #include "socket.h"
-  
+
 extern char *taskname;
 extern int errsock;
 
+
 int forkinet(int port) {
- 
-  char errbuf[256];  
+
+  char errbuf[256];
   int status;
   int sock;
   int pipeid[2];
@@ -40,8 +41,8 @@ int forkinet(int port) {
 
   if ((status=fcntl(pipeid[1],F_GETFL))==-1) return -1;
   status|=O_NONBLOCK;
-  if ((status=fcntl(pipeid[1],F_SETFL,status))==-1) return -1; 
- 
+  if ((status=fcntl(pipeid[1],F_SETFL,status))==-1) return -1;
+
   if ((cpid=fork()) !=0) {
     close(pipeid[0]);
     return pipeid[1];
@@ -50,7 +51,7 @@ int forkinet(int port) {
   close(pipeid[1]);
 
   ErrLog(errsock,taskname,"Child server process starting");
- 
+
   sock=createsocket(&port);
   if (sock !=-1) {
     pid_t pid;
@@ -62,20 +63,19 @@ int forkinet(int port) {
     pid=getpid();
     sprintf(errbuf,"Child PID %d.",(int) pid);
     ErrLog(errsock,taskname,errbuf);
- 
 
   } else ErrLog(errsock,taskname,"Failed to create Socket");
 
   if (sock !=-1) procsocket(sock,pipeid[0]);
-	   
+
   close(sock);
   close(pipeid[0]);
 
   ErrLog(errsock,taskname,"Child Server process terminating");
 
   exit(0);
-  
+
   return -1;
-  
-}    
+
+}
 

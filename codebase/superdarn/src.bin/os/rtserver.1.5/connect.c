@@ -36,34 +36,36 @@ extern int msgmax;
 extern char *taskname;
 extern int errsock;
 
+
 void closesock(int i) {
   if ((i<msgmax) && (client[i].sock !=-1)) {
-    
+
     char errbuf[256];
     sprintf(errbuf,"%s : Close Connection.",client[i].host);
     ErrLog(errsock,taskname,errbuf);
-    
+
     close(client[i].sock);
     client[i].sock=-1;
     if (i==msgmax-1) msgmax--;
-  } 
+  }
 }
+
 
 int opensock(int sock,fd_set *fdset) {
   int i,status;
   char errbuf[256];
   int temp;
   unsigned int clength;
- 
+
   struct sockaddr_in caddr;
- 
+
   if (FD_ISSET(sock,fdset)==0) return -1;
   for (i=0;(i<msgmax) && (client[i].sock !=-1);i++);
-  if (i>=CLIENT_MAX) { 
+  if (i>=CLIENT_MAX) {
     /* dequeue the request here */
-    
+
     ErrLog(errsock,taskname,"Too many clients attached - refusing connection.");
-    
+
     temp=accept(sock,0,0);
     if (temp !=-1) close(temp);
     return -1;
@@ -72,9 +74,9 @@ int opensock(int sock,fd_set *fdset) {
   clength=sizeof(caddr);
   if ((client[i].sock=accept(sock,
       (struct sockaddr *) &caddr,&clength))==-1) {
-    
+
      ErrLog(errsock,taskname,"Accept failed.");
-    
+
      return -1;
   }
 
@@ -83,29 +85,26 @@ int opensock(int sock,fd_set *fdset) {
   if ((status=fcntl(client[i].sock,F_GETFL))==-1) {
     close(client[i].sock);
     client[i].sock=-1;
-    
+
     ErrLog(errsock,taskname,"Failed to read file control block.");
-    
+
     return -1;
   }
+
   status|=O_NONBLOCK;
   if ((status=fcntl(client[i].sock,F_SETFL,status))==-1) {
     close(client[i].sock);
     client[i].sock=-1;
-    
+
     ErrLog(errsock,taskname,"Failed to write file control block.");
-    
+
     return -1;
-  } 
-  
+  }
+
   sprintf(errbuf,"%s : Open Connection.",client[i].host);
   ErrLog(errsock,taskname,errbuf);
-  
+
   if (i==msgmax) msgmax++;
   return client[i].sock;
 }
-
-
-
-
 

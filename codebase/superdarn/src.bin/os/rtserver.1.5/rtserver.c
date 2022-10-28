@@ -1,5 +1,5 @@
-/* fitacfwrite
-    =========== 
+/* rtserver
+   ========
    Author: R.J.Barnes
 */
 
@@ -49,7 +49,7 @@
 struct OptionData opt;
 
 struct RMsgBlock rblk;
-unsigned char *store=NULL; 
+unsigned char *store=NULL;
 
 struct DMsg {
   int tag;
@@ -60,7 +60,6 @@ struct DMsg {
 int dnum=0;
 int dptr=0;
 struct DMsg dmsg[32];
-
 
 struct RadarParm *prm;
 struct FitData *fit;
@@ -76,8 +75,9 @@ char errbuf[1024];
 
 int channel=-1;
 
+
 int operate(pid_t parent,int sock,int port) {
- 
+
   int s,i;
   int msg,rmsg;
 
@@ -89,7 +89,7 @@ int operate(pid_t parent,int sock,int port) {
   int bufsze;
 
   outpipe=forkinet(port);
-  sleep(1);	
+  sleep(1);
 
   while(1) {
 
@@ -97,9 +97,9 @@ int operate(pid_t parent,int sock,int port) {
 
     if (s !=sizeof(int)) break;
     rmsg=TASK_OK;
+
     switch (msg) {
-    
-    case TASK_OPEN:
+      case TASK_OPEN:
       ErrLog(errsock,taskname,"Opening file.");
       rmsg=RMsgRcvDecodeOpen(sock,&cbuflen,&cbufadr);
       break;
@@ -116,41 +116,40 @@ int operate(pid_t parent,int sock,int port) {
       break;
     case TASK_DATA:
       ErrLog(errsock,taskname,"Received Data.");
-      rmsg=RMsgRcvDecodeData(sock,&rblk,&store);    
+      rmsg=RMsgRcvDecodeData(sock,&rblk,&store);
     default:
-      break;  
+      break;
     }
+
     TCPIPMsgSend(sock,&rmsg,sizeof(int));
 
     if (msg==TASK_DATA) {
       dnum=0;
       for (i=0;i<rblk.num;i++) {
-        for (dptr=0;dptr<dnum;dptr++) 
+        for (dptr=0;dptr<dnum;dptr++)
           if (dmsg[dptr].tag==rblk.data[i].tag) break;
-          if (dptr==dnum) {
-            dmsg[dptr].tag=rblk.data[i].tag;
-            dmsg[dptr].pbuf=NULL;
-            dmsg[dptr].fbuf=NULL;
-            dnum++;
-	  }
-          switch (rblk.data[i].type) {
-	  case PRM_TYPE:
+
+        if (dptr==dnum) {
+          dmsg[dptr].tag=rblk.data[i].tag;
+          dmsg[dptr].pbuf=NULL;
+          dmsg[dptr].fbuf=NULL;
+          dnum++;
+        }
+
+        switch (rblk.data[i].type) {
+          case PRM_TYPE:
             dmsg[dptr].pbuf=rblk.ptr[rblk.data[i].index];
-	    break;
+            break;
           case FIT_TYPE:
             dmsg[dptr].fbuf=rblk.ptr[rblk.data[i].index];
-	    break;
+            break;
           default:
             break;
-	  }
+        }
       }
 
-
-
-
       for (dptr=0;dptr<dnum;dptr++) {
-
-	if (dmsg[dptr].pbuf==NULL) continue;
+        if (dmsg[dptr].pbuf==NULL) continue;
         if (dmsg[dptr].fbuf==NULL) continue;
         RadarParmExpand(prm,dmsg[dptr].pbuf);
         FitExpand(fit,prm->nrang,dmsg[dptr].fbuf);
@@ -159,27 +158,28 @@ int operate(pid_t parent,int sock,int port) {
           if ((channel==1) && (prm->channel==2)) continue;
           if ((channel==2) && (prm->channel!=2)) continue;
         }
+
         if (outpipe==-1) {
           sprintf(errbuf,"Child process died - Restarting.");
-          ErrLog(errsock,taskname,errbuf);  
+          ErrLog(errsock,taskname,errbuf);
           outpipe=forkinet(port);
         }
+
         bufadr=fitpacket(prm,fit,&bufsze);
         if (bufadr !=NULL) {
           if (outpipe !=-1) s=ConnexWriteIP(outpipe,bufadr,bufsze);
           free(bufadr);
-	}       
+        }
       }
 
-
-      
       if (store !=NULL) free(store);
       store=NULL;
-    }  
+    }
   }
 
   return 0;
 }
+
 
 int rst_opterr(char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
@@ -187,11 +187,11 @@ int rst_opterr(char *txt) {
   return(-1);
 }
 
+
 int main(int argc,char *argv[]) {
-  
+
   int rport=DEF_PORT,tport=1024,arg=0;
   int sock;
-
   int sc_reuseaddr=1,temp;
 
   unsigned char help=0;
@@ -222,7 +222,6 @@ int main(int argc,char *argv[]) {
 
   OptionAdd(&opt,"rp",'i',&rport);
   OptionAdd(&opt,"tp",'i',&tport);
-
 
   OptionAdd(&opt,"eh",'t',&errhost);
   OptionAdd(&opt,"ep",'i',&errport);
@@ -255,16 +254,14 @@ int main(int argc,char *argv[]) {
     if (tolower(chstr[0])=='b') channel=2;
   }
 
-
   if (errhost==NULL) errhost=derrhost;
   errsock=TCPIPMsgOpen(errhost,errport);
 
   sprintf(errbuf,"Started (version %s.%s) listening on port %d for control program, and on port %d for clients",
           MAJOR_VERSION,MINOR_VERSION,rport,tport);
-  ErrLog(errsock,taskname,errbuf);  
+  ErrLog(errsock,taskname,errbuf);
 
-
-  signal(SIGCHLD,SIG_IGN); 
+  signal(SIGCHLD,SIG_IGN);
   signal(SIGPIPE,SIG_IGN);
 
   root=getpid();
@@ -277,86 +274,62 @@ int main(int argc,char *argv[]) {
 
   /* set socket options */
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
-                 sizeof(sc_reuseaddr));
+                  sizeof(sc_reuseaddr));
 
   /* name and bind socket to an address and port number */
 
   server.sin_family=AF_INET;
   server.sin_addr.s_addr=INADDR_ANY;
-  if (rport !=0) server.sin_port=htons(rport); 
+  if (rport !=0) server.sin_port=htons(rport);
   else server.sin_port=0;
-  
+
   if (bind(sock,(struct sockaddr *) &server,sizeof(server))) {
-     perror("binding stream socket");
-     exit(1);
+    perror("binding stream socket");
+    exit(1);
   }
 
   /* Find out assigned port number and print it out */
 
   length=sizeof(server);
   if (getsockname(sock,(struct sockaddr *) &server,&length)) {
-     perror("getting socket name");
-     exit(1);
+    perror("getting socket name");
+    exit(1);
   }
 
   listen(sock,5); /* mark our socket willing to accept connections */
-  
+
   do {
 
-      /* block until someone wants to attach to us */
+    /* block until someone wants to attach to us */
 
-      FD_ZERO(&ready);
-      FD_SET(sock,&ready);
-      if (select(sock+1,&ready,0,0,NULL) < 0) { 
-       perror("while testing for connections");
-       continue;
-      }
-     
-      /* Accept the connection from the client */
+    FD_ZERO(&ready);
+    FD_SET(sock,&ready);
+    if (select(sock+1,&ready,0,0,NULL) < 0) {
+      perror("while testing for connections");
+      continue;
+    }
 
-      fprintf(stdout,"Accepting a new connection...\n");
-      clength=sizeof(client);
-      msgsock=accept(sock,(struct sockaddr *) &client,&clength);
-        
-      if (msgsock==-1) {
-         perror("accept"); 
-         continue;
-      }
+    /* Accept the connection from the client */
 
-      if (fork() == 0) {
-        close(sock);
-        operate(root,msgsock,tport);
-        exit(0);
-      }
-      close (msgsock);
+    fprintf(stdout,"Accepting a new connection...\n");
+    clength=sizeof(client);
+    msgsock=accept(sock,(struct sockaddr *) &client,&clength);
+
+    if (msgsock==-1) {
+      perror("accept");
+      continue;
+    }
+
+    if (fork() == 0) {
+      close(sock);
+      operate(root,msgsock,tport);
+      exit(0);
+    }
+
+    close(msgsock);
   } while(1);
 
- 
   return 0;
 
 }
-   
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

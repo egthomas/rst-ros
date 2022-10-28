@@ -47,9 +47,11 @@ int runloop=1;
 char tmpbuf[BUF_SIZE];
 char mbuf[BUF_SIZE];
 
+
 void trap_reset(int signal) {
-   runloop=0;
+  runloop=0;
 }
+
 
 void reset() {
   int i;
@@ -59,6 +61,7 @@ void reset() {
      client[i].out_sze=0;
   }
 }
+
 
 int pollsock(int sock,struct timeval *tv,fd_set *fdset) {
   int i;
@@ -70,6 +73,7 @@ int pollsock(int sock,struct timeval *tv,fd_set *fdset) {
   return 0;
 }
 
+
 int createsocket(int *port) {
 
   unsigned int length;
@@ -77,42 +81,38 @@ int createsocket(int *port) {
   struct sockaddr_in server;
   int sc_reuseaddr=1,temp;
 
-
- 
   /* reset the client array */
   reset();
-  
+
   sock=socket(AF_INET,SOCK_STREAM,0); /* create our listening socket */
   if (sock<0) return -1;
-  
+
   /* name and bind socket to an address and port number */
 
   server.sin_family=AF_INET;
   server.sin_addr.s_addr=INADDR_ANY;
-  if (*port !=0) server.sin_port=htons(*port); 
+  if (*port !=0) server.sin_port=htons(*port);
   else server.sin_port=0;
-
 
  /* set socket options */
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
-                 sizeof(sc_reuseaddr));
-  
+                  sizeof(sc_reuseaddr));
+
   if (bind(sock,(struct sockaddr *) &server,sizeof(server))) return -1;
 
-
-   
   /* Find out assigned port number and print it out */
 
   length=sizeof(server);
   if (getsockname(sock,(struct sockaddr *) &server,&length)) return -1;
-    
+
   *port=ntohs(server.sin_port);
   return sock;
 }
 
+
 int procsocket(int sock,int inpipe) {
 
-  fd_set fdset; /* selected file descriptors */  
+  fd_set fdset; /* selected file descriptors */
   int poll,i;
 
   struct timeval tv;
@@ -120,16 +120,16 @@ int procsocket(int sock,int inpipe) {
   signal(SIGPIPE,SIG_IGN);
   signal(SIGUSR1,trap_reset);
   listen(sock,5);
- 
+
   tv.tv_sec=0;
   tv.tv_usec=0;
 
-  poll=0;  
-  runloop=1; 
+  poll=0;
+  runloop=1;
   do {
 
     FD_ZERO(&fdset);
-    FD_SET(inpipe,&fdset);  
+    FD_SET(inpipe,&fdset);
     if (poll==0) {
       if (pollsock(sock,NULL,&fdset) !=0) continue;
     } else pollsock(sock,&tv,&fdset);
@@ -148,27 +148,26 @@ int procsocket(int sock,int inpipe) {
       if (size==0) break;
       writeraw(mbuf,size);
     }
-    
+
     /* send the data to the clients */
 
     if (writesock() !=0) poll=1;
-   
+
     /* read back any data from the clients */
 
-    readsock(&fdset,tmpbuf,BUF_SIZE); 
-    
+    readsock(&fdset,tmpbuf,BUF_SIZE);
+
     /* decode the buffers here */
 
   } while(runloop);
-  
+
   /* close all the clients down */
- 
+
   for (i=0;i<msgmax;i++) {
     if (client[i].sock !=0) close(client[i].sock);
   }
   close(sock);
+
   return -1;
 }
-
-
 

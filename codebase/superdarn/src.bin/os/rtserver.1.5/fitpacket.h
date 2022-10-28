@@ -12,4 +12,4 @@
 */
 
 unsigned char *fitpacket(struct RadarParm *prm,
-			 struct FitData *fit,int *size);
+                         struct FitData *fit,int *size);
