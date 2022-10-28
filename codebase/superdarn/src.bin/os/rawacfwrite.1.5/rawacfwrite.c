@@ -1,5 +1,5 @@
 /* rawacfwrite
-    =========== 
+   ===========
    Author: R.J.Barnes
 */
 
@@ -45,12 +45,12 @@
 
 struct OptionData opt;
 
-struct RadarNetwork *network;  
+struct RadarNetwork *network;
 struct Radar *radar;
 struct RadarSite *site;
 
 struct RMsgBlock rblk;
-unsigned char *store=NULL; 
+unsigned char *store=NULL;
 
 struct DMsg {
   int tag;
@@ -61,7 +61,6 @@ struct DMsg {
 int dnum=0;
 int dptr=0;
 struct DMsg dmsg[32];
-
 
 struct RadarParm *prm;
 struct RawData *raw;
@@ -96,34 +95,33 @@ int operate(pid_t parent,int sock) {
 
     if (s !=sizeof(int)) break;
     rmsg=TASK_OK;
-    switch (msg) {
-    
-    case TASK_OPEN:
-      ErrLog(errsock,taskname,"Opening file.");
-      rmsg=RMsgRcvDecodeOpen(sock,&cbuflen,&cbufadr);
 
-      if (rmsg==TASK_OK) flg=1;
-      break;
-    case TASK_CLOSE:
-      ErrLog(errsock,taskname,"Closing file.");
-      if (filename !=NULL) free(filename);
-      filename=NULL;
-      break;
-    case TASK_RESET:
-      ErrLog(errsock,taskname,"Reset.");
-      if (filename !=NULL) free(filename);
-      filename=NULL;
-      break;
-    case TASK_QUIT:
-      ErrLog(errsock,taskname,"Stopped.");
-      TCPIPMsgSend(sock,&rmsg,sizeof(int));
-      exit(0);
-      break;
-    case TASK_DATA:
-      ErrLog(errsock,taskname,"Received Data.");
-      rmsg=RMsgRcvDecodeData(sock,&rblk,&store);
-    default:
-      break;  
+    switch (msg) {
+      case TASK_OPEN:
+        ErrLog(errsock,taskname,"Opening file.");
+        rmsg=RMsgRcvDecodeOpen(sock,&cbuflen,&cbufadr);
+        if (rmsg==TASK_OK) flg=1;
+        break;
+      case TASK_CLOSE:
+        ErrLog(errsock,taskname,"Closing file.");
+        if (filename !=NULL) free(filename);
+        filename=NULL;
+        break;
+      case TASK_RESET:
+        ErrLog(errsock,taskname,"Reset.");
+        if (filename !=NULL) free(filename);
+        filename=NULL;
+        break;
+      case TASK_QUIT:
+        ErrLog(errsock,taskname,"Stopped.");
+        TCPIPMsgSend(sock,&rmsg,sizeof(int));
+        exit(0);
+        break;
+      case TASK_DATA:
+        ErrLog(errsock,taskname,"Received Data.");
+        rmsg=RMsgRcvDecodeData(sock,&rblk,&store);
+      default:
+        break;
     }
 
     TCPIPMsgSend(sock,&rmsg,sizeof(int));
@@ -131,27 +129,30 @@ int operate(pid_t parent,int sock) {
     if (msg==TASK_DATA) {
       dnum=0;
       for (i=0;i<rblk.num;i++) {
-        for (dptr=0;dptr<dnum;dptr++) 
+        for (dptr=0;dptr<dnum;dptr++)
           if (dmsg[dptr].tag==rblk.data[i].tag) break;
-          if (dptr==dnum) {
-            dmsg[dptr].tag=rblk.data[i].tag;
-            dmsg[dptr].pbuf=NULL;
-            dmsg[dptr].rbuf=NULL;
-            dnum++;
-	  }
-          switch (rblk.data[i].type) {
-	  case PRM_TYPE:
+
+        if (dptr==dnum) {
+          dmsg[dptr].tag=rblk.data[i].tag;
+          dmsg[dptr].pbuf=NULL;
+          dmsg[dptr].rbuf=NULL;
+          dnum++;
+        }
+
+        switch (rblk.data[i].type) {
+          case PRM_TYPE:
             dmsg[dptr].pbuf=rblk.ptr[rblk.data[i].index];
-	    break;
+            break;
           case RAW_TYPE:
             dmsg[dptr].rbuf=rblk.ptr[rblk.data[i].index];
-	    break;
+            break;
           default:
             break;
-	  }
+        }
       }
+
       for (dptr=0;dptr<dnum;dptr++) {
-	if (dmsg[dptr].pbuf==NULL) continue;
+        if (dmsg[dptr].pbuf==NULL) continue;
         if (dmsg[dptr].rbuf==NULL) continue;
         RadarParmExpand(prm,dmsg[dptr].pbuf);
         RawExpand(raw,prm->nrang,prm->mplgs,dmsg[dptr].rbuf);
@@ -159,34 +160,37 @@ int operate(pid_t parent,int sock) {
         if ((filename==NULL) && (flg !=0)) {
           flg=0;
           filename=FIOMakeFile(getenv("SD_RAW_PATH"),
-			       prm->time.yr,
+                               prm->time.yr,
                                prm->time.mo,
                                prm->time.dy,
                                prm->time.hr,
                                prm->time.mt,
                                prm->time.sc,
-			       RadarGetCode(network,prm->stid,0),
-			       chn,"rawacf",0,0);
-	}
+                               RadarGetCode(network,prm->stid,0),
+                               chn,"rawacf",0,0);
+        }
+
         if (filename !=NULL) {
           fp=fopen(filename,"a");
           if (fp==NULL) ErrLog(errsock,taskname,"Error opening file.");
-	  else {
+          else {
             raw->thr=thr;
-            s=RawFwrite(fp,prm,raw);  
+            s=RawFwrite(fp,prm,raw);
             if (s==-1) break;
-	  }
+          }
           if (s==-1) ErrLog(errsock,taskname,"Error writing record.");
           fclose(fp);
-	}
+        }
       }
+
       if (store !=NULL) free(store);
       store=NULL;
-    }  
+    }
   }
 
   return 0;
 }
+
 
 int rst_opterr(char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
@@ -194,15 +198,14 @@ int rst_opterr(char *txt) {
   return(-1);
 }
 
+
 int main(int argc,char *argv[]) {
   FILE *fp=NULL;
   char *envstr=NULL;
-  
+
   int port=DEF_PORT,arg=0;
   int sock;
-
   int sc_reuseaddr=1,temp;
-
 
   unsigned char help=0;
   unsigned char option=0;
@@ -269,7 +272,7 @@ int main(int argc,char *argv[]) {
   }
 
   network=RadarLoad(fp);
-  fclose(fp); 
+  fclose(fp);
   if (network==NULL) {
     fprintf(stderr,"Failed to read radar information.\n");
     exit(-1);
@@ -278,14 +281,11 @@ int main(int argc,char *argv[]) {
   if (errhost==NULL) errhost=derrhost;
   errsock=TCPIPMsgOpen(errhost,errport);
 
-  
-
   sprintf(errbuf,"Started (version %s.%s) listening on port %d",
           MAJOR_VERSION,MINOR_VERSION,port);
-  ErrLog(errsock,taskname,errbuf);  
+  ErrLog(errsock,taskname,errbuf);
 
-
-  signal(SIGCHLD,SIG_IGN); 
+  signal(SIGCHLD,SIG_IGN);
   signal(SIGPIPE,SIG_IGN);
 
   root=getpid();
@@ -298,88 +298,62 @@ int main(int argc,char *argv[]) {
 
   /* set socket options */
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
-                 sizeof(sc_reuseaddr));
-
-
+                  sizeof(sc_reuseaddr));
 
   /* name and bind socket to an address and port number */
 
   server.sin_family=AF_INET;
   server.sin_addr.s_addr=INADDR_ANY;
-  if (port !=0) server.sin_port=htons(port); 
+  if (port !=0) server.sin_port=htons(port);
   else server.sin_port=0;
-  
+
   if (bind(sock,(struct sockaddr *) &server,sizeof(server))) {
-     perror("binding stream socket");
-     exit(1);
+    perror("binding stream socket");
+    exit(1);
   }
 
   /* Find out assigned port number and print it out */
 
   length=sizeof(server);
   if (getsockname(sock,(struct sockaddr *) &server,&length)) {
-     perror("getting socket name");
-     exit(1);
+    perror("getting socket name");
+    exit(1);
   }
 
   listen(sock,5); /* mark our socket willing to accept connections */
-  
+
   do {
 
-      /* block until someone wants to attach to us */
+    /* block until someone wants to attach to us */
 
-      FD_ZERO(&ready);
-      FD_SET(sock,&ready);
-      if (select(sock+1,&ready,0,0,NULL) < 0) { 
-       perror("while testing for connections");
-       continue;
-      }
-     
-      /* Accept the connection from the client */
+    FD_ZERO(&ready);
+    FD_SET(sock,&ready);
+    if (select(sock+1,&ready,0,0,NULL) < 0) {
+      perror("while testing for connections");
+      continue;
+    }
 
-      fprintf(stdout,"Accepting a new connection...\n");
-      clength=sizeof(client);
-      msgsock=accept(sock,(struct sockaddr *) &client,&clength);
-        
-      if (msgsock==-1) {
-         perror("accept"); 
-         continue;
-      }
+    /* Accept the connection from the client */
 
-      if (fork() == 0) {
-        close(sock);
-        operate(root,msgsock);
-        exit(0);
-      }
-      close (msgsock);
+    fprintf(stdout,"Accepting a new connection...\n");
+    clength=sizeof(client);
+    msgsock=accept(sock,(struct sockaddr *) &client,&clength);
+
+    if (msgsock==-1) {
+      perror("accept");
+      continue;
+    }
+
+    if (fork() == 0) {
+      close(sock);
+      operate(root,msgsock);
+      exit(0);
+    }
+
+    close(msgsock);
   } while(1);
 
- 
   return 0;
 
 }
-   
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
