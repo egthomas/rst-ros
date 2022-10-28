@@ -58,6 +58,7 @@ char progname[256];
 int arg=0;
 struct OptionData opt;
 
+char *roshost=NULL;
 int tnum=4;      
 
 void usage(void);
@@ -183,6 +184,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "intus",  'i', &intus);
   OptionAdd(&opt, "setintt",'x', &setintt);
 
+  OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address  */
   OptionAdd(&opt, "-help",  'x', &hlp);      /* just dump some parameters   */
 
   OptionAdd(&opt, "baud",   'i', &nbaud);
@@ -239,7 +241,7 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
-  SiteStart();
+  SiteStart(roshost);
 
   /* reprocess the commandline since some things are reset by SiteStart */
   arg = OptionProcess(1,argc,argv,&opt,NULL);
@@ -516,6 +518,7 @@ void usage(void)
   printf("-setintt    : set to enable integration period override.\n");
   printf("-intsc  int : integration period seconds.\n");
   printf("-intus  int : integration period microseconds.\n");
+  printf("  -ros char : change the roshost IP address\n");
   printf(" --help     : print this message and quit.\n");
   printf("\n");
 }

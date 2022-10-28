@@ -72,7 +72,7 @@ void SiteCvwExit(int signum)
   }
 }
 
-int SiteCvwStart()
+int SiteCvwStart(char *host)
 {
   signal(SIGPIPE, SiteCvwExit);
   signal(SIGINT,  SiteCvwExit);
@@ -81,8 +81,10 @@ int SiteCvwStart()
   cancel_count  = 0;
 
   sock = 0;
-  strcpy(server,"192.168.7.5");
+  if (host !=NULL) strcpy(server,host);
+  else strcpy(server,"192.168.7.5");
   port = 45000;
+
   rnum = 2; /* Radar number to register */
   cnum = 1; /* Channel number to register */
   backward = 1; /* Beam Scan Direction settings */

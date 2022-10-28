@@ -78,6 +78,7 @@ char progname[256];
 int arg=0;
 struct OptionData opt;
 
+char *roshost=NULL;
 int tnum=4;      
 
 int rst_opterr(char *txt) {
@@ -183,6 +184,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "bp",  'i', &baseport); 
   OptionAdd(&opt, "stid",'t', &ststr); 
   OptionAdd(&opt, "fast",'x', &fast);
+  OptionAdd(&opt, "ros", 't', &roshost);  /* Set the roshost IP address */
    
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -216,7 +218,7 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
-  SiteStart();		/* sbm and ebm are reset by this function. SGS */
+  SiteStart(roshost);		/* sbm and ebm are reset by this function. SGS */
 
   arg=OptionProcess(1,argc,argv,&opt,NULL);  /* this fixes it... SGS */
 

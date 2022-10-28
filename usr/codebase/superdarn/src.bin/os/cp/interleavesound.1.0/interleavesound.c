@@ -60,6 +60,8 @@ char progid[80]={"interleavesound 2022/10/25"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
+
+char *roshost=NULL;
 int tnum=4;
 
 void usage(void);
@@ -193,6 +195,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);     /* fix the transmit frequency */
   OptionAdd(&opt,"frqrng",'i',&frqrng);     /* fix the FCLR window [kHz] */
   OptionAdd(&opt,"sfrqrng",'i',&snd_frqrng); /* sounding FCLR window [kHz] */
+  OptionAdd(&opt,"ros",   't',&roshost);    /* Set the roshost IP address */
   OptionAdd(&opt,"-help", 'x',&hlp);        /* just dump some parameters */
 
   /* Process all of the command line options
@@ -256,7 +259,7 @@ int main(int argc,char *argv[]) {
   }
 
   /* IMPORTANT: sbm and ebm are reset by this function */
-  SiteStart();
+  SiteStart(roshost);
 
   /* Reprocess the command line to restore desired parameters */
   arg=OptionProcess(1,argc,argv,&opt,NULL);
@@ -579,6 +582,7 @@ void usage(void)
     printf(" -fixfrq int : transmit on fixed frequency (kHz)\n");
     printf(" -frqrng int : set the clear frequency search window (kHz)\n");
     printf("-sfrqrng int : set the sounding FCLR search window (kHz)\n");
+    printf("   -ros char : change the roshost IP address\n");
     printf("  --help     : print this message and quit.\n");
     printf("\n");
 }

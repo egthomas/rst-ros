@@ -57,12 +57,12 @@ struct TCPIPMsgHost task[4]={
 int baseport=44100;
 
 
-int SiteStart() {
+int SiteStart(char *host) {
   rdata.main=NULL;
   rdata.back=NULL;
   badtrdat.start_usec=NULL;
   badtrdat.duration_usec=NULL; 
-  return (sitelib.start)();
+  return (sitelib.start)(host);
 }
 
 int SiteSetupRadar() {
@@ -96,7 +96,4 @@ int SiteEndScan(int bsc,int bus, unsigned sleepus) {
 void SiteExit(int signo) {
   (sitelib.exit)(signo);
 }
-
-
-
 

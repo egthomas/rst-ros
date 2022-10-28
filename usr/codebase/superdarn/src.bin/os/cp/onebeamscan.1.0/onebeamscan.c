@@ -68,6 +68,7 @@ char progname[256];
 int arg=0;
 struct OptionData opt;
 
+char *roshost=NULL;
 int tnum=4;      
 
 void usage(void);
@@ -194,6 +195,7 @@ int main(int argc,char *argv[]) {
   /*OptionAdd(&opt, "sb",     'i', &sbm);*/
   /*OptionAdd(&opt, "eb",     'i', &ebm);*/
   OptionAdd(&opt, "fixfrq", 'i', &fixfrq);   /* fix the transmit frequency */
+  OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address */
   OptionAdd(&opt, "-help",  'x', &hlp);      /* just dump some parameters */
 
   /* process the commandline; need this for setting errlog port */
@@ -221,7 +223,7 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
-  SiteStart();
+  SiteStart(roshost);
 
   /* reprocess the commandline since some things are reset by SiteStart */
   arg = OptionProcess(1, argc, argv, &opt, NULL);  
@@ -427,7 +429,7 @@ int main(int argc,char *argv[]) {
  
 void usage(void)
 {
-  printf("\nnormalscan [command-line options]\n\n");
+  printf("\nonebeamscan [command-line options]\n\n");
   printf("command-line options:\n");
   printf("    -di     : indicates running during discretionary time\n");
   printf(" -frang int : delay to first range (km) [180]\n");
@@ -437,14 +439,14 @@ void usage(void)
   printf("    -df int : daytime frequency (kHz) [site.c]\n");
   printf("    -nf int : nighttime frequency (kHz) [site.c]\n");
   printf("   -xcf     : set for computing XCFs [global.c]\n");
-  printf("    -sb int : starting beam [site.c]\n");
-  printf("    -eb int : ending beam [site.c]\n");
   printf("    -ep int : error log port (must be set here for dual radars)\n");
   printf("    -sp int : shell port (must be set here for dual radars)\n");
   printf("    -bp int : base port (must be set here for dual radars)\n");
   printf("  -stid char: radar string (must be set here for dual radars)\n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
   printf("-nowait     : do not wait at end of scan boundary.\n");
+  printf("    -ob int : THE one beam\n");
+  printf("  -ros char : change the roshost IP address\n");
   printf(" --help     : print this message and quit.\n");
   printf("\n");
 }

@@ -61,6 +61,7 @@ char progname[256];
 int arg=0;
 struct OptionData opt;
 
+char *roshost=NULL;
 int tnum=4;      
 
 int rst_opterr(char *txt) {
@@ -171,6 +172,7 @@ int main(int argc,char *argv[]) {
 	OptionAdd(&opt, "nowait", 'x', &scannowait);
 	OptionAdd(&opt, "sb",     'i', &sbm);
 	OptionAdd(&opt, "eb",     'i', &ebm);
+    OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address */
  
 	/* Process all of the command line options
 	 * Important: need to do this here because we need stid and ststr for
@@ -199,7 +201,7 @@ int main(int argc,char *argv[]) {
 
 	/* IMPORTANT: sbm and ebm are reset by this function */
 	/* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-	SiteStart();
+	SiteStart(roshost);
 
 	/* Reprocess the command line to restore desired parameters */
 	/* Important: need to do this for command line arguments to work */

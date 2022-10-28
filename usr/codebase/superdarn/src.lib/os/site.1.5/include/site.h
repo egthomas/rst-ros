@@ -8,7 +8,7 @@
 #define _SITE_H
 
 struct SiteLibrary {
-  int (*start)();
+  int (*start)(char *);
   int (*setupradar)();
   int (*startscan)();
   int (*startintt)(int,int);
@@ -19,7 +19,7 @@ struct SiteLibrary {
   void (*exit)(int);
 };
 
-int SiteStart();
+int SiteStart(char *host);
 int SiteSetupRadar();
 int SiteStartScan();
 int SiteStartIntt(int intsc,int intus);

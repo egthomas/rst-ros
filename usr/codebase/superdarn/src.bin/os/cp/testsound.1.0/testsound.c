@@ -70,6 +70,7 @@ char progname[256];
 int arg=0;
 struct OptionData opt;
 
+char *roshost=NULL;
 int tnum=4;
 
 void usage(void);
@@ -217,6 +218,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "frqrng", 'i', &frqrng);     /* fix the FCLR window [kHz] */
   OptionAdd(&opt, "sfrqrng",'i', &snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt, "sndsc",  'i', &snd_sc);     /* sounding duration per scan [sec] */
+  OptionAdd(&opt, "ros",    't', &roshost);    /* Set the roshost IP address */
   OptionAdd(&opt, "-help",  'x', &hlp);        /* just dump some parameters */
 
   /* process the commandline; need this for setting errlog port */
@@ -280,7 +282,7 @@ int main(int argc,char *argv[])
     exit(1);
   }
 
-  SiteStart();
+  SiteStart(roshost);
 
   /* reprocess the commandline since some things are reset by SiteStart */
   arg=OptionProcess(1,argc,argv,&opt,NULL);
@@ -636,6 +638,7 @@ void usage(void)
     printf("-frqrng int : set the clear frequency search window (kHz)\n");
     printf("-sfrqrng int: set the sounding FCLR search window (kHz)\n");
     printf(" -sndsc int : set the sounding duration per scan (sec)\n");
+    printf("  -ros char : change the roshost IP address\n");
     printf(" --help     : print this message and quit.\n");
     printf("\n");
 }

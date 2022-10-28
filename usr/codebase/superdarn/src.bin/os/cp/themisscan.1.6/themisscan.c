@@ -77,6 +77,8 @@ char progid[80]={"themisscan"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
+
+char *roshost=NULL;
 int tnum=4;      
 
 void usage(void);
@@ -185,6 +187,7 @@ int main(int argc,char *argv[]) {
 	OptionAdd(&opt,"stid",  't',&ststr);
 	OptionAdd(&opt,"fixfrq",'i',&fixfrq);		/* fix the transmit frequency */
 	OptionAdd(&opt,"camp",  'i',&cbm);			/* camping beam number */
+    OptionAdd(&opt,"ros",   't',&roshost);      /* Set the roshost IP address */
 	OptionAdd(&opt,"-help", 'x',&hlp);			/* just dump some parameters */
 
 	/* Process all of the command line options
@@ -283,7 +286,7 @@ int main(int argc,char *argv[]) {
 	}
 	
 	/* IMPORTANT: sbm and ebm are reset by this function */
-	SiteStart();
+	SiteStart(roshost);
 
 	/* Reprocess the command line to restore desired parameters */
 	arg=OptionProcess(1,argc,argv,&opt,NULL);
@@ -530,6 +533,7 @@ void usage(void)
 		printf("    -bp int : base port (must be set here for dual radars)\n");
 		printf("  -stid char: radar string (must be set here for dual radars)\n");
 		printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
+        printf("  -ros char : change the roshost IP address\n");
 		printf(" --help     : print this message and quit.\n");
 		printf("\n");
 }
