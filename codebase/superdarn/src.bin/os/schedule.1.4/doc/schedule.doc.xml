@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>schedule</name>
+<location>src.bin/os/schedule</location>
+
+<syntax>schedule --help</syntax>
+<syntax>schedule [<ar>options</ar>] <ar>schedule</ar></syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on>-d</on><od>reload the schedule once a day.</od>
+</option>
+<option><on>-h</on><od>reload the schedule once an hour.</od>
+</option>
+<option><on>-t</on><od>reload the schedule once every 10 minutes.</od>
+</option>
+<option><on>-m</on><od>reload the schedule once a minute.</od>
+</option>
+<option><on>-name <ar>stid</ar></on><od>add the three-letter station ID code <ar>stid</ar> to the scdlog filename.</od>
+</option>
+<option><on><ar>schedule</ar></on><od>read the schedule from the file <ar>schedule</ar>.</od>
+</option>
+<synopsis><p>Schedules the running of control programs.</p></synopsis>
+
+</binary>

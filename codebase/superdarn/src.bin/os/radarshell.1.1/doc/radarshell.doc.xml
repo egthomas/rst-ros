@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>radarshell</name>
+<location>src.bin/os/radarshell</location>
+
+<syntax>radarshell --help</syntax>
+<syntax>radarshell <ar>host</ar> <ar>port</ar></syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on><ar>host</ar></on><od>hostname or IP address of the shellserver to connect to (default is localhost).</od>
+</option>
+<option><on><ar>port</ar></on><od>port number of the shellserver to connect to on the system (default is 44002).</od>
+</option>
+<synopsis><p>An interactive shell for manipulating radar operating parameters.</p></synopsis>
+
+</binary>

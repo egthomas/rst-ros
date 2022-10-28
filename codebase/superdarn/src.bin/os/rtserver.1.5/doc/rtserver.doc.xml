@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>rtserver</name>
+<location>src.bin/os/rtserver</location>
+
+<syntax>rtserver --help</syntax>
+<syntax>rtserver [<ar>options</ar>]</syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on>-rp <ar>rport</ar></on><od>listen for fitted data on the local port number <ar>rport</ar> (default is 44103).</od>
+</option>
+<option><on>-tp <ar>tport</ar></on><od>serve the fitted data for clients on the local port number <ar>tport</ar> (default is 1024).</od>
+</option>
+<option><on>-eh <ar>ehost</ar></on><od>connect to the error logger at hostname or IP address <ar>ehost</ar> (default is localhost).</od>
+</option>
+<option><on>-ep <ar>eport</ar></on><od>connect to the error logger at port number <ar>eport</ar> (default is 44000).</od>
+</option>
+<option><on>-c <ar>chn</ar></on><od>filter the data and only serve data from channel <ar>chn</ar>.</od>
+</option>
+<synopsis><p>A data relay task for distributing fitted data over the internet.</p></synopsis>
+
+</binary>

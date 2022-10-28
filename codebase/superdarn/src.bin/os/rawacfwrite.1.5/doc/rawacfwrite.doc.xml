@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>rawacfwrite</name>
+<location>src.bin/os/rawacfwrite</location>
+
+<syntax>rawacfwrite --help</syntax>
+<syntax>rawacfwrite [<ar>options</ar>]</syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on>-lp <ar>lport</ar></on><od>listen for raw ACF data on the local port number <ar>lport</ar> (default is 44101).</od>
+</option>
+<option><on>-eh <ar>ehost</ar></on><od>connect to the error logger at hostname or IP address <ar>ehost</ar> (default is localhost).</od>
+</option>
+<option><on>-ep <ar>eport</ar></on><od>connect to the error logger at port number <ar>eport</ar> (default is 44000).</od>
+</option>
+<option><on>-t <ar>thr</ar></on><od>apply a threshold of <ar>thr</ar> to determine if the data are saved.</od>
+</option>
+<option><on>-c <ar>chn</ar></on><od>append an optional channel identifier <ar>chn</ar> to the output filename.</od>
+</option>
+<synopsis><p>Stores raw ACF data in <code>rawacf</code> files.</p></synopsis>
+
+</binary>

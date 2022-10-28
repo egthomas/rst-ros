@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>errlog</name>
+<location>src.bin/os/errlog</location>
+
+<syntax>errlog --help</syntax>
+<syntax>errlog [<ar>options</ar>]</syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on>-lp <ar>lport</ar></on><od>listen for error messages on the local port number <ar>lport</ar> (default is 44000).</od>
+</option>
+<option><on>-name <ar>stid</ar></on><od>add the three-letter station ID code <ar>stid</ar> to the errlog filename.</od>
+</option>
+<synopsis><p>Records error messages in a log.</p></synopsis>
+
+</binary>

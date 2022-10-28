@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>shellserver</name>
+<location>src.bin/os/shellserver</location>
+
+<syntax>shellserver --help</syntax>
+<syntax>shellserver [<ar>options</ar>]</syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on>-cp <ar>cport</ar></on><od>listen for the control program on the local port number <ar>cport</ar> (default is 44001).</od>
+</option>
+<option><on>-sp <ar>sport</ar></on><od>listen for radarshell clients on the local port number <ar>sport</ar> (default is 44002).</od>
+</option>
+<option><on>-sh <ar>shmem</ar></on><od>assign the shell memory name <ar>shmem</ar> (default is RadarShell).</od>
+</option>
+<synopsis><p>A data relay task between the control program and interactive radarshell.</p></synopsis>
+
+</binary>
