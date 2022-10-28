@@ -141,6 +141,7 @@ int main(int argc,char *argv[]) {
 	int bufsc=0;				/* a buffer at the end of scan; historically this has */
 	int bufus=0;				/*  been set to 3.0s to account for what???           */
 	unsigned char hlp=0;
+	unsigned char option=0;
 
 	/*
     beam sequences for 24-beam MSI radars but only using 20 most meridional
@@ -183,6 +184,7 @@ int main(int argc,char *argv[]) {
 	OptionAdd(&opt,"fixfrq",'i',&fixfrq);		/* fix the transmit frequency */
     OptionAdd(&opt,"ros",   't',&roshost);      /* Set the roshost IP address */
 	OptionAdd(&opt,"-help", 'x',&hlp);			/* just dump some parameters */
+	OptionAdd(&opt,"-option",'x',&option);
 
 	/* Process all of the command line options
 			Important: need to do this here because we need stid and ststr */
@@ -190,6 +192,11 @@ int main(int argc,char *argv[]) {
 
     if (arg==-1) {
       exit(-1);
+    }
+
+    if (option==1) {
+      OptionDump(stdout,&opt);
+      exit(0);
     }
 
 	/* specify beams right here assuming the following: */

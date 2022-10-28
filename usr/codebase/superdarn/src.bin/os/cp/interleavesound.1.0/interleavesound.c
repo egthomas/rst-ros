@@ -125,6 +125,7 @@ int main(int argc,char *argv[]) {
   int intgt[20];      /* start times of each integration period             */
   int nintgs=20;      /* number of integration periods per scan; SGS 1-min  */
   unsigned char hlp=0;
+  unsigned char option=0;
 
   /*
     beam sequences for 24-beam MSI radars but only using 20 most meridional
@@ -197,6 +198,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"sfrqrng",'i',&snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt,"ros",   't',&roshost);    /* Set the roshost IP address */
   OptionAdd(&opt,"-help", 'x',&hlp);        /* just dump some parameters */
+  OptionAdd(&opt,"-option",'x',&option);
 
   /* Process all of the command line options
       Important: need to do this here because we need stid and ststr */
@@ -204,6 +206,11 @@ int main(int argc,char *argv[]) {
 
   if (arg==-1) {
     exit(-1);
+  }
+
+  if (option==1) {
+    OptionDump(stdout,&opt);
+    exit(0);
   }
 
   if (hlp) {

@@ -140,6 +140,8 @@ int main(int argc,char *argv[]) {
   unsigned char fast=0;
   unsigned char discretion=0;
 
+  unsigned char option=0;
+
   int status=0,n,i;
 
   int PCPBEAM=9;    /* Set PCPBEAM to default to beam 9 -KTS */
@@ -185,11 +187,17 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "stid",'t', &ststr); 
   OptionAdd(&opt, "fast",'x', &fast);
   OptionAdd(&opt, "ros", 't', &roshost);  /* Set the roshost IP address */
+  OptionAdd(&opt, "-option",'x', &option);
    
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
   if (arg==-1) {
     exit(-1);
+  }
+
+  if (option==1) {
+    OptionDump(stdout,&opt);
+    exit(0);
   }
  
   if (ststr==NULL) ststr=dfststr;

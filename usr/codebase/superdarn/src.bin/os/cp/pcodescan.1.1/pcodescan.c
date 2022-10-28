@@ -138,6 +138,7 @@ int main(int argc,char *argv[]) {
   int bufsc=0;    /* a buffer at the end of scan; historically this has   */
   int bufus=0;    /*   been set to 3.0s to account for what???            */
   unsigned char hlp=0;
+  unsigned char option=0;
 
   /* Flag and variables for beam synchronizing */
   int bm_sync = 0;
@@ -186,6 +187,7 @@ int main(int argc,char *argv[]) {
 
   OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address  */
   OptionAdd(&opt, "-help",  'x', &hlp);      /* just dump some parameters   */
+  OptionAdd(&opt, "-option",'x', &option);
 
   OptionAdd(&opt, "baud",   'i', &nbaud);
   OptionAdd(&opt, "sf",     'i', &stfrq);
@@ -197,6 +199,11 @@ int main(int argc,char *argv[]) {
 
   if (arg==-1) {
     exit(-1);
+  }
+
+  if (option==1) {
+    OptionDump(stdout,&opt);
+    exit(0);
   }
 
   backward = (sbm > ebm) ? 1 : 0;   /* allow for non-standard scan dir. */

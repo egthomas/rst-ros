@@ -155,6 +155,7 @@ int main(int argc,char *argv[]) {
   int bufsc=0;    /* a buffer at the end of scan; historically this has   */
   int bufus=0;    /*   been set to 3.0s to account for what???            */
   unsigned char hlp=0;
+  unsigned char option=0;
 
   /* Flag and variables for beam synchronizing */
   int bm_sync = 0;
@@ -222,15 +223,21 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "scnsc",  'i', &scnsc);     /* set the scan time */
   OptionAdd(&opt, "scnus",  'i', &scnus);
 
-  OptionAdd(&opt,"ros",     't',&roshost);   /* Set the roshost IP address */
+  OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address  */
 
   OptionAdd(&opt, "-help",  'x', &hlp);      /* just dump some parameters   */
+  OptionAdd(&opt, "-option",'x', &option);
 
   /* process the commandline; need this for setting errlog port */
   arg = OptionProcess(1,argc,argv,&opt,rst_opterr);
 
   if (arg==-1) {
     exit(-1);
+  }
+
+  if (option==1) {
+    OptionDump(stdout,&opt);
+    exit(0);
   }
 
   backward = (sbm > ebm) ? 1 : 0;   /* allow for non-standard scan dir. */

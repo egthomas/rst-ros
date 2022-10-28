@@ -128,6 +128,8 @@ int main(int argc,char *argv[]) {
 	unsigned char fast=0;
 	unsigned char discretion=0;
 
+    unsigned char option=0;
+
 	int status=0,n;
 
 	int beams=0;
@@ -173,6 +175,7 @@ int main(int argc,char *argv[]) {
 	OptionAdd(&opt, "sb",     'i', &sbm);
 	OptionAdd(&opt, "eb",     'i', &ebm);
     OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address */
+    OptionAdd(&opt, "-option",'x', &option);
  
 	/* Process all of the command line options
 	 * Important: need to do this here because we need stid and ststr for
@@ -181,6 +184,11 @@ int main(int argc,char *argv[]) {
 
     if (arg==-1) {
       exit(-1);
+    }
+
+    if (option==1) {
+      OptionDump(stdout,&opt);
+      exit(0);
     }
 
 	if (ststr==NULL) ststr=dfststr;
