@@ -33,9 +33,6 @@
 #include "global.h"
 #include "site.h"
 
-int sock;
-char server[256];
-int port;
 int num_transmitters;
 /*struct timeval tock;*/
 struct ControlPRM rprm;
@@ -46,6 +43,7 @@ struct TXStatus txstatus;
 struct SiteLibrary sitelib;
 int cancel_count=0;
 
+struct TCPIPMsgHost ros={"127.0.0.1",45000,-1};
 struct TCPIPMsgHost errlog={"127.0.0.1",44100,-1};
 struct TCPIPMsgHost shell={"127.0.0.1",44101,-1};
 struct TCPIPMsgHost task[4]={

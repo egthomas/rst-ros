@@ -53,13 +53,13 @@ void SiteCveExit(int signum)
       /*printf("SiteCveExit: Sig 0: %d\n",CVE_exit_flag); */
       if(CVE_exit_flag != 0) {
         msg.type = QUIT;
-        TCPIPMsgSend(sock, &msg, sizeof(struct ROSMsg));
-        TCPIPMsgRecv(sock, &msg, sizeof(struct ROSMsg));
+        TCPIPMsgSend(ros.sock, &msg, sizeof(struct ROSMsg));
+        TCPIPMsgRecv(ros.sock, &msg, sizeof(struct ROSMsg));
         if (debug) {
           fprintf(stderr,"QUIT:type=%c\n",msg.type);
           fprintf(stderr,"QUIT:status=%d\n",msg.status);
         }
-        close(sock);
+        close(ros.sock);
         if (samples != NULL)
           ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
         exit(errno);
@@ -80,10 +80,10 @@ int SiteCveStart(char *host)
   CVE_exit_flag = 0;
   cancel_count  = 0;
 
-  sock = 0;
-  if (host !=NULL) strcpy(server,host);
-  else strcpy(server,"192.168.7.5");
-  port = 45000;
+  ros.sock = 0;
+  if (host !=NULL) strcpy(ros.host,host);
+  else strcpy(ros.host,"192.168.7.5");
+  ros.port = 45000;
 
   rnum = 1; /* Radar number to register */
   cnum = 1; /* Channel number to register */
@@ -124,14 +124,14 @@ int SiteCveSetupRadar()
   char requested_entry_type,returned_entry_type;
   struct ROSMsg smsg,rmsg;
 
-  if ((sock=TCPIPMsgOpen(server,port)) == -1) return -1;
+  if ((ros.sock=TCPIPMsgOpen(ros.host,ros.port)) == -1) return -1;
   smsg.type = SET_RADAR_CHAN;
-  TCPIPMsgSend(sock, &smsg,sizeof(struct ROSMsg)); 
+  TCPIPMsgSend(ros.sock, &smsg,sizeof(struct ROSMsg)); 
   temp32 = rnum;
-  TCPIPMsgSend(sock, &temp32, sizeof(int32)); 
+  TCPIPMsgSend(ros.sock, &temp32, sizeof(int32)); 
   temp32 = cnum;
-  TCPIPMsgSend(sock, &temp32, sizeof(int32));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg)); 
+  TCPIPMsgSend(ros.sock, &temp32, sizeof(int32));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg)); 
   if (rmsg.status < 0) {
     fprintf(stderr, "Requested radar channel unavailable\n"
                     "Sleeping 1 second and exiting\n");
@@ -144,22 +144,22 @@ int SiteCveSetupRadar()
   }
 
   smsg.type = QUERY_INI_SETTINGS;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
   sprintf(ini_entry_name,"site_settings:ifmode");  
   requested_entry_type = 'b';  
   returned_entry_type  = ' ';  
   temp32 = -1;
   ifmode = -1;
   data_length = strlen(ini_entry_name);
-  TCPIPMsgSend(sock, &data_length, sizeof(int32));
-  TCPIPMsgSend(sock, &ini_entry_name, data_length*sizeof(char));
-  TCPIPMsgSend(sock, &requested_entry_type, sizeof(char));
-  TCPIPMsgRecv(sock, &returned_entry_type, sizeof(char));
-  TCPIPMsgRecv(sock, &data_length, sizeof(int32));
+  TCPIPMsgSend(ros.sock, &data_length, sizeof(int32));
+  TCPIPMsgSend(ros.sock, &ini_entry_name, data_length*sizeof(char));
+  TCPIPMsgSend(ros.sock, &requested_entry_type, sizeof(char));
+  TCPIPMsgRecv(ros.sock, &returned_entry_type, sizeof(char));
+  TCPIPMsgRecv(ros.sock, &data_length, sizeof(int32));
   if (returned_entry_type==requested_entry_type)
-    TCPIPMsgRecv(sock, &temp32, sizeof(int32));
+    TCPIPMsgRecv(ros.sock, &temp32, sizeof(int32));
 
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"QUERY_INI_SETTINGS:type=%c\n",rmsg.type);
     fprintf(stderr,"QUERY_INI_SETTINGS:status=%d\n",rmsg.status);
@@ -174,9 +174,9 @@ int SiteCveSetupRadar()
   }
 
   smsg.type = GET_PARAMETERS;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(sock, &rprm, sizeof(struct ControlPRM));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock, &rprm, sizeof(struct ControlPRM));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"GET_PARAMETERS:type=%c\n",rmsg.type);
     fprintf(stderr,"GET_PARAMETERS:status=%d\n",rmsg.status);
@@ -195,8 +195,8 @@ int SiteCveStartScan()
   struct ROSMsg smsg,rmsg;
 
   smsg.type = SET_ACTIVE;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
 
   return 0;
 }
@@ -212,17 +212,17 @@ int SiteCveStartIntt(int sec,int usec)
 
   total_samples = tsgprm.samples + tsgprm.smdelay;
   smsg.type = PING; 
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"PING:type=%c\n",rmsg.type);
     fprintf(stderr,"PING:status=%d\n",rmsg.status);
   }
 
   smsg.type = GET_PARAMETERS;  
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(sock, &rprm, sizeof(struct ControlPRM));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock, &rprm, sizeof(struct ControlPRM));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"GET_PARAMETERS:type=%c\n",rmsg.type);
     fprintf(stderr,"GET_PARAMETERS:status=%d\n",rmsg.status);
@@ -237,9 +237,9 @@ int SiteCveStartIntt(int sec,int usec)
   rprm.number_of_samples   = total_samples + nbaud + 10; 
 
   smsg.type = SET_PARAMETERS;
-  TCPIPMsgSend(sock,&smsg,sizeof(struct ROSMsg));
-  TCPIPMsgSend(sock,&rprm,sizeof(struct ControlPRM));
-  TCPIPMsgRecv(sock,&rmsg,sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock,&rprm,sizeof(struct ControlPRM));
+  TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"SET_PARAMETERS:type=%c\n",rmsg.type);
     fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
@@ -275,9 +275,9 @@ int SiteCveFCLR(int stfreq,int edfreq)
   rprm.number_of_samples   = total_samples + nbaud + 10; 
 
   smsg.type = SET_PARAMETERS;
-  TCPIPMsgSend(sock,&smsg,sizeof(struct ROSMsg));
-  TCPIPMsgSend(sock,&rprm,sizeof(struct ControlPRM));
-  TCPIPMsgRecv(sock,&rmsg,sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock,&rprm,sizeof(struct ControlPRM));
+  TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"SET_PARAMETERS:type=%c\n",rmsg.type);
     fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
@@ -289,19 +289,19 @@ int SiteCveFCLR(int stfreq,int edfreq)
   fprm.filter_bandwidth = 250;  
 
   smsg.type = REQUEST_CLEAR_FREQ_SEARCH;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgSend(sock, &fprm, sizeof(struct CLRFreqPRM));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &fprm, sizeof(struct CLRFreqPRM));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"REQUEST_CLEAR_FREQ_SEARCH:type=%c\n",rmsg.type);
     fprintf(stderr,"REQUEST_CLEAR_FREQ_SEARCH:status=%d\n",rmsg.status);
   }
 
   smsg.type = REQUEST_ASSIGNED_FREQ;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(sock,&tfreq, sizeof(int32)); 
-  TCPIPMsgRecv(sock,&noise, sizeof(float));  
-  TCPIPMsgRecv(sock,&rmsg, sizeof(struct ROSMsg)); 
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock,&tfreq, sizeof(int32)); 
+  TCPIPMsgRecv(ros.sock,&noise, sizeof(float));  
+  TCPIPMsgRecv(ros.sock,&rmsg, sizeof(struct ROSMsg)); 
   if (debug) {
     fprintf(stderr,"REQUEST_ASSIGNED_FREQ:type=%c\n",rmsg.type);
     fprintf(stderr,"REQUEST_ASSIGNED_FREQ:status=%d\n",rmsg.status);
@@ -351,11 +351,11 @@ int SiteCveTimeSeq(int *ptab)
   tprm.smdelay = tsgprm.smdelay;
 
   smsg.type = REGISTER_SEQ;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgSend(sock, &tprm, sizeof(struct SeqPRM));
-  TCPIPMsgSend(sock, tsgbuf->rep, sizeof(unsigned char)*tprm.len);
-  TCPIPMsgSend(sock, tsgbuf->code, sizeof(unsigned char)*tprm.len);
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &tprm, sizeof(struct SeqPRM));
+  TCPIPMsgSend(ros.sock, tsgbuf->rep, sizeof(unsigned char)*tprm.len);
+  TCPIPMsgSend(ros.sock, tsgbuf->code, sizeof(unsigned char)*tprm.len);
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"REGISTER_SEQ:type=%c\n",rmsg.type);
     fprintf(stderr,"REGISTER_SEQ:status=%d\n",rmsg.status);
@@ -497,17 +497,17 @@ int SiteCveIntegrate(int (*lags)[2])
     rprm.number_of_samples   = total_samples + nbaud + 10; 
 
     smsg.type = SET_PARAMETERS;
-    TCPIPMsgSend(sock,&smsg,sizeof(struct ROSMsg));
-    TCPIPMsgSend(sock,&rprm,sizeof(struct ControlPRM));
-    TCPIPMsgRecv(sock,&rmsg,sizeof(struct ROSMsg));
+    TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
+    TCPIPMsgSend(ros.sock,&rprm,sizeof(struct ControlPRM));
+    TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
     if (debug) {
       fprintf(stderr,"SET_PARAMETERS:type=%c\n",rmsg.type);
       fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
     }
 
     smsg.type = SET_READY_FLAG;
-    TCPIPMsgSend(sock,&smsg,sizeof(struct ROSMsg));
-    TCPIPMsgRecv(sock,&rmsg,sizeof(struct ROSMsg));
+    TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
+    TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
     if (debug) {
       fprintf(stderr,"SET_READY_FLAG:type=%c\n",rmsg.type);
       fprintf(stderr,"SET_READY_FLAG:status=%d\n",rmsg.status);
@@ -518,10 +518,10 @@ int SiteCveIntegrate(int (*lags)[2])
     if (rdata.back != NULL) free(rdata.back);
     rdata.main = NULL;
     rdata.back = NULL;
-    TCPIPMsgSend(sock,&smsg,sizeof(struct ROSMsg));
+    TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
     if (debug) fprintf(stderr,"CVE GET_DATA: recv dprm\n");
 
-    TCPIPMsgRecv(sock,&dprm,sizeof(struct DataPRM));
+    TCPIPMsgRecv(ros.sock,&dprm,sizeof(struct DataPRM));
     if (rdata.main) free(rdata.main);
     if (rdata.back) free(rdata.back);
       if (debug) fprintf(stderr,"CVE GET_DATA: samples %d status %d\n",
@@ -535,16 +535,16 @@ int SiteCveIntegrate(int (*lags)[2])
       rdata.back = malloc(sizeof(uint32)*dprm.samples);
       if (debug) fprintf(stderr,"CVE GET_DATA: recv main\n");
 
-      TCPIPMsgRecv(sock, rdata.main, sizeof(uint32)*dprm.samples);
+      TCPIPMsgRecv(ros.sock, rdata.main, sizeof(uint32)*dprm.samples);
       if (debug) fprintf(stderr,"CVE GET_DATA: recv back\n");
 
-      TCPIPMsgRecv(sock, rdata.back, sizeof(uint32)*dprm.samples);
+      TCPIPMsgRecv(ros.sock, rdata.back, sizeof(uint32)*dprm.samples);
       if (badtrdat.start_usec    != NULL) free(badtrdat.start_usec);
       if (badtrdat.duration_usec != NULL) free(badtrdat.duration_usec);
       if (debug) 
         fprintf(stderr,"CVE GET_DATA: trtimes length %d\n",badtrdat.length);
 
-      TCPIPMsgRecv(sock, &badtrdat.length, sizeof(badtrdat.length));
+      TCPIPMsgRecv(ros.sock, &badtrdat.length, sizeof(badtrdat.length));
       if (debug) 
         fprintf(stderr,"CVE GET_DATA: badtrdat.start_usec: uint32: %d array: "
                 "%d\n",(int)sizeof(uint32),(int)sizeof(uint32)*badtrdat.length);
@@ -552,24 +552,24 @@ int SiteCveIntegrate(int (*lags)[2])
       badtrdat.duration_usec = malloc(sizeof(uint32)*badtrdat.length);
       if (debug) fprintf(stderr,"CVE GET_DATA: start_usec\n");
 
-      TCPIPMsgRecv(sock, badtrdat.start_usec, sizeof(uint32)*badtrdat.length);
+      TCPIPMsgRecv(ros.sock, badtrdat.start_usec, sizeof(uint32)*badtrdat.length);
       if (debug) fprintf(stderr,"CVE GET_DATA: duration_usec\n");
 
-      TCPIPMsgRecv(sock, badtrdat.duration_usec,sizeof(uint32)*badtrdat.length);
-      TCPIPMsgRecv(sock, &num_transmitters, sizeof(int));
-      TCPIPMsgRecv(sock, &txstatus.AGC, sizeof(int)*num_transmitters);
-      TCPIPMsgRecv(sock, &txstatus.LOWPWR, sizeof(int)*num_transmitters);
+      TCPIPMsgRecv(ros.sock, badtrdat.duration_usec,sizeof(uint32)*badtrdat.length);
+      TCPIPMsgRecv(ros.sock, &num_transmitters, sizeof(int));
+      TCPIPMsgRecv(ros.sock, &txstatus.AGC, sizeof(int)*num_transmitters);
+      TCPIPMsgRecv(ros.sock, &txstatus.LOWPWR, sizeof(int)*num_transmitters);
     }
-    TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+    TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
     if (debug) {
       fprintf(stderr,"CVE GET_DATA:type=%c\n",rmsg.type);
       fprintf(stderr,"CVE GET_DATA:status=%d\n",rmsg.status);
     }
 
     smsg.type = GET_PARAMETERS;
-    TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-    TCPIPMsgRecv(sock, &rprm, sizeof(struct ControlPRM));
-    TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+    TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+    TCPIPMsgRecv(ros.sock, &rprm, sizeof(struct ControlPRM));
+    TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
     if (debug) {
       fprintf(stderr,"CVE GET_PARAMETERS:type=%c\n",rmsg.type);
       fprintf(stderr,"CVE GET_PARAMETERS:status=%d\n",rmsg.status);
@@ -798,16 +798,16 @@ int SiteCveEndScan(int bsc,int bus, unsigned sleepus)
   tock.tv_usec = (tme-floor(tme))*USEC;
 
   smsg.type = SET_INACTIVE;
-  TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
 
   gettimeofday(&tick,NULL);
   while (1) {
     if (tick.tv_sec > tock.tv_sec) break;
     if ((tick.tv_sec == tock.tv_sec) && (tick.tv_usec > tock.tv_usec)) break;
     smsg.type = PING;
-    TCPIPMsgSend(sock, &smsg, sizeof(struct ROSMsg));
-    TCPIPMsgRecv(sock, &rmsg, sizeof(struct ROSMsg));
+    TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+    TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
 
     if (debug) {
       fprintf(stderr,"PING:type=%c\n",rmsg.type);

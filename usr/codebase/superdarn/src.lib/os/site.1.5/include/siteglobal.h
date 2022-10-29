@@ -14,9 +14,6 @@
 #ifndef _SITEGLOBAL_H
 #define _SITEGLOBAL_H
 
-extern int sock;
-extern char server[256];
-extern int port;
 extern int num_transmitters;
 /*extern struct timeval tock;*/
 extern struct ControlPRM rprm;
@@ -27,6 +24,7 @@ extern struct TXStatus txstatus;
 extern struct SiteLibrary sitelib;
 extern int cancel_count;
 
+extern struct TCPIPMsgHost ros;
 extern struct TCPIPMsgHost errlog;
 extern struct TCPIPMsgHost shell;
 extern struct TCPIPMsgHost task[4];
