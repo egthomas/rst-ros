@@ -68,6 +68,19 @@ void SiteCveExit(int signum)
     default:
       printf("SiteCveExit: Sig %d: %d\n",signum,CVE_exit_flag); 
       if (CVE_exit_flag == 0) CVE_exit_flag = signum;
+      if (CVE_exit_flag != 0) {
+        msg.type = QUIT;
+        TCPIPMsgSend(ros.sock, &msg, sizeof(struct ROSMsg));
+        TCPIPMsgRecv(ros.sock, &msg, sizeof(struct ROSMsg));
+        if (debug) {
+          fprintf(stderr,"QUIT:type=%c\n",msg.type);
+          fprintf(stderr,"QUIT:status=%d\n",msg.status);
+        }
+        close(ros.sock);
+        if (samples != NULL)
+          ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
+        exit(errno);
+      }
       break;
   }
 }
