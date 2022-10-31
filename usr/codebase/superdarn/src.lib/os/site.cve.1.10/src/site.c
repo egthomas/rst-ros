@@ -149,7 +149,7 @@ int SiteCveSetupRadar()
     fprintf(stderr, "Requested radar channel unavailable\n"
                     "Sleeping 1 second and exiting\n");
     sleep(1);
-    exit(0); 
+    SiteCveExit(-1);
   } 
   if (debug) {
     fprintf(stderr,"SET_RADAR_CHAN:type=%c\n",rmsg.type);
@@ -247,7 +247,9 @@ int SiteCveStartIntt(int sec,int usec)
   rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6; 
   rprm.filter_bandwidth    = rprm.baseband_samplerate; 
   rprm.match_filter        = 1;
-  rprm.number_of_samples   = total_samples + nbaud + 10; 
+  rprm.number_of_samples   = total_samples + nbaud + 10;
+  rprm.priority            = cnum;
+  rprm.buffer_index        = 0;
 
   smsg.type = SET_PARAMETERS;
   TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
@@ -286,6 +288,8 @@ int SiteCveFCLR(int stfreq,int edfreq)
   rprm.filter_bandwidth    = rprm.baseband_samplerate; 
   rprm.match_filter        = 1;
   rprm.number_of_samples   = total_samples + nbaud + 10; 
+  rprm.priority            = cnum;
+  rprm.buffer_index        = 0;
 
   smsg.type = SET_PARAMETERS;
   TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
@@ -354,7 +358,10 @@ int SiteCveTimeSeq(int *ptab)
 
   tsgbuf = TSGMake(&tsgprm,&flag);
 
-  if (tsgbuf==NULL) return -1;
+  if (tsgbuf==NULL) {
+    if (flag != 0) return flag;
+    else return -1;
+  }
 
   tprm.index   = index;
 /*  memcpy(&tprm.buf,tsgbuf,sizeof(struct TSGbuf));*/
@@ -374,7 +381,7 @@ int SiteCveTimeSeq(int *ptab)
     fprintf(stderr,"REGISTER_SEQ:status=%d\n",rmsg.status);
   }
 
-  if (rmsg.status != 1) return -1;
+  if (rmsg.status != 1) return -2;
 
   lagfr = tsgprm.lagfr;
   smsep = tsgprm.smsep;
@@ -411,7 +418,7 @@ int SiteCveIntegrate(int (*lags)[2])
   int aflg=0,abflg=0;
   void *dest; /*AJ*/
   int total_samples=0; /*AJ*/
-
+  int usecs;
   short I,Q;
 
   /* phase code declarations */
@@ -445,7 +452,7 @@ int SiteCveIntegrate(int (*lags)[2])
     }
   }
 
-  total_samples = tsgprm.samples+tsgprm.smdelay;
+  total_samples = tsgprm.samples + tsgprm.smdelay;
   smpnum = total_samples;
   skpnum = tsgprm.smdelay;  /* skpnum != 0  returns 1, which is used as the  *
                                             dflg argument in ACFCalculate to *
@@ -457,7 +464,7 @@ int SiteCveIntegrate(int (*lags)[2])
   gettimeofday(&tick,NULL);
   gettimeofday(&tack,NULL);
 
-  for (i=0; i<MAX_RANGE ;i++) {
+  for (i=0; i<MAX_RANGE; i++) {
     pwr0[i] = 0;
     for (j=0; j<LAG_SIZE*2; j++) {
       acfd[i*LAG_SIZE*2+j] = 0;
@@ -466,18 +473,7 @@ int SiteCveIntegrate(int (*lags)[2])
   }
 
   while (1) {
-  /*
-    if (debug) {
-  printf("Size of Struct ROSMsg  %ld\n",sizeof(struct ROSMsg));
-  printf("Size of Struct int32  %ld\n",sizeof(int32));
-  printf("Size of Struct float  %ld\n",sizeof(float));
-  printf("Size of Struct unsigned char  %ld\n",sizeof(unsigned char));
-  printf("Size of Struct ControlPRM  %ld\n",sizeof(struct ControlPRM));
-  printf("Size of Struct CLRFreqPRM  %ld\n",sizeof(struct CLRFreqPRM));
-  printf("Size of Struct SeqPRM  %ld\n",sizeof(struct SeqPRM));
-  printf("Size of Struct DataPRM  %ld\n",sizeof(struct DataPRM));
-   }
-  */
+    SiteCveExit(0);
 
     seqtval[nave].tv_sec  = tick.tv_sec;
     seqtval[nave].tv_nsec = tick.tv_usec*1000;
@@ -496,8 +492,9 @@ int SiteCveIntegrate(int (*lags)[2])
      
     tick.tv_sec  += floor(tavg);
     tick.tv_usec += 1.0e6*(tavg-floor(tavg));
+
     time_diff  = (tick.tv_sec-tock.tv_sec);
-    time_diff += (tick.tv_usec-tock.tv_usec)/1E6; 
+    time_diff += (tick.tv_usec-tock.tv_usec)/1E6;
     if (time_diff > 0.) break;
 
     rprm.tbeam = bmnum;   
@@ -508,6 +505,10 @@ int SiteCveIntegrate(int (*lags)[2])
     rprm.filter_bandwidth    = rprm.baseband_samplerate; 
     rprm.match_filter        = 1;
     rprm.number_of_samples   = total_samples + nbaud + 10; 
+    rprm.priority            = cnum;
+    rprm.buffer_index        = 0;
+
+    usecs = (int)(rprm.number_of_samples/rprm.baseband_samplerate*1E6);
 
     smsg.type = SET_PARAMETERS;
     TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
@@ -525,6 +526,8 @@ int SiteCveIntegrate(int (*lags)[2])
       fprintf(stderr,"SET_READY_FLAG:type=%c\n",rmsg.type);
       fprintf(stderr,"SET_READY_FLAG:status=%d\n",rmsg.status);
     }
+
+    usleep(usecs);
 
     smsg.type = GET_DATA;
     if (rdata.main != NULL) free(rdata.main);
@@ -554,7 +557,7 @@ int SiteCveIntegrate(int (*lags)[2])
       TCPIPMsgRecv(ros.sock, rdata.back, sizeof(uint32)*dprm.samples);
       if (badtrdat.start_usec    != NULL) free(badtrdat.start_usec);
       if (badtrdat.duration_usec != NULL) free(badtrdat.duration_usec);
-      if (debug) 
+      if (debug)
         fprintf(stderr,"CVE GET_DATA: trtimes length %d\n",badtrdat.length);
 
       TCPIPMsgRecv(ros.sock, &badtrdat.length, sizeof(badtrdat.length));
@@ -775,7 +778,7 @@ int SiteCveIntegrate(int (*lags)[2])
    } else if (nave > 0) {
      /* ACFEX calculation */
      ACFexCalculate(&tsgprm, (int16 *)samples,nave*smpnum,nave,smpnum,
-                   roff,ioff, mplgs,mplgexs,lagtable,lagsum, pwr0,acfd,&noise);
+                    roff,ioff, mplgs,mplgexs,lagtable,lagsum, pwr0,acfd,&noise);
    }
    free(lagtable[0]);
    free(lagtable[1]);

@@ -147,7 +147,7 @@ int SiteCvwSetupRadar()
     fprintf(stderr, "Requested radar channel unavailable\n"
                     "Sleeping 1 second and exiting\n");
     sleep(1);
-    exit(0); 
+    SiteCvwExit(-1);
   } 
   if (debug) {
     fprintf(stderr,"SET_RADAR_CHAN:type=%c\n",rmsg.type);
@@ -169,7 +169,6 @@ int SiteCvwSetupRadar()
   TCPIPMsgRecv(ros.sock, &data_length, sizeof(int32));
   if (returned_entry_type == requested_entry_type)
     TCPIPMsgRecv(ros.sock, &temp32, sizeof(int32));
-  
   TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"QUERY_INI_SETTINGS:type=%c\n",rmsg.type);
@@ -230,7 +229,7 @@ int SiteCvwStartIntt(int sec,int usec)
     fprintf(stderr,"PING:status=%d\n",rmsg.status);
   }
 
-  smsg.type=GET_PARAMETERS;  
+  smsg.type = GET_PARAMETERS;
   TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
   TCPIPMsgRecv(ros.sock, &rprm, sizeof(struct ControlPRM));
   TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
@@ -245,7 +244,9 @@ int SiteCvwStartIntt(int sec,int usec)
   rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6; 
   rprm.filter_bandwidth    = rprm.baseband_samplerate; 
   rprm.match_filter        = 1;
-  rprm.number_of_samples   = total_samples + nbaud + 10; 
+  rprm.number_of_samples   = total_samples + nbaud + 10;
+  rprm.priority            = cnum;
+  rprm.buffer_index        = 0;
 
   smsg.type = SET_PARAMETERS;
   TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
@@ -255,9 +256,10 @@ int SiteCvwStartIntt(int sec,int usec)
     fprintf(stderr,"SET_PARAMETERS:type=%c\n",rmsg.type);
     fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
   }
+
   gettimeofday(&tock,NULL);
   secs = sec + (double)usec/1E6;
-  tock.tv_sec  +=  floor(secs);
+  tock.tv_sec  += floor(secs);
   tock.tv_usec += (secs-floor(secs))*1E6;
 
   if (debug) fprintf(stderr,"SiteCvwStartInt: end\n");
@@ -283,6 +285,8 @@ int SiteCvwFCLR(int stfreq,int edfreq)
   rprm.filter_bandwidth    = rprm.baseband_samplerate; 
   rprm.match_filter        = 1;
   rprm.number_of_samples   = total_samples + nbaud + 10; 
+  rprm.priority            = cnum;
+  rprm.buffer_index        = 0;
 
   smsg.type = SET_PARAMETERS;
   TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
@@ -351,7 +355,10 @@ int SiteCvwTimeSeq(int *ptab)
 
   tsgbuf = TSGMake(&tsgprm,&flag);
 
-  if (tsgbuf==NULL) return -1;
+  if (tsgbuf==NULL) {
+    if (flag != 0) return flag;
+    else return -1;
+  }
 
   tprm.index   = index;
 /*  memcpy(&tprm.buf,tsgbuf,sizeof(struct TSGbuf));*/
@@ -371,7 +378,7 @@ int SiteCvwTimeSeq(int *ptab)
     fprintf(stderr,"REGISTER_SEQ:status=%d\n",rmsg.status);
   }
 
-  if (rmsg.status != 1) return -1;
+  if (rmsg.status != 1) return -2;
 
   lagfr = tsgprm.lagfr;
   smsep = tsgprm.smsep;
@@ -408,7 +415,7 @@ int SiteCvwIntegrate(int (*lags)[2])
   int aflg=0,abflg=0;
   void *dest; /*AJ*/
   int total_samples=0; /*AJ*/
-
+  int usecs;
   short I,Q;
 
   /* phase code declarations */
@@ -416,7 +423,7 @@ int SiteCvwIntegrate(int (*lags)[2])
   uint32 uQ32,uI32;
 
   if (debug) fprintf(stderr,"CVW SiteIntegrate: start\n");
-  
+
   SiteCvwExit(0);
 
   if (nrang >= MAX_RANGE) return -1;
@@ -463,18 +470,7 @@ int SiteCvwIntegrate(int (*lags)[2])
   }
 
   while (1) {
-  /*
-    if (debug) {
-  printf("Size of Struct ROSMsg  %ld\n",sizeof(struct ROSMsg));
-  printf("Size of Struct int32  %ld\n",sizeof(int32));
-  printf("Size of Struct float  %ld\n",sizeof(float));
-  printf("Size of Struct unsigned char  %ld\n",sizeof(unsigned char));
-  printf("Size of Struct ControlPRM  %ld\n",sizeof(struct ControlPRM));
-  printf("Size of Struct CLRFreqPRM  %ld\n",sizeof(struct CLRFreqPRM));
-  printf("Size of Struct SeqPRM  %ld\n",sizeof(struct SeqPRM));
-  printf("Size of Struct DataPRM  %ld\n",sizeof(struct DataPRM));
-    }
-  */
+    SiteCvwExit(0);
 
     seqtval[nave].tv_sec  = tick.tv_sec;
     seqtval[nave].tv_nsec = tick.tv_usec*1000;
@@ -506,6 +502,10 @@ int SiteCvwIntegrate(int (*lags)[2])
     rprm.filter_bandwidth    = rprm.baseband_samplerate; 
     rprm.match_filter        = 1;
     rprm.number_of_samples   = total_samples + nbaud + 10; 
+    rprm.priority            = cnum;
+    rprm.buffer_index        = 0;
+
+    usecs = (int)(rprm.number_of_samples/rprm.baseband_samplerate*1E6);
 
     smsg.type = SET_PARAMETERS;
     TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
@@ -523,6 +523,8 @@ int SiteCvwIntegrate(int (*lags)[2])
       fprintf(stderr,"SET_READY_FLAG:type=%c\n",rmsg.type);
       fprintf(stderr,"SET_READY_FLAG:status=%d\n",rmsg.status);
     }
+
+    usleep(usecs);
 
     smsg.type = GET_DATA;
     if (rdata.main != NULL) free(rdata.main);
@@ -595,7 +597,7 @@ int SiteCvwIntegrate(int (*lags)[2])
 
    /* invert interf phase here if necessary */
 /*      if(invert!=0) {*/
-        for(n=0; n<(nsamp); n++){
+        for(n=0; n<(nsamp); n++) {
           Q = ((rdata.main)[n] & 0xffff0000) >> 16;
           I = (rdata.main)[n] & 0x0000ffff;
           Q = -Q;
@@ -645,7 +647,7 @@ int SiteCvwIntegrate(int (*lags)[2])
           (rdata.back)[n] = uQ32|uI32;
         }
       }
-      if (dprm.samples<total_samples) {
+      if (dprm.samples < total_samples) {
         fprintf(stderr,"Not enough  samples from the ROS in SiteIntegrate\n");
         fflush(stderr);
       }
