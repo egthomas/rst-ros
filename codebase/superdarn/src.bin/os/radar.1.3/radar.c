@@ -58,8 +58,6 @@ int operate(pid_t parent,int sock) {
   char entry_name[80];
   char entry_type,return_type;
 
-  int tlen=0,n;
-
   int num_transmitters=16;
 
   int AGC[16],LOPWR[16];
@@ -131,9 +129,6 @@ int operate(pid_t parent,int sock) {
         if (vb) fprintf(stderr,"%d\n",tprm.len);
         TCPIPMsgRecv(sock, tsgbuf->rep, sizeof(unsigned char)*tsgbuf->len);
         TCPIPMsgRecv(sock, tsgbuf->code, sizeof(unsigned char)*tsgbuf->len);
-        n=0;
-        tlen=0;
-        for (n=0;n<tprm.len;n++) tlen+=tsgbuf->rep[n];
         break;
 
       case PING:
@@ -147,7 +142,6 @@ int operate(pid_t parent,int sock) {
       case GET_DATA:
         if (vb) fprintf(stderr,"GET_DATA\n");
 
-        usleep(tlen*10);
         if (rdata.main !=NULL) free(rdata.main);
         if (rdata.back !=NULL) free(rdata.back);
 
