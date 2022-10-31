@@ -131,7 +131,6 @@ int main(int argc,char *argv[])
   int def_intt_sc=0;
   int def_intt_us=0;
   int def_nrang=0;
-  int debug=0;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -218,6 +217,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "ros",    't', &roshost);    /* Set the roshost IP address */
   OptionAdd(&opt, "-help",  'x', &hlp);        /* just dump some parameters */
   OptionAdd(&opt, "-option",'x', &option);
+  OptionAdd(&opt, "debug", 'x', &debug);
 
   /* process the commandline; need this for setting errlog port */
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
@@ -364,6 +364,17 @@ int main(int argc,char *argv[])
 
     printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
     tsgid=SiteTimeSeq(ptab);
+    if (tsgid !=0) {
+      if (tsgid==-2) {
+        ErrLog(errlog.sock,progname,"Error registering timing sequence.");
+      } else if (tsgid==-1) {
+        ErrLog(errlog.sock,progname,"TSGMake error code: 0 (tsgbuff==NULL)");
+      } else {
+        sprintf(logtxt,"TSGMake error code: %d",tsgid);
+        ErrLog(errlog.sock,progname,logtxt);
+      }
+      continue;
+    }
 
     printf("Entering Site Start Scan Station ID: %s  %d\n",ststr,stid);
     if (SiteStartScan() !=0) continue;
@@ -504,6 +515,17 @@ int main(int argc,char *argv[])
 
     /* make a new timing sequence for the sounding */
     tsgid = SiteTimeSeq(ptab);
+    if (tsgid !=0) {
+      if (tsgid==-2) {
+        ErrLog(errlog.sock,progname,"Error registering SND timing sequence.");
+      } else if (tsgid==-1) {
+        ErrLog(errlog.sock,progname,"SND TSGMake error code: 0 (tsgbuff==NULL)");
+      } else {
+        sprintf(logtxt,"SND TSGMake error code: %d",tsgid);
+        ErrLog(errlog.sock,progname,logtxt);
+      }
+      continue;
+    }
 
     /* we have time until the end of the minute to do sounding */
     /* minus a safety factor given in time_needed */
