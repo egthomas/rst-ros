@@ -47,7 +47,7 @@ void SiteCvwExit(int signum)
     case 2:
       cancel_count++;
       CVW_exit_flag = signum;
-      printf("SiteCvwExit: Sig 2: %d\n", CVW_exit_flag); 
+      printf("SiteCvwExit: Sig 2: %d\n", CVW_exit_flag);
       if (cancel_count < 3) break;
     case 0:
       /*printf("SiteCvwExit: Sig 0: %d\n",CVW_exit_flag);*/ 
@@ -63,10 +63,10 @@ void SiteCvwExit(int signum)
         if (samples != NULL)
           ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
         exit(errno);
-      } 
+      }
       break;
     default:
-      printf("SiteCvwExit: Sig %d: %d\n",signum,CVW_exit_flag); 
+      printf("SiteCvwExit: Sig %d: %d\n",signum,CVW_exit_flag);
       if (CVW_exit_flag == 0) CVW_exit_flag = signum;
       if (CVW_exit_flag != 0) {
         msg.type = QUIT;
@@ -137,18 +137,18 @@ int SiteCvwSetupRadar()
 
   if ((ros.sock=TCPIPMsgOpen(ros.host,ros.port)) == -1) return -1;
   smsg.type = SET_RADAR_CHAN;
-  TCPIPMsgSend(ros.sock, &smsg,sizeof(struct ROSMsg)); 
+  TCPIPMsgSend(ros.sock, &smsg,sizeof(struct ROSMsg));
   temp32 = rnum;
-  TCPIPMsgSend(ros.sock, &temp32, sizeof(int32)); 
+  TCPIPMsgSend(ros.sock, &temp32, sizeof(int32));
   temp32 = cnum;
   TCPIPMsgSend(ros.sock, &temp32, sizeof(int32));
-  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg)); 
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (rmsg.status < 0) {
     fprintf(stderr, "Requested radar channel unavailable\n"
                     "Sleeping 1 second and exiting\n");
     sleep(1);
     SiteCvwExit(-1);
-  } 
+  }
   if (debug) {
     fprintf(stderr,"SET_RADAR_CHAN:type=%c\n",rmsg.type);
     fprintf(stderr,"SET_RADAR_CHAN:status=%d\n",rmsg.status);
@@ -156,9 +156,9 @@ int SiteCvwSetupRadar()
 
   smsg.type = QUERY_INI_SETTINGS;
   TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
-  sprintf(ini_entry_name,"site_settings:ifmode");  
-  requested_entry_type = 'b';  
-  returned_entry_type  = ' ';  
+  sprintf(ini_entry_name,"site_settings:ifmode");
+  requested_entry_type = 'b';
+  returned_entry_type  = ' ';
   temp32 = -1;
   ifmode = -1;
   data_length = strlen(ini_entry_name);
@@ -169,6 +169,7 @@ int SiteCvwSetupRadar()
   TCPIPMsgRecv(ros.sock, &data_length, sizeof(int32));
   if (returned_entry_type == requested_entry_type)
     TCPIPMsgRecv(ros.sock, &temp32, sizeof(int32));
+
   TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"QUERY_INI_SETTINGS:type=%c\n",rmsg.type);
@@ -180,7 +181,7 @@ int SiteCvwSetupRadar()
   if ((rmsg.status) && (temp32 >= 0)) ifmode = temp32;
   if ((ifmode != 0) && (ifmode != 1)) {
     fprintf(stderr,"QUERY_INI_SETTINGS: Bad IFMODE)\n");
-    exit(0); 
+    exit(0);
   }
 
   smsg.type = GET_PARAMETERS;
@@ -221,7 +222,7 @@ int SiteCvwStartIntt(int sec,int usec)
   if (debug) fprintf(stderr,"SiteCvwStartInt: start\n");
 
   total_samples = tsgprm.samples + tsgprm.smdelay;
-  smsg.type = PING; 
+  smsg.type = PING;
   TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
   TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
@@ -238,11 +239,11 @@ int SiteCvwStartIntt(int sec,int usec)
     fprintf(stderr,"GET_PARAMETERS:status=%d\n",rmsg.status);
   }
 
-  rprm.tbeam = bmnum;   
-  rprm.tfreq = 12000;   
-  rprm.trise = 5000;   
-  rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6; 
-  rprm.filter_bandwidth    = rprm.baseband_samplerate; 
+  rprm.tbeam = bmnum;
+  rprm.tfreq = 12000;
+  rprm.trise = 5000;
+  rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
+  rprm.filter_bandwidth    = rprm.baseband_samplerate;
   rprm.match_filter        = 1;
   rprm.number_of_samples   = total_samples + nbaud + 10;
   rprm.priority            = cnum;
@@ -277,14 +278,14 @@ int SiteCvwFCLR(int stfreq,int edfreq)
   SiteCvwExit(0);
 
   total_samples = tsgprm.samples + tsgprm.smdelay;
-  rprm.tbeam = bmnum;   
-  rprm.tfreq = tfreq;   
-  rprm.rfreq = tfreq;   
-  rprm.trise = 5000;   
-  rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6; 
-  rprm.filter_bandwidth    = rprm.baseband_samplerate; 
+  rprm.tbeam = bmnum;
+  rprm.tfreq = tfreq;
+  rprm.rfreq = tfreq;
+  rprm.trise = 5000;
+  rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
+  rprm.filter_bandwidth    = rprm.baseband_samplerate;
   rprm.match_filter        = 1;
-  rprm.number_of_samples   = total_samples + nbaud + 10; 
+  rprm.number_of_samples   = total_samples + nbaud + 10;
   rprm.priority            = cnum;
   rprm.buffer_index        = 0;
 
@@ -297,10 +298,10 @@ int SiteCvwFCLR(int stfreq,int edfreq)
     fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
   }
 
-  fprm.start = stfreq; 
-  fprm.end   = edfreq;  
-  fprm.nave  = 20;  
-  fprm.filter_bandwidth = 250;  
+  fprm.start = stfreq;
+  fprm.end   = edfreq;
+  fprm.nave  = 20;
+  fprm.filter_bandwidth = 250;
 
   smsg.type = REQUEST_CLEAR_FREQ_SEARCH;
   TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
@@ -313,9 +314,9 @@ int SiteCvwFCLR(int stfreq,int edfreq)
 
   smsg.type = REQUEST_ASSIGNED_FREQ;
   TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
-  TCPIPMsgRecv(ros.sock,&tfreq, sizeof(int32)); 
-  TCPIPMsgRecv(ros.sock,&noise, sizeof(float));  
-  TCPIPMsgRecv(ros.sock,&rmsg, sizeof(struct ROSMsg)); 
+  TCPIPMsgRecv(ros.sock,&tfreq, sizeof(int32));
+  TCPIPMsgRecv(ros.sock,&noise, sizeof(float));
+  TCPIPMsgRecv(ros.sock,&rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"REQUEST_ASSIGNED_FREQ:type=%c\n",rmsg.type);
     fprintf(stderr,"REQUEST_ASSIGNED_FREQ:status=%d\n",rmsg.status);
@@ -337,16 +338,16 @@ int SiteCvwTimeSeq(int *ptab)
   if (tsgprm.pat != NULL) free(tsgprm.pat);
   memset(&tsgprm,0,sizeof(struct TSGprm));
 
-  tsgprm.nrang   = nrang;         
+  tsgprm.nrang   = nrang;
   tsgprm.frang   = frang;
-  tsgprm.rtoxmin = 0;      
+  tsgprm.rtoxmin = 0;
   tsgprm.stdelay = 18+2;
   tsgprm.gort    = 1;
-  tsgprm.rsep    = rsep;          
+  tsgprm.rsep    = rsep;
   tsgprm.smsep   = smsep;
-  tsgprm.txpl    = txpl; 
+  tsgprm.txpl    = txpl;
   tsgprm.mpinc   = mpinc;
-  tsgprm.mppul   = mppul; 
+  tsgprm.mppul   = mppul;
   tsgprm.mlag    = 0;
   tsgprm.nbaud   = nbaud;
   tsgprm.code    = pcode;
@@ -485,7 +486,7 @@ int SiteCvwIntegrate(int (*lags)[2])
 
     tval = (tick.tv_sec+tick.tv_usec/1.0e6) - (tack.tv_sec+tack.tv_usec/1.0e6);
 
-    if (nave > 0) tavg = tval/nave; 
+    if (nave > 0) tavg = tval/nave;
      
     tick.tv_sec  += floor(tavg);
     tick.tv_usec += 1.0e6*(tavg-floor(tavg));
@@ -494,14 +495,14 @@ int SiteCvwIntegrate(int (*lags)[2])
     time_diff += (tick.tv_usec-tock.tv_usec)/1E6;
     if (time_diff > 0.) break;
 
-    rprm.tbeam = bmnum;   
-    rprm.tfreq = tfreq;   
-    rprm.rfreq = tfreq;   
-    rprm.trise = 5000;   
-    rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6; 
-    rprm.filter_bandwidth    = rprm.baseband_samplerate; 
+    rprm.tbeam = bmnum;
+    rprm.tfreq = tfreq;
+    rprm.rfreq = tfreq;
+    rprm.trise = 5000;
+    rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
+    rprm.filter_bandwidth    = rprm.baseband_samplerate;
     rprm.match_filter        = 1;
-    rprm.number_of_samples   = total_samples + nbaud + 10; 
+    rprm.number_of_samples   = total_samples + nbaud + 10;
     rprm.priority            = cnum;
     rprm.buffer_index        = 0;
 
@@ -713,7 +714,7 @@ int SiteCvwIntegrate(int (*lags)[2])
       if (mplgexs == 0) {
         dest = (void *)(samples);
         dest += iqoff;
-        rngoff = 2*rxchn; 
+        rngoff = 2*rxchn;
         if (debug) fprintf(stderr,"CVW seq %d :: rngoff %d rxchn %d\n"
                                   "CVW seq %d :: ACFSumPower\n",
                            nave,rngoff,rxchn, nave);
@@ -738,8 +739,8 @@ int SiteCvwIntegrate(int (*lags)[2])
           if (debug) fprintf(stderr,"CVW seq %d :: rngoff %d rxchn %d\n"
                                     "CVW seq %d :: ACFNormalize\n",
                              nave,rngoff,rxchn, nave);
-          ACFNormalize(pwr0,acfd,xcfd,tsgprm.nrang,mplgs,atstp); 
-        }  
+          ACFNormalize(pwr0,acfd,xcfd,tsgprm.nrang,mplgs,atstp);
+        }
         if (debug) fprintf(stderr,"CVW seq %d :: rngoff %d rxchn %d\n",
                                    nave,rngoff,rxchn);
       }
@@ -763,7 +764,7 @@ int SiteCvwIntegrate(int (*lags)[2])
        for(range=0; range < nrang;range++) {
          pwr0[range]=(double)pwr0[range]/(double)nave;
 
-         for(lag=0;lag < mplgs; lag++) {     
+         for(lag=0;lag < mplgs; lag++) {
            acfd[range*(2*mplgs)+2*lag]= (double) acfd[range*(2*mplgs)+2*lag]/
                                        (double) nave;
            acfd[range*(2*mplgs)+2*lag+1]= (double) acfd[range*(2*mplgs)+2*lag+1]/
