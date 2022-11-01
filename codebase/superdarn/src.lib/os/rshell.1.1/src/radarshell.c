@@ -280,6 +280,7 @@ int RadarShellParse(struct RShellTable *rptr,char *name,...) {
     vname=strtok(NULL,DELIM);
   }
   va_end(ap);
+  free(lname);
   return 0;
 }
 
