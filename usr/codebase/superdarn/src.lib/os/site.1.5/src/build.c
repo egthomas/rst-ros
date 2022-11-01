@@ -66,7 +66,6 @@ int SiteBuild(char *stid) {
   char symbol[256];
   char st[6];
 
-
   char *error;
   int n=0;
 
@@ -98,8 +97,4 @@ int SiteBuild(char *stid) {
   }
   return 0;
 }
-
-
-
-
 

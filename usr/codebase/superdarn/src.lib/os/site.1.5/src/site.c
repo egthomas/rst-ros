@@ -59,7 +59,7 @@ int SiteStart(char *host) {
   rdata.main=NULL;
   rdata.back=NULL;
   badtrdat.start_usec=NULL;
-  badtrdat.duration_usec=NULL; 
+  badtrdat.duration_usec=NULL;
   return (sitelib.start)(host);
 }
 
