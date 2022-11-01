@@ -1,18 +1,19 @@
 RST Radar Operating Software (RST-ROS)
 ======================================
-R.J.Barnes  (original developer)
-J.D.Spaleta (original developer)
+R.J.Barnes   (original developer)
+J.D.Spaleta  (original developer)
+S.G.Shepherd (CVE/CVW radar PI)
 SuperDARN Data Analysis Working Group (RST developers)
-E.G.Thomas  (merged ROS back into RST)
+E.G.Thomas   (merged ROS back into RST)
 
 Version Log
 ===========
 
 1.25    Final release of QNX4 ROS
 2.0     Beta release of Linux ROS
-3.1     First release of ROS 3
-4.0     First release of joint RST (5.0) + ROS (3.1-cv)
-
+3.1     First release of Linux ROS 3
+3.6     Final release of Linux ROS 3
+4.0     First release of Linux RST (5.0) + ROS (3.1-cv)
 
 
 Introduction
@@ -23,12 +24,13 @@ operate the SuperDARN radar network. The software is distributed in
 the form of source code and data tables for Linux platforms.
 
 This package does not include the hardware interface software, instead
-it contains a "dummy" radar task that simulates the responses of the radar
-hardware.
+it contains a "dummy" radar task that simulates the responses of the
+radar hardware.
 
 Note the ROS code in this package is based on the RST 3.1 software used
 at the Christmas Valley radars, and does not include all of the ROS 3.6+
 updates in use at the Fort Hays or other MSI-style radars.
+
 
 Features
 --------
@@ -50,6 +52,7 @@ The RST-ROS package includes the following software:
 The package also includes control programs, site libraries, and all
 of the RST data processing and plotting functionality (e.g., dmapdump,
 make_fit, time_plot, etc.).
+
 
 Installation
 ------------
@@ -93,8 +96,8 @@ The directories in which data and log files are recorded are defined by
 environment variables (in .profile/ros.bash). By default the following
 directories are used:
 
-/data/ros/rawacf       - rawacf files
 /data/ros/iqdat        - iqdat files
+/data/ros/rawacf       - rawacf files
 /data/ros/fitacf       - fitacf files
 /data/ros/snd          - snd files
 /data/ros/errlog       - error logs
@@ -114,3 +117,36 @@ Three scripts are available for testing the operation of the radar:
 test.radar    - tests the operation of both radars
 test.east     - tests the operation of the east radar
 test.west     - tests the operation of the west radar
+
+Note that when using the "dummy" radar simulator with the above test
+scripts, the ROS hostname (or IP address) should be set to localhost
+(or 127.0.0.1) using the "-ros" command line option with the appropriate
+control program in the schedule file (see below).
+
+
+Scheduling the radar
+--------------------
+
+The schedule files contain a list of starting times and control programs.
+
+The format for the starting time is:  yr mo dy hr mn
+
+    where   yr  is the four digit year (e.g., 2021)
+            mo  is the two digit month (01 to 12)
+            dy  is the two digit day of month (01 to 31)
+            hr  is the two digit UT hour (00 to 23)
+            mn  is the two digit UT minute (00 to 59)
+
+The first non-comment line of the schedule file should name the default
+control program to be run when no valid time has been reached, e.g.,
+
+    default normalscan -stid -cve -df 14700 -nf 10400
+
+All subsequent lines should contain a valid time followed by a control
+program and its command line options, e.g.,
+
+    2022 10 01 12 00 normalscan [command-line options]
+
+Note that unlike previous versions of the ROS, it is no longer necessary
+to specifiy the path where the control programs are located (this path
+is now set by default to the USR_BINPATH environment variable).
