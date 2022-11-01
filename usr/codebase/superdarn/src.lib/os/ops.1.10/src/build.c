@@ -6,7 +6,7 @@
 /*
  (c) 2010 JHU/APL & Others - Please Consult LICENSE.superdarn-rst.3.1-beta-18-gf704e97.txt for more information.
  
-20121207 SGS small change from JS (20121022) to fix memory leak. 
+20121207 SGS small change from JS (20121022) to fix memory leak.
  
 */
 
@@ -33,17 +33,17 @@ void OpsBuildPrm(struct RadarParm *prm,int *ptab,int (*lags)[2]) {
   int i,j;
   time_t ctime;
   float offset;
-  
+
   int16 *lagtab=NULL;
   int16 *pulsetab=NULL;
-  
+
   char tmstr[80];
 
   prm->revision.major = MAJOR_VERSION;
   prm->revision.minor = MINOR_VERSION;
 
   prm->origin.code=0;
-  
+
   ctime = time((time_t) 0);
   RadarParmSetOriginCommand(prm,(char *) command);
 
@@ -89,7 +89,7 @@ void OpsBuildPrm(struct RadarParm *prm,int *ptab,int (*lags)[2]) {
   prm->scan  = scan;
   prm->mxpwr = mxpwr;
   prm->lvmax = lvmax;
-  prm->cp	= cp;
+  prm->cp    = cp;
 
   prm->stat.agc=agcstat;
   prm->stat.lopwr=lopwrstat;
@@ -103,19 +103,20 @@ void OpsBuildPrm(struct RadarParm *prm,int *ptab,int (*lags)[2]) {
     lagtab=malloc(sizeof(int16)*2*(mplgexs+1));
     for (i=0;i<2;i++) {
       for (j=0;j<=mplgexs;j++) lagtab[2*j+i]=lags[j][i];
-    } 
-    RadarParmSetLag(prm,mplgexs,lagtab); 
+    }
+    RadarParmSetLag(prm,mplgexs,lagtab);
     free(lagtab);
   } else {
     lagtab=malloc(sizeof(int16)*2*(mplgs+1));
     for (i=0;i<2;i++) {
       for (j=0;j<=mplgs;j++) lagtab[2*j+i]=lags[j][i];
-    } 
+    }
     RadarParmSetLag(prm,mplgs,lagtab);
     free(lagtab);
   }
   RadarParmSetCombf(prm,combf);
 }
+
 
 void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
 
@@ -125,7 +126,7 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
 
   iq->seqnum=nave;
   iq->chnnum=rxchn;
-  iq->smpnum=smpnum;  
+  iq->smpnum=smpnum;
   iq->skpnum=skpnum;
 
   IQSetTime(iq,nave,seqtval);
@@ -137,7 +138,7 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
 /* 20121207 SGS */
 /*  if (iq->badtr==NULL) tmp=malloc(sizeof(int)*nave); */
 /*  else tmp=realloc(iq->badtr,sizeof(int)*nave);      */
-	if (iq->badtr!=NULL)
+  if (iq->badtr!=NULL)
     free(iq->badtr);
   iq->badtr=NULL;
   tmp=malloc(sizeof(int)*nave);
@@ -146,7 +147,7 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
   if (tmp==NULL) return;
 
   iq->badtr=tmp;
-  
+
   for (i=0;i<nave;i++) {
     iq->badtr[i]=seqbadtr[i].num;
     badtrnum+=seqbadtr[i].num;
@@ -156,20 +157,18 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
   badtradr=malloc(sizeof(unsigned int)*2*badtrnum);
   *badtr=(unsigned int *) badtradr;
 
-  for (i=0;i<nave;i++) { 
+  for (i=0;i<nave;i++) {
     memcpy(badtradr+badtroff,seqbadtr[i].start,
-           sizeof(unsigned int)*seqbadtr[i].num); 
-    badtroff+= sizeof(unsigned int)*seqbadtr[i].num; 
+           sizeof(unsigned int)*seqbadtr[i].num);
+    badtroff+= sizeof(unsigned int)*seqbadtr[i].num;
     memcpy(badtradr+badtroff,seqbadtr[i].length,
-           sizeof(unsigned int)*seqbadtr[i].num); 
-    badtroff+= sizeof(unsigned int)*seqbadtr[i].num; 
+           sizeof(unsigned int)*seqbadtr[i].num);
+    badtroff+= sizeof(unsigned int)*seqbadtr[i].num;
   }
 }
 
 
-
-
-void OpsBuildRaw(struct RawData *raw) {  
+void OpsBuildRaw(struct RawData *raw) {
   RawSetPwr(raw,nrang,pwr0,0,NULL);
   RawSetACF(raw,nrang,mplgs,acfd,0,NULL);
   RawSetXCF(raw,nrang,mplgs,xcfd,0,NULL);

@@ -28,7 +28,6 @@
 #include "radar.h"
 #include "global.h"
 
-
 #define USEC 1000000.0
 
 int OpsDayNight() {
@@ -40,7 +39,8 @@ int OpsDayNight() {
   }
   return 1;
 }
- 
+
+
 /*int OpsFindSkip(int bsc,int bus)*/
 int OpsFindSkip(int scnsc, int scnus, int synsc, int synus, int nbm)
 {
@@ -58,7 +58,7 @@ int OpsFindSkip(int scnsc, int scnus, int synsc, int synus, int nbm)
   tv   = (mt*60 + sc)*1000000 + us + iv/2 - 100000; /* time from start of hour
                                                        add half a beam & some
                                                        rando buffer for FCLR? */
-  skip = (tv % bv)/iv; 
+  skip = (tv % bv)/iv;
   if (skip > nbm || skip < 0) skip = 0;
 
   return skip;
@@ -67,8 +67,8 @@ int OpsFindSkip(int scnsc, int scnus, int synsc, int synus, int nbm)
   TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
   iv=intsc*1000000+intus;
   bv=bsc*1000000+bus;
-  tv=(mt*60+sc)*1000000+us+iv/2-100000; 
-  skip=(tv % bv)/iv; 
+  tv=(mt*60+sc)*1000000+us+iv/2-100000;
+  skip=(tv % bv)/iv;
   if (skip>nbm) skip=0;
   if (skip<0) skip=0;
   return skip;

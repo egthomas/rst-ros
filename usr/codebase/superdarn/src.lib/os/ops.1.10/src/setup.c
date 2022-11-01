@@ -1,5 +1,5 @@
 /* setup.c
-   ======= 
+   =======
    Author: R.J.Barnes
 */
 
@@ -34,6 +34,7 @@
 #include "global.h"
 #include "setup.h"
 
+
 int OpsSetupCommand(int argc,char *argv[]) {
 
   int c,n;
@@ -49,12 +50,13 @@ int OpsSetupCommand(int argc,char *argv[]) {
   return 0;
 }
 
+
 int OpsStart(char *ststr) {
   FILE *fp;
   char *envstr;
- 
+
   TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
- 
+
   envstr=getenv("SD_RADAR");
   if (envstr==NULL) {
     fprintf(stderr,"Environment variable 'SD_RADAR' must be defined.\n");
@@ -69,7 +71,7 @@ int OpsStart(char *ststr) {
   }
 
   network=RadarLoad(fp);
-  fclose(fp); 
+  fclose(fp);
   if (network==NULL) {
     fprintf(stderr,"Failed to read radar information.\n");
     exit(-1);
@@ -121,15 +123,17 @@ int OpsStart(char *ststr) {
   return 0;
 }
 
+
 int OpsFitACFStart() {
   TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
   if (site==NULL) return -1;
   fit=FitMake();
-  fblk=FitACFMake(site,yr); 
+  fblk=FitACFMake(site,yr);
   fprintf(stderr,"leaving OpsFitACFStart");
   fflush(stderr);
   return 0;
 }
+
 
 void OpsLogStart(int sock,char *name,int argc,char *argv[]) {
   char buffer[4096];
@@ -142,17 +146,18 @@ void OpsLogStart(int sock,char *name,int argc,char *argv[]) {
   ErrLog(sock,name,buffer);
 }
 
+
 void OpsSetupTask(int tnum,struct TCPIPMsgHost *task,int sock,char *name) {
   char buffer[4096];
- 
+
   int n;
-  fprintf(stderr,"setting up tasks.\n"); 
+  fprintf(stderr,"setting up tasks.\n");
   for (n=0;n<tnum;n++) {
     task[n].sock=TCPIPMsgOpen(task[n].host,task[n].port);
-    if (task[n].sock==-1) 
+    if (task[n].sock==-1)
       sprintf(buffer,"Error attaching to %s:%d",task[n].host,task[n].port);
     else 
-     sprintf(buffer,"Attached to %s:%d",task[n].host,task[n].port);
+      sprintf(buffer,"Attached to %s:%d",task[n].host,task[n].port);
     ErrLog(sock,name,buffer);
   }
 }

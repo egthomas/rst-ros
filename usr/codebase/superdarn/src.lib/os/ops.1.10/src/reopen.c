@@ -36,7 +36,7 @@ int OpsReOpen(int hbnd,int mtbnd,int scbnd) {
 
   bndsec=hbnd*3600+60*mtbnd+scbnd;
   nowsec=hr*3600+60*mt+sc;
-  
+
   now=nowsec/bndsec;
   if (then==-1) then=now;
   if (then !=now) {
@@ -46,6 +46,3 @@ int OpsReOpen(int hbnd,int mtbnd,int scbnd) {
   return 0;
 }
 
-
-
- 

@@ -45,11 +45,9 @@ struct Radar *radar;
 struct TSGbuf *tsgbuf;
 struct TSGprm tsgprm;
 
-
 struct RMsgBlock msg;
 
 struct RShellTable rstable;
-
 
 int maxatten=DEFAULT_MAX_ATTEN;
 int protatten=DEFAULT_PROT_ATTEN;
@@ -117,8 +115,8 @@ int backward=0;
 int sbm=0;
 int ebm=15;
 
-int xcnt=1;		/* set to 0 for no xcf calculations;   */
-							/*       >0 to do xcf every xcnt scans */
+int xcnt=1;     /* set to 0 for no xcf calculations;   */
+                /*       >0 to do xcf every xcnt scans */
 
 int day=10;
 int night=20;
@@ -156,10 +154,4 @@ unsigned int *badtr;
 
 int shmemfd;
 char sharedmemory[256]="IQBuffer";
-
-
-
-
-
-
 
