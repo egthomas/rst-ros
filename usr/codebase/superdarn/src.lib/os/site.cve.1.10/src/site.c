@@ -92,51 +92,6 @@ void SiteCveExit(int signum)
 
 int SiteCveStart(char *host)
 {
-  signal(SIGPIPE, SiteCveExit);
-  signal(SIGINT,  SiteCveExit);
-  signal(SIGUSR1, SiteCveExit);
-  CVE_exit_flag = 0;
-  cancel_count  = 0;
-
-  ros.sock = 0;
-  if (host !=NULL) strcpy(ros.host,host);
-  else strcpy(ros.host,"192.168.7.5");
-  ros.port = 45000;
-
-  rnum = 1; /* Radar number to register */
-  cnum = 1; /* Channel number to register */
-  backward = 0; /* Beam Scan Direction settings */
-
-  errlog.port = 44000;
-  shell.port = 44001;
-  baseport = 44100;
-
-/* Set invert to 0, there is no phase inversion between main and interf */
-/*  invert=0;*/
-
-  sbm =  0;        /* full 24 beams */
-  ebm = 23;
-
-/* day/night times for December in Bismarck, ND ~ halfway out */
-/*  day=8+6;*/
-/*  night=18+6;*/
-/*  night=0;*/
-/*  day=16;         changed 20110210 */
-/*  night=1;        changed 20110210 */
-
-  day   = 15; /* changed 20110321 */
-  night =  3; /* changed 20110321 */
-
-/* rxchn number of channels typically 1*/
-/* rngoff argument in ACFCalculate.. is 2*rxchn and is normally set to 2 */
-  rxchn = 1;
-  if (debug) fprintf(stderr,"SiteCveStart: rxchn=%d\n",rxchn);
-
-  return 0;
-}
-
-int SiteCveCfgStart(char *host)
-{
   int n,ltemp,retval;
   const char *str;
   char station[10];
@@ -151,7 +106,7 @@ int SiteCveCfgStart(char *host)
 
   config_dir = getenv("SD_SITE_PATH");
   if (config_dir == NULL) {
-    fprintf(stderr,"Environment varaible 'SD_SITE_PATH' not defined\nSiteCveCfgStart aborting\n");
+    fprintf(stderr,"Environment varaible 'SD_SITE_PATH' not defined\nSiteCveStart aborting\n");
     return -1;
   }
 

@@ -92,49 +92,6 @@ void SiteCvwExit(int signum)
 
 int SiteCvwStart(char *host)
 {
-  signal(SIGPIPE, SiteCvwExit);
-  signal(SIGINT,  SiteCvwExit);
-  signal(SIGUSR1, SiteCvwExit);
-  CVW_exit_flag = 0;
-  cancel_count  = 0;
-
-  ros.sock = 0;
-  if (host !=NULL) strcpy(ros.host,host);
-  else strcpy(ros.host,"192.168.7.5");
-  ros.port = 45000;
-
-  rnum = 2; /* Radar number to register */
-  cnum = 1; /* Channel number to register */
-  backward = 1; /* Beam Scan Direction settings */
-
-  errlog.port = 54000;
-  shell.port = 54001;
-  baseport = 54100;
-
-/* Set invert to 0, there is no phase inversion between main and interf */
-/*  invert=0;*/
-
-  sbm = 23;               /* full 24 beams */
-  ebm =  0;
-/* day/night times for December in Juneau, AK ~ halfway out */
-/*  day=8+9;*/
-/*  night=15+9;*/
-/*  day = 16;       changed 20110210
- *  night = 1;      */
-
-  day   = 15; /* changed 20110321 */
-  night =  3; /* changed 20110321 */
-
-/* rxchn number of channels typically 1*/
-/* rngoff argument in ACFCalculate.. is 2*rxchn and is normally set to 2 */
-  rxchn = 1;
-  if (debug) fprintf(stderr,"SiteCvwStart: rxchn=%d\n",rxchn);
-
-  return 0;
-}
-
-int SiteCvwCfgStart(char *host)
-{
   int n,ltemp,retval;
   const char *str;
   char station[10];
@@ -149,7 +106,7 @@ int SiteCvwCfgStart(char *host)
 
   config_dir = getenv("SD_SITE_PATH");
   if (config_dir == NULL) {
-    fprintf(stderr,"Environment varaible 'SD_SITE_PATH' not defined\nSiteCvwCfgStart aborting\n");
+    fprintf(stderr,"Environment varaible 'SD_SITE_PATH' not defined\nSiteCvwStart aborting\n");
     return -1;
   }
 

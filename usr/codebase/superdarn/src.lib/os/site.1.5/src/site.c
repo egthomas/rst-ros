@@ -63,14 +63,6 @@ int SiteStart(char *host) {
   return (sitelib.start)(host);
 }
 
-int SiteCfgStart(char *host) {
-  rdata.main=NULL;
-  rdata.back=NULL;
-  badtrdat.start_usec=NULL;
-  badtrdat.duration_usec=NULL;
-  return (sitelib.cfgstart)(host);
-}
-
 int SiteSetupRadar() {
   return (sitelib.setupradar)();
 }
