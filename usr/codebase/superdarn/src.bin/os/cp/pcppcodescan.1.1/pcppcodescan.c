@@ -226,7 +226,11 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
-  SiteStart(roshost);		/* sbm and ebm are reset by this function. SGS */
+  status = SiteStart(roshost);		/* sbm and ebm are reset by this function. SGS */
+  if (status==-1) {
+    fprintf(stderr,"Error reading site configuration file.\n");
+    exit(1);
+  }
 
   arg=OptionProcess(1,argc,argv,&opt,NULL);  /* this fixes it... SGS */
 

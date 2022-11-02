@@ -253,7 +253,11 @@ int main(int argc,char *argv[]) {
 	}
 	
 	/* IMPORTANT: sbm and ebm are reset by this function */
-	SiteStart(roshost);
+	status = SiteStart(roshost);
+	if (status==-1) {
+		fprintf(stderr,"Error reading site configuration file.\n");
+		exit(1);
+	}
 
 	/* Reprocess the command line to restore desired parameters */
 	arg=OptionProcess(1,argc,argv,&opt,NULL);

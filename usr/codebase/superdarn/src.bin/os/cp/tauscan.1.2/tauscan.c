@@ -210,7 +210,11 @@ int main(int argc,char *argv[]) {
 
 	/* IMPORTANT: sbm and ebm are reset by this function */
 	/* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-	SiteStart(roshost);
+	status = SiteStart(roshost);
+	if (status==-1) {
+		fprintf(stderr,"Error reading site configuration file.\n");
+		exit(1);
+	}
 
 	/* Reprocess the command line to restore desired parameters */
 	/* Important: need to do this for command line arguments to work */

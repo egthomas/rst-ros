@@ -285,7 +285,11 @@ int main(int argc,char *argv[])
     exit(1);
   }
 
-  SiteStart(roshost);
+  status = SiteStart(roshost);
+  if (status==-1) {
+    fprintf(stderr,"Error reading site configuration file.\n");
+    exit(1);
+  }
 
   /* reprocess the commandline since some things are reset by SiteStart */
   arg=OptionProcess(1,argc,argv,&opt,NULL);
