@@ -57,7 +57,7 @@ make_fit, time_plot, etc.).
 Installation
 ------------
 
-First install the required libraries for the RST:
+First install the required libraries for the RST (and libconfig-dev):
 
     https://radar-software-toolkit-rst.readthedocs.io/en/latest/user_guide/linux_install/#ubuntu
 
@@ -102,6 +102,18 @@ directories are used:
 /data/ros/snd          - snd files
 /data/ros/errlog       - error logs
 /data/ros/scdlogs      - scheduler logs
+
+
+Configuration Files
+-------------------
+
+The site-specific configuration files are found in directories along the
+path defined by the SD_SITE_PATH environment variable (in .profile/ros.bash).
+Each configuration file includes site-specific values for operating the
+radar, which can now be modified without needing to recompile the site
+libraries (and control programs). These values are loaded when each control
+program begins, and the user can override them using command line arguments
+to the control program.
 
 
 Running the radar
