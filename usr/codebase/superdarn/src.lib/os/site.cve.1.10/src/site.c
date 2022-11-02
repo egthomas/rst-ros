@@ -36,7 +36,6 @@
 #define IMAG_BUF_OFFSET 1
 #define USEC 1000000.0
 int CVE_exit_flag=0;
-/*int invert=0;*/  /* initilize to zero, set as needed in the Site*Start function below */
 
 struct timeval tock;
 
@@ -207,6 +206,16 @@ int SiteCveStart(char *host)
   } else {
     nfrq = 10400;
     fprintf(stderr,"Site Cfg Warning:: 'nfrq' setting undefined in site cfg file, using: %d\n",nfrq);
+  }
+
+  /* Get whether you need to correct for inverted phase between main and interf rf signal
+   *   invert=0         No inversion necessary
+   *   invert=non-zero  Inversion necessary */
+  if (config_lookup_int(&cfg, "invert", &ltemp)) {
+    invert = ltemp;
+  } else {
+    invert = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'invert' setting undefined in site cfg file, using: %d\n",invert);
   }
 
   /* Get the number of rx channels (typically 1) */
@@ -752,8 +761,8 @@ int SiteCveIntegrate(int (*lags)[2])
     if (dprm.status == 0) {
       nsamp = (int)dprm.samples;
 
-    /* invert interf phase here if necessary */
-/*      if(invert!=0) {*/
+      /* invert interf phase here if necessary */
+      if (invert !=0) {
         for(n=0; n<(nsamp); n++) {
           Q = ((rdata.main)[n] & 0xffff0000) >> 16;
           I = (rdata.main)[n] & 0x0000ffff;
@@ -763,7 +772,7 @@ int SiteCveIntegrate(int (*lags)[2])
           uI32 = ((uint32) I) & 0xFFFF;
           (rdata.main)[n] = uQ32|uI32;
         }
-    /*  }*/
+      }
 
     /* decode phase coding here */
       if (nbaud > 1) {
