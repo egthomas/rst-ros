@@ -252,9 +252,9 @@ int main(int argc,char *argv[])
   if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
-  if (strcmp(ststr,"cve") == 0) {
+  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
     snd_bms = snd_bmse;
-  } else if (strcmp(ststr,"cvw") == 0) {
+  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
     snd_bms = snd_bmsw;
   } else {
     printf("Error: Not intended for station %s\n", ststr);
