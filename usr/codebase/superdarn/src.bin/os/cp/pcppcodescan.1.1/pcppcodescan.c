@@ -157,7 +157,6 @@ int main(int argc,char *argv[]) {
   rsep=6;
   nbaud=13;
 
-  debug=0;
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 
   OptionAdd(&opt,"di",'x',&discretion);
@@ -187,6 +186,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "stid",'t', &ststr); 
   OptionAdd(&opt, "fast",'x', &fast);
   OptionAdd(&opt, "ros", 't', &roshost);  /* Set the roshost IP address */
+  OptionAdd(&opt, "debug",'x', &debug);
   OptionAdd(&opt, "-option",'x', &option);
    
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);

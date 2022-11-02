@@ -197,6 +197,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"frqrng",'i',&frqrng);     /* fix the FCLR window [kHz] */
   OptionAdd(&opt,"sfrqrng",'i',&snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt,"ros",   't',&roshost);    /* Set the roshost IP address */
+  OptionAdd(&opt,"debug", 'x',&debug);
   OptionAdd(&opt,"-help", 'x',&hlp);        /* just dump some parameters */
   OptionAdd(&opt,"-option",'x',&option);
 

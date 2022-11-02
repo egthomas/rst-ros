@@ -128,7 +128,6 @@ int main(int argc,char *argv[]) {
   int beams=0;
   int total_scan_usecs=0;
   int total_integration_usecs=0;
-  int debug=0;
 
   int bufsc=0;    /* a buffer at the end of scan; historically this has   */
   int bufus=0;    /*   been set to 3.0s to account for what???            */
@@ -212,6 +211,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "setintt",'x', &setintt);
 
   OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address  */
+  OptionAdd(&opt, "debug"  ,'x', &debug);
   OptionAdd(&opt, "-help",  'x', &hlp);      /* just dump some parameters   */
   OptionAdd(&opt, "-option",'x', &option);
 

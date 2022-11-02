@@ -139,7 +139,6 @@ int main(int argc,char *argv[]) {
   int nbm = 20;    /* default number of "beams" */
   int total_scan_usecs = 0;
   int total_integration_usecs = 0;
-  int debug=0;
 
   int bufsc=0;    /* a buffer at the end of scan; historically this has   */
   int bufus=0;    /*   been set to 3.0s to account for what??? Sounding?  */
@@ -197,6 +196,7 @@ int main(int argc,char *argv[]) {
   /*OptionAdd(&opt, "eb",     'i', &ebm);*/
   OptionAdd(&opt, "fixfrq", 'i', &fixfrq);   /* fix the transmit frequency */
   OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address */
+  OptionAdd(&opt, "debug",  'x', &debug);
   OptionAdd(&opt, "-help",  'x', &hlp);      /* just dump some parameters */
   OptionAdd(&opt, "-option",'x', &option);
 

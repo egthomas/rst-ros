@@ -135,7 +135,6 @@ int main(int argc,char *argv[])
   int def_intt_sc=0;
   int def_intt_us=0;
   int def_nrang=0;
-  int debug=0;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -220,6 +219,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "sfrqrng",'i', &snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt, "sndsc",  'i', &snd_sc);     /* sounding duration per scan [sec] */
   OptionAdd(&opt, "ros",    't', &roshost);    /* Set the roshost IP address */
+  OptionAdd(&opt, "debug",  'x', &debug);
   OptionAdd(&opt, "-help",  'x', &hlp);        /* just dump some parameters */
   OptionAdd(&opt, "-option",'x', &option);
 

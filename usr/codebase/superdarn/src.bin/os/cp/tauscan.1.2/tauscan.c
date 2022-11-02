@@ -175,6 +175,7 @@ int main(int argc,char *argv[]) {
 	OptionAdd(&opt, "sb",     'i', &sbm);
 	OptionAdd(&opt, "eb",     'i', &ebm);
     OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address */
+    OptionAdd(&opt, "debug",  'x', &debug);
     OptionAdd(&opt, "-option",'x', &option);
  
 	/* Process all of the command line options
