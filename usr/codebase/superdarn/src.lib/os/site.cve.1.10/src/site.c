@@ -42,6 +42,7 @@ struct timeval tock;
 config_t cfg;
 char *config_dir=NULL;
 char config_filepath[256];
+char station[10];
 
 
 void SiteCveExit(int signum)
@@ -91,11 +92,11 @@ void SiteCveExit(int signum)
 }
 
 
-int SiteCveStart(char *host)
+int SiteCveStart(char *host,char *ststr)
 {
   int n,ltemp,retval;
   const char *str;
-  char station[10];
+  char *dfststr="cve";
 
   signal(SIGPIPE, SiteCveExit);
   signal(SIGINT,  SiteCveExit);
@@ -111,7 +112,9 @@ int SiteCveStart(char *host)
     return -1;
   }
 
-  sprintf(config_filepath,"%s/site.cve/cve.cfg",config_dir);
+  if (ststr==NULL) ststr=dfststr;
+
+  sprintf(config_filepath,"%s/site.%s/%s.cfg",config_dir,ststr,ststr);
 
   config_init(&cfg);
   retval = config_read_file(&cfg,config_filepath);

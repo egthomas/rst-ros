@@ -42,6 +42,7 @@ struct timeval tock;
 config_t cfg;
 char *config_dir=NULL;
 char config_filepath[256];
+char station[10];
 
 
 void SiteCvwExit(int signum)
@@ -91,11 +92,11 @@ void SiteCvwExit(int signum)
 }
 
 
-int SiteCvwStart(char *host)
+int SiteCvwStart(char *host,char *ststr)
 {
   int n,ltemp,retval;
   const char *str;
-  char station[10];
+  char *dfststr="cvw";
 
   signal(SIGPIPE, SiteCvwExit);
   signal(SIGINT,  SiteCvwExit);
@@ -111,7 +112,9 @@ int SiteCvwStart(char *host)
     return -1;
   }
 
-  sprintf(config_filepath,"%s/site.cvw/cvw.cfg",config_dir);
+  if (ststr==NULL) ststr=dfststr;
+
+  sprintf(config_filepath,"%s/site.%s/%s.cfg",config_dir,ststr,ststr);
 
   config_init(&cfg);
   retval = config_read_file(&cfg,config_filepath);
@@ -132,7 +135,7 @@ int SiteCvwStart(char *host)
   if (config_lookup_int(&cfg, "backward", &ltemp)) {
     backward = ltemp;
   } else {
-    backward = 0;
+    backward = 1;
     fprintf(stderr,"Site Cfg Warning:: 'backward' setting undefined in site cfg file, using: %d\n",backward);
   }
 
@@ -148,7 +151,7 @@ int SiteCvwStart(char *host)
   if (config_lookup_int(&cfg, "sbm", &ltemp)) {
     sbm = ltemp;
   } else {
-    sbm = 0;
+    sbm = 23;
     fprintf(stderr,"Site Cfg Warning:: 'sbm' setting undefined in site cfg file, using: %d\n",sbm);
   }
 
@@ -156,7 +159,7 @@ int SiteCvwStart(char *host)
   if (config_lookup_int(&cfg, "ebm", &ltemp)) {
     ebm = ltemp;
   } else {
-    ebm = 23;
+    ebm = 0;
     fprintf(stderr,"Site Cfg Warning:: 'ebm' setting undefined in site cfg file, using: %d\n",ebm);
   }
 
@@ -164,7 +167,7 @@ int SiteCvwStart(char *host)
   if (config_lookup_int(&cfg, "rnum", &ltemp)) {
     rnum = ltemp;
   } else {
-    rnum = 1;
+    rnum = 2;
     fprintf(stderr,"Site Cfg Warning:: 'rnum' setting undefined in site cfg file, using: %d\n",rnum);
   }
 

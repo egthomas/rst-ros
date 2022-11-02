@@ -7,7 +7,7 @@
 #ifndef _SITECVW_H
 #define _SITECVW_H
 
-int SiteCvwStart(char *host);
+int SiteCvwStart(char *host,char *ststr);
 int SiteCvwSetupRadar();
 int SiteCvwStartScan();
 int SiteCvwStartIntt(int intsc,int intus);

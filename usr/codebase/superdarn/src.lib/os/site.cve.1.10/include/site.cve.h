@@ -7,7 +7,7 @@
 #ifndef _SITECVE_H
 #define _SITECVE_H
 
-int SiteCveStart(char *host);
+int SiteCveStart(char *host,char *ststr);
 int SiteCveSetupRadar();
 int SiteCveStartScan();
 int SiteCveStartIntt(int intsc,int intus);
