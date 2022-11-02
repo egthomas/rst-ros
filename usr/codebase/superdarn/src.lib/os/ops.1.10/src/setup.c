@@ -129,7 +129,7 @@ int OpsFitACFStart() {
   if (site==NULL) return -1;
   fit=FitMake();
   fblk=FitACFMake(site,yr);
-  fprintf(stderr,"leaving OpsFitACFStart");
+  fprintf(stderr,"Leaving OpsFitACFStart\n");
   fflush(stderr);
   return 0;
 }
