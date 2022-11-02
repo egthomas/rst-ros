@@ -27,9 +27,10 @@ beams [even/odd]. Note that unlike normalsound, this information
 is not used to adjust the radar operating frequency in real-time.
 
 The control program requires a radar-specific sounding file called
-"interleave_sounder.dat". By default, the control program will look
-for this file in the SD_SITE_PATH directory. This file should
-contain the following values (one per line):
+"sounder_[rad].dat", where "[rad]" should be replaced by
+the three-letter radar station string. By default, the control
+program will look for this file in the SD_SITE_PATH directory.
+This file should contain the following values (one per line):
 
 Number of sounder frequencies (maximum of 12)
 The sounder frequencies [kHz]
