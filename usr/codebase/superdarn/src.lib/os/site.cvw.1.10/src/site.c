@@ -157,7 +157,7 @@ int SiteCvwStart(char *host)
   if (config_lookup_int(&cfg, "ebm", &ltemp)) {
     ebm = ltemp;
   } else {
-    ebm = 1;
+    ebm = 23;
     fprintf(stderr,"Site Cfg Warning:: 'ebm' setting undefined in site cfg file, using: %d\n",ebm);
   }
 
