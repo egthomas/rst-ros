@@ -71,6 +71,7 @@
 
 char *ststr=NULL;
 char *dfststr="tst";
+char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 char progid[80]={"themisscan"};
@@ -286,15 +287,15 @@ int main(int argc,char *argv[]) {
 	/* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
 	OpsStart(ststr);
 		
-	status=SiteBuild(ststr);
+	status=SiteBuild(libstr);
 	
 	if (status==-1) {
-		fprintf(stderr,"Could not identify station.\n");
+		fprintf(stderr,"Could not load site library.\n");
 		exit(1);
 	}
 	
 	/* IMPORTANT: sbm and ebm are reset by this function */
-	status = SiteStart(roshost);
+	status = SiteStart(roshost,ststr);
 	if (status==-1) {
 		fprintf(stderr,"Error reading site configuration file.\n");
 		exit(1);

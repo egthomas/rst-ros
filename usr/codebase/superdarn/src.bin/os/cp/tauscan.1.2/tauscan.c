@@ -51,6 +51,7 @@
 
 char *ststr=NULL;
 char *dfststr="tst";
+char *libstr="ros";
 
 void *tmpbuf;
 size_t tmpsze;
@@ -201,16 +202,16 @@ int main(int argc,char *argv[]) {
 	/* NOTE: the function just assigns the remaing functions starting with
 	 *       'Site' to the appropriate site specific functions, i.e.,
 	 *       SiteStart() is SiteCveStart() for cve, etc. */
-	status=SiteBuild(ststr);
+	status=SiteBuild(libstr);
 
 	if (status==-1) {
-		fprintf(stderr,"Could not identify station.\n");
+		fprintf(stderr,"Could not load site library.\n");
 		exit(1);
 	}
 
 	/* IMPORTANT: sbm and ebm are reset by this function */
 	/* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-	status = SiteStart(roshost);
+	status = SiteStart(roshost,ststr);
 	if (status==-1) {
 		fprintf(stderr,"Error reading site configuration file.\n");
 		exit(1);
