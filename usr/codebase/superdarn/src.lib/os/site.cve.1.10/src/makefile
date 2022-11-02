@@ -15,6 +15,6 @@ DSTPATH=$(USR_LIBPATH)
 OUTPUT = site.cve
 LIBS=-lacf.1 -ltsg.1 -lacfex.1 -lshmem.1
 
-LFLAGS += -lrt
+LFLAGS += -lrt -lconfig
 
 include $(MAKELIB).$(SYSTEM)
