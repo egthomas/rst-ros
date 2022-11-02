@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <math.h>
+#include <libconfig.h>
 #include "rtypes.h"
 #include "limit.h"
 #include "tsg.h"
@@ -38,6 +39,10 @@ int CVW_exit_flag=0;
 /*int invert=0;*/  /* Initialize to zero and set in Site*Start function below */
 
 struct timeval tock;
+
+config_t cfg;
+char *config_dir=NULL;
+char config_filepath[256];
 
 void SiteCvwExit(int signum)
 {
@@ -127,6 +132,193 @@ int SiteCvwStart(char *host)
 
   return 0;
 }
+
+int SiteCvwCfgStart(char *host)
+{
+  int n,ltemp,retval;
+  const char *str;
+  char station[10];
+
+  signal(SIGPIPE, SiteCvwExit);
+  signal(SIGINT,  SiteCvwExit);
+  signal(SIGUSR1, SiteCvwExit);
+  CVW_exit_flag = 0;
+  cancel_count  = 0;
+
+  ros.sock = 0;
+
+  config_dir = getenv("SD_SITE_PATH");
+  if (config_dir == NULL) {
+    fprintf(stderr,"Environment varaible 'SD_SITE_PATH' not defined\nSiteCvwCfgStart aborting\n");
+    return -1;
+  }
+
+  sprintf(config_filepath,"%s/site.cvw/cvw.cfg",config_dir);
+
+  config_init(&cfg);
+  retval = config_read_file(&cfg,config_filepath);
+  if (retval == CONFIG_FALSE) {
+    fprintf(stderr,"cvw.cfg file read error: %d - %s\n",
+            config_error_line(&cfg), config_error_text(&cfg));
+  }
+
+  /* Get the station name */
+  if (config_lookup_string(&cfg, "station", &str)) {
+    strcpy(station,str);
+  } else {
+    fprintf(stderr,"Site Cfg Error:: No station setting in configuration file\n");
+    return -1;
+  }
+
+  /* Get the radar beam scan direction */
+  if (config_lookup_int(&cfg, "backward", &ltemp)) {
+    backward = ltemp;
+  } else {
+    backward = 0;
+    fprintf(stderr,"Site Cfg Warning:: 'backward' setting undefined in site cfg file, using: %d\n",backward);
+  }
+
+  /* Get the XCF (ie elevation angle) collection option */
+  if (config_lookup_int(&cfg, "xcf", &ltemp)) {
+    xcf = ltemp;
+  } else {
+    xcf = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'xcf' setting undefined in site cfg file, using: %d\n",xcf);
+  }
+
+  /* Get the starting beam number */
+  if (config_lookup_int(&cfg, "sbm", &ltemp)) {
+    sbm = ltemp;
+  } else {
+    sbm = 0;
+    fprintf(stderr,"Site Cfg Warning:: 'sbm' setting undefined in site cfg file, using: %d\n",sbm);
+  }
+
+  /* Get the ending beam number */
+  if (config_lookup_int(&cfg, "ebm", &ltemp)) {
+    ebm = ltemp;
+  } else {
+    ebm = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'ebm' setting undefined in site cfg file, using: %d\n",ebm);
+  }
+
+  /* Get the radar number to register with the ROS server */
+  if (config_lookup_int(&cfg, "rnum", &ltemp)) {
+    rnum = ltemp;
+  } else {
+    rnum = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'rnum' setting undefined in site cfg file, using: %d\n",rnum);
+  }
+
+  /* Get the channel number to register with the ROS server */
+  if (config_lookup_int(&cfg, "cnum", &ltemp)) {
+    cnum = ltemp;
+  } else {
+    cnum = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'cnum' setting undefined in site cfg file, using: %d\n",cnum);
+  }
+
+  /* Get the Universal time to start using the day frequency (dfrq) */
+  if (config_lookup_int(&cfg, "day", &ltemp)) {
+    day = ltemp;
+  } else {
+    day = 15;
+    fprintf(stderr,"Site Cfg Warning:: 'day' setting undefined in site cfg file, using: %d\n",day);
+  }
+
+  /* Get the Universal time to start using the night frequency (nfrq) */
+  if (config_lookup_int(&cfg, "night", &ltemp)) {
+    night = ltemp;
+  } else {
+    night = 3;
+    fprintf(stderr,"Site Cfg Warning:: 'night' setting undefined in site cfg file, using: %d\n",night);
+  }
+
+  /* Get the day frequency */
+  if (config_lookup_int(&cfg, "dfrq", &ltemp)) {
+    dfrq = ltemp;
+  } else {
+    dfrq = 14700;
+    fprintf(stderr,"Site Cfg Warning:: 'dfrq' setting undefined in site cfg file, using: %d\n",dfrq);
+  }
+
+  /* Get the night frequency */
+  if (config_lookup_int(&cfg, "nfrq", &ltemp)) {
+    nfrq = ltemp;
+  } else {
+    nfrq = 10400;
+    fprintf(stderr,"Site Cfg Warning:: 'nfrq' setting undefined in site cfg file, using: %d\n",nfrq);
+  }
+
+  /* Get the number of rx channels (typically 1) */
+  if (config_lookup_int(&cfg, "rxchn", &ltemp)) {
+    rxchn = ltemp;
+  } else {
+    rxchn = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'rxchn' setting undefined in site cfg file, using: %d\n",rxchn);
+  }
+
+  /* Get the ROS server address */
+  if (host !=NULL) {
+    strcpy(ros.host,host);
+  } else if (config_lookup_string(&cfg, "ros.host", &str)) {
+    strcpy(ros.host,str);
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'ros.host' setting undefined in site cfg file, using: %s\n",ros.host);
+  }
+
+  /* Get the ROS server port */
+  if (config_lookup_int(&cfg, "ros.port", &ltemp)) {
+    ros.port = ltemp;
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'ros.port' setting undefined in site cfg file, using: %d\n",ros.port);
+  }
+
+  /* Get the errlog server address */
+  if (config_lookup_string(&cfg, "errlog.host", &str)) {
+    strcpy(errlog.host,str);
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'errlog.host' setting undefined in site cfg file, using: %s\n",errlog.host);
+  }
+
+  /* Get the errlog server port */
+  if (config_lookup_int(&cfg, "errlog.port", &ltemp)) {
+    errlog.port = ltemp;
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'errlog.port' setting undefined in site cfg file, using: %d\n",errlog.port);
+  }
+
+  /* Get the shell server address */
+  if (config_lookup_string(&cfg, "shell.host", &str)) {
+    strcpy(shell.host,str);
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'shell.host' setting undefined in site cfg file, using: %s\n",shell.host);
+  }
+
+  /* Get the shell server port */
+  if (config_lookup_int(&cfg, "shell.port", &ltemp)) {
+    shell.port = ltemp;
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'shell.port' setting undefined in site cfg file, using: %d\n",shell.port);
+  }
+
+  /* Get the task server address */
+  if (config_lookup_string(&cfg, "task.host", &str)) {
+    for (n=0;n<4;n++) strcpy(task[n].host,str);
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'task.host' setting undefined in site cfg file, using: %s\n",task[0].host);
+  }
+
+  /* Get the task server baseport */
+  if (config_lookup_int(&cfg, "task.baseport", &ltemp)) {
+    baseport = ltemp;
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'task.baseport' setting undefined in site cfg file, using: %d\n",baseport);
+  }
+
+  return 0;
+}
+
 
 int SiteCvwSetupRadar()
 {

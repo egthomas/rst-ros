@@ -9,6 +9,7 @@
 
 struct SiteLibrary {
   int (*start)(char *);
+  int (*cfgstart)(char *);
   int (*setupradar)();
   int (*startscan)();
   int (*startintt)(int,int);
@@ -20,6 +21,7 @@ struct SiteLibrary {
 };
 
 int SiteStart(char *host);
+int SiteCfgStart(char *host);
 int SiteSetupRadar();
 int SiteStartScan();
 int SiteStartIntt(int intsc,int intus);

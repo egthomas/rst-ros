@@ -1,4 +1,4 @@
-/* site.fhe.h
+/* site.cve.h
    ==========
    Author: R.J.Barnes
 */
@@ -8,7 +8,7 @@
 #define _SITECVE_H
 
 int SiteCveStart(char *host);
-int SiteCveKeepAlive();
+int SiteCveCfgStart(char *host);
 int SiteCveSetupRadar();
 int SiteCveStartScan();
 int SiteCveStartIntt(int intsc,int intus);

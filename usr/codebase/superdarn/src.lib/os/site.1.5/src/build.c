@@ -37,6 +37,7 @@
 #include "siteglobal.h"
 
 char *sitefn[]={"Site%sStart",
+                "Site%sCfgStart",
                 "Site%sSetupRadar",
                 "Site%sStartScan",
                 "Site%sStartIntt",
@@ -48,6 +49,7 @@ char *sitefn[]={"Site%sStart",
                 0};
 
 void **siteptr[]={ (void **) &sitelib.start,
+                   (void **) &sitelib.cfgstart,
                    (void **) &sitelib.setupradar,
                    (void **) &sitelib.startscan,
                    (void **) &sitelib.startintt,
