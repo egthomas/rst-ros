@@ -44,6 +44,7 @@ config_t cfg;
 char *config_dir=NULL;
 char config_filepath[256];
 
+
 void SiteCveExit(int signum)
 {
   struct ROSMsg msg;
@@ -89,6 +90,7 @@ void SiteCveExit(int signum)
       break;
   }
 }
+
 
 int SiteCveStart(char *host)
 {
@@ -276,6 +278,7 @@ int SiteCveStart(char *host)
   return 0;
 }
 
+
 int SiteCveSetupRadar()
 {
   int32 temp32,data_length;;
@@ -349,6 +352,7 @@ int SiteCveSetupRadar()
   return 0;
 }
 
+
 int SiteCveStartScan()
 {
   struct ROSMsg smsg,rmsg;
@@ -359,6 +363,7 @@ int SiteCveStartScan()
 
   return 0;
 }
+
 
 int SiteCveStartIntt(int sec,int usec)
 {
@@ -416,6 +421,7 @@ int SiteCveStartIntt(int sec,int usec)
   return 0;
 }
 
+
 int SiteCveFCLR(int stfreq,int edfreq)
 {
   int32 tfreq;
@@ -472,6 +478,7 @@ int SiteCveFCLR(int stfreq,int edfreq)
 
   return tfreq;
 }
+
 
 int SiteCveTimeSeq(int *ptab)
 {
@@ -535,6 +542,7 @@ int SiteCveTimeSeq(int *ptab)
 
   return index;
 }
+
 
 int SiteCveIntegrate(int (*lags)[2])
 {
@@ -938,6 +946,7 @@ int SiteCveIntegrate(int (*lags)[2])
 
    return nave;
 }
+
 
 int SiteCveEndScan(int bsc,int bus, unsigned sleepus)
 {

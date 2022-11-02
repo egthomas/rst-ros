@@ -44,6 +44,7 @@ config_t cfg;
 char *config_dir=NULL;
 char config_filepath[256];
 
+
 void SiteCvwExit(int signum)
 {
   struct ROSMsg msg;
@@ -89,6 +90,7 @@ void SiteCvwExit(int signum)
       break;
   }
 }
+
 
 int SiteCvwStart(char *host)
 {
@@ -350,6 +352,7 @@ int SiteCvwSetupRadar()
   return 0;
 }
 
+
 int SiteCvwStartScan()
 {
   struct ROSMsg smsg,rmsg;
@@ -360,6 +363,7 @@ int SiteCvwStartScan()
 
   return 0;
 }
+
 
 int SiteCvwStartIntt(int sec,int usec)
 {
@@ -417,6 +421,7 @@ int SiteCvwStartIntt(int sec,int usec)
   return 0;
 }
 
+
 int SiteCvwFCLR(int stfreq,int edfreq)
 {
   int32 tfreq;
@@ -473,6 +478,7 @@ int SiteCvwFCLR(int stfreq,int edfreq)
 
   return tfreq;
 }
+
 
 int SiteCvwTimeSeq(int *ptab)
 {
@@ -536,6 +542,7 @@ int SiteCvwTimeSeq(int *ptab)
 
   return index;
 }
+
 
 int SiteCvwIntegrate(int (*lags)[2])
 {
@@ -939,6 +946,7 @@ int SiteCvwIntegrate(int (*lags)[2])
 
    return nave;
 }
+
 
 int SiteCvwEndScan(int bsc,int bus, unsigned sleepus)
 {
