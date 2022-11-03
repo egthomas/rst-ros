@@ -1,21 +1,22 @@
-*.a
-*.so
-*.o
-*~
-bin/
-build/bin/
-build/include/
-build/lib/
-dlm/
-/doc/
-/idl/
-/include/
-usr/include
-lib/
-log/
+bin
+/build/include
+/build/lib
+/dlm
+/doc
+/idl
+/include
+/lib
+/log
+/usr/include
+/usr/lib
 
 codebase/general/src.lib/stdkey.1.5/src/make_palette
 
+*.o
+*.swp
 *errstr.h
 *hlpstr.h
 *version.h
+
+!fitacfversion.h
+!rosversion.h
