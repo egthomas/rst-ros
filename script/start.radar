@@ -31,7 +31,7 @@ fitacfwrite -lp 54103 -ep 54000 &
 
 sleep 2
 
-echo "Waiting for rtserver to start"
+#echo "Waiting for rtserver to start"
 #rtserver -rp 44104 -ep 44000 -tp 1024 &
 #sleep 2
 #rtserver -rp 54104 -ep 54000 -tp 1025 &
