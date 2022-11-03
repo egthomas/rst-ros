@@ -5,19 +5,30 @@ radar &
 
 # critical tasks
 
-errlog -name cve -lp 44000 &
 echo "Waiting for errlog to start"
+errlog -name cve -lp 44000 &
 sleep 1
 
+echo "Waiting for shellserver to start"
 shellserver -sh RadarShellA -cp 44001 -sp 45001 &
 sleep 1
+
 # support tasks
 
+echo "Waiting for iqwrite to start"
 iqwrite -lp 44101 -ep 44000 &
+
+echo "Waiting for rawacfwrite to start"
 rawacfwrite -lp 44102 -ep 44000 &
+
+echo "Waiting for fitacfwrite to start"
 fitacfwrite -lp 44103 -ep 44000 &
+
 sleep 2
-echo "Ready for Control Programs"
+
+echo "Waiting for rtserver to start"
 rtserver -rp 44104 -ep 44000 -tp 1024 &
 sleep 2
+
+echo "Ready for Control Programs"
 schedule -name cve /data/ros/scd/cve.scd &
