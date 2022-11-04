@@ -385,7 +385,7 @@ int main(int argc,char *argv[])
       }
     }
 
-    scan = 1;   /* scan flagg */
+    scan = 1;   /* scan flag */
 
     ErrLog(errlog.sock,progname,"Starting scan.");
     if (xcnt>0) {
