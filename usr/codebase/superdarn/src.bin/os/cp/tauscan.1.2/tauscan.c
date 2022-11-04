@@ -1,7 +1,7 @@
 /* tauscan.c
   ============
   Author: R.J.Barnes
-   Based on algoritms developed by R.A. Greenwald and K.Oksavik
+   Based on algorithms developed by R.A. Greenwald and K.Oksavik
 */
 
 /*
