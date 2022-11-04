@@ -293,7 +293,7 @@ int main(int argc,char *argv[]) {
   sprintf(progname,"interleavesound (fast)");
   for (i=0; i<nintgs; i++){
     sprintf(tempLog, "%3d", bms[i]);
-    strcat(logtxt, tempLog);	
+    strcat(logtxt, tempLog);
   }
   ErrLog(errlog.sock,progname,logtxt);
 
