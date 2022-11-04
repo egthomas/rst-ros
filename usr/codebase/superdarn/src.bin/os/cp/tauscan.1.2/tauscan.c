@@ -244,12 +244,10 @@ int main(int argc,char *argv[]) {
                            &sbm,&ebm, &dfrq,&nfrq, &dfrang,&nfrang,
                            &dmpinc,&nmpinc, &frqrng,&xcnt);
 
-  fprintf(stderr,"got here.\n");
-
   /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
   status=SiteSetupRadar();
 
-  sprintf("Initial Setup Complete: Station ID: %s %d\n" , ststr,stid);
+  printf("Initial Setup Complete: Station ID: %s %d\n" , ststr,stid);
 
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
