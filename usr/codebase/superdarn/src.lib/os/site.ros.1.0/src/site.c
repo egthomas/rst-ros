@@ -66,6 +66,7 @@ void SiteRosExit(int signum)
           fprintf(stderr,"QUIT:status=%d\n",msg.status);
         }
         close(ros.sock);
+        config_destroy(&cfg);
         if (samples != NULL)
           ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
         exit(errno);
@@ -83,6 +84,7 @@ void SiteRosExit(int signum)
           fprintf(stderr,"QUIT:status=%d\n",msg.status);
         }
         close(ros.sock);
+        config_destroy(&cfg);
         if (samples != NULL)
           ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
         exit(errno);
