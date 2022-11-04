@@ -68,7 +68,7 @@ int arg=0;
 struct OptionData opt;
 
 char *roshost=NULL;
-int tnum = 4;      
+int tnum = 4;
 
 void usage(void);
 
@@ -87,7 +87,7 @@ int main(int argc,char *argv[]) {
    * way of determining the time it takes for a given sequence.
    */
   int ptab[8] = {0,14,22,24,27,31,42,43};
-  
+
   int lags[LAG_SIZE][2] = {
     { 0, 0},    /*  0 */
     {42,43},    /*  1 */
@@ -95,7 +95,7 @@ int main(int argc,char *argv[]) {
     {24,27},    /*  3 */
     {27,31},    /*  4 */
     {22,27},    /*  5 */
-    
+
     {24,31},    /*  7 */
     {14,22},    /*  8 */
     {22,31},    /*  9 */
@@ -112,14 +112,14 @@ int main(int argc,char *argv[]) {
     {22,42},    /* 20 */
     {22,43},    /* 21 */
     { 0,22},    /* 22 */
-    
+
     { 0,24},    /* 24 */
-    
+
     {43,43}};   /* alternate lag-0  */
-  
+
   char logtxt[1024] = "";
   char tempLog[40];
-  
+
   int exitpoll   = 0;
   int scannowait = 0;
   /* these are set for a standard 1-min scan, any changes here will affect
@@ -152,7 +152,7 @@ int main(int argc,char *argv[]) {
       cve: 0 to 20 with camp on 10
       cvw: 23 to 3 with camp on 11
 
-		note the absence of sampling the camping beam 3-consecutive scans
+    note the absence of sampling the camping beam 3-consecutive scans
    */
   /* count         1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 */
   int bmse[20] = { 0,10, 2,10, 4,10, 6,10, 8,10,12,10,14,10,16,10,18,10,20,10};
@@ -170,7 +170,7 @@ int main(int argc,char *argv[]) {
   rsep   = 45;
   txpl   = 300;             /* note: recomputed below */
   dfrq   = 10200;
-  
+
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
   OptionAdd(&opt,"di",    'x',&discretion);
   OptionAdd(&opt,"frang", 'i',&frang);
@@ -182,8 +182,8 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"xcf",   'x',&xcnt);
   OptionAdd(&opt,"nrang", 'i',&nrang);
   OptionAdd(&opt,"ep",    'i',&errlog.port);
-  OptionAdd(&opt,"sp",    'i',&shell.port); 
-  OptionAdd(&opt,"bp",    'i',&baseport); 
+  OptionAdd(&opt,"sp",    'i',&shell.port);
+  OptionAdd(&opt,"bp",    'i',&baseport);
   OptionAdd(&opt,"stid",  't',&ststr);
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);   /* fix the transmit frequency */
   OptionAdd(&opt,"ros",   't',&roshost);  /* Set the roshost IP address */
@@ -242,16 +242,16 @@ int main(int argc,char *argv[]) {
   /* not sure if -nrang commandline option works */
 
   if (ststr == NULL) ststr = dfststr;
-  
+
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
-    
+
   /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
   if ((status = SiteBuild(libstr)) == -1) {
     fprintf(stderr,"Could not load site library.\n");
     exit(1);
   }
-  
+
   /* IMPORTANT: sbm and ebm are reset by this function */
   status = SiteStart(roshost,ststr);
   if (status==-1) {
@@ -263,7 +263,7 @@ int main(int argc,char *argv[]) {
   arg = OptionProcess(1,argc,argv,&opt,NULL);
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
-  strncpy(combf,progid,80);   
+  strncpy(combf,progid,80);
 
   if ((errlog.sock = TCPIPMsgOpen(errlog.host,errlog.port)) == -1)
     fprintf(stderr,"Error connecting to error log.\n");
@@ -277,7 +277,7 @@ int main(int argc,char *argv[]) {
   sprintf(progname,"everyotherbeam");
   for (i=0; i<nintgs; i++){
     sprintf(tempLog, "%3d", bms[i]);
-    strcat(logtxt, tempLog);  
+    strcat(logtxt, tempLog);
   }
   ErrLog(errlog.sock,progname,logtxt);
 
@@ -287,7 +287,7 @@ int main(int argc,char *argv[]) {
 
   RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l dfrang l nfrang l"
           " dmpinc l nmpinc l frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
-          &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);      
+          &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);
 
   status = SiteSetupRadar();
 
@@ -299,37 +299,37 @@ int main(int argc,char *argv[]) {
   }
 
   if (discretion) cp = -cp;
-  
+
   txpl = (rsep*20)/3;   /* computing TX pulse length */
-  
-  OpsLogStart(errlog.sock,progname,argc,argv);  
+
+  OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
 
   for (n=0; n<tnum; n++) {
     RMsgSndReset(task[n].sock);
-    RMsgSndOpen(task[n].sock,strlen((char *)command),command);     
+    RMsgSndOpen(task[n].sock,strlen((char *)command),command);
   }
-  
+
   OpsFitACFStart();
-  
+
   tsgid = SiteTimeSeq(ptab);  /* get the timing sequence */
-  
+
   do {
-    
+
     if (SiteStartScan() !=0) continue;
-    
+
     if (OpsReOpen(2,0,0) != 0) {
       ErrLog(errlog.sock,progname,"Opening new files.");
       for (n=0;n<tnum;n++) {
         RMsgSndClose(task[n].sock);
-        RMsgSndOpen(task[n].sock,strlen((char *)command),command);     
+        RMsgSndOpen(task[n].sock,strlen((char *)command),command);
       }
     }
-    
+
     scan = 1;
-    
+
     ErrLog(errlog.sock,progname,"Starting scan.");
-    
+
     if (xcnt > 0) {
       cnt++;
       if (cnt == xcnt) {
@@ -337,7 +337,7 @@ int main(int argc,char *argv[]) {
         cnt = 0;
       } else xcf = 0;
     } else xcf = 0;
-    
+
     skip = OpsFindSkip(scnsc,scnus,intsc,intus,0);
 
     /* is this C99? why is this a sequential control structure with variables
@@ -368,7 +368,7 @@ int main(int argc,char *argv[]) {
       /* If this is not the case, decrease the Integration time */
       /* MAX < or <=  3s ? */
       /* once again, don't like this... */
-    
+
       {
         int t_now;
         int t_dly;
@@ -388,33 +388,33 @@ int main(int argc,char *argv[]) {
         stfrq = nfrq;
         mpinc = nmpinc;
         frang = nfrang;
-      }        
+      }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",
-							bmnum,intsc,intus,hr,mt,sc,us);
+              bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
-        
+
       ErrLog(errlog.sock,progname,"Starting Integration.");
       SiteStartIntt(intsc,intus);
-      
-      ErrLog(errlog.sock,progname,"Doing clear frequency search."); 
+
+      ErrLog(errlog.sock,progname,"Doing clear frequency search.");
       sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
       ErrLog(errlog.sock,progname, logtxt);
       tfreq = SiteFCLR(stfrq,stfrq+frqrng);
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq; 
-      
+      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
-      nave = SiteIntegrate(lags);   
+      nave = SiteIntegrate(lags);
       if (nave < 0) {
         sprintf(logtxt,"Integration error:%d",nave);
-        ErrLog(errlog.sock,progname,logtxt); 
+        ErrLog(errlog.sock,progname,logtxt);
         continue;
       }
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
-      
+
       OpsBuildPrm(prm,ptab,lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
@@ -426,11 +426,11 @@ int main(int argc,char *argv[]) {
       msg.tsize = 0;
 
       tmpbuf = RadarParmFlatten(prm,&tmpsze);
-      RMsgSndAdd(&msg,tmpsze,tmpbuf,PRM_TYPE,0); 
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,PRM_TYPE,0);
 
       tmpbuf = IQFlatten(iq,prm->nave,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,IQ_TYPE,0);
-      
+
       RMsgSndAdd(&msg,sizeof(unsigned int)*2*iq->tbadtr,
             (unsigned char *)badtr,BADTR_TYPE,0);
 
@@ -438,21 +438,21 @@ int main(int argc,char *argv[]) {
             IQS_TYPE,0);
 
       tmpbuf = RawFlatten(raw,prm->nrang,prm->mplgs,&tmpsze);
-      RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0); 
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0);
 
       tmpbuf = FitFlatten(fit,prm->nrang,&tmpsze);
-      RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0); 
-    
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *)progname,
-            NME_TYPE,0);   
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
 
-      for (n=0; n<tnum; n++) RMsgSndSend(task[n].sock,&msg); 
+      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *)progname,
+            NME_TYPE,0);
+
+      for (n=0; n<tnum; n++) RMsgSndSend(task[n].sock,&msg);
 
       for (n=0; n<msg.num; n++) {
         if (msg.data[n].type == PRM_TYPE) free(msg.ptr[n]);
         if (msg.data[n].type == IQ_TYPE)  free(msg.ptr[n]);
         if (msg.data[n].type == RAW_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type == FIT_TYPE) free(msg.ptr[n]); 
+        if (msg.data[n].type == FIT_TYPE) free(msg.ptr[n]);
       }
 
       RadarShell(shell.sock,&rstable);
@@ -465,7 +465,7 @@ int main(int argc,char *argv[]) {
 
     } while (1);
 
-    ErrLog(errlog.sock,progname,"Waiting for scan boundary."); 
+    ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     if ((exitpoll == 0) && (scannowait == 0)) SiteEndScan(scnsc,scnus,5000);
   } while (exitpoll == 0);
 
@@ -475,8 +475,8 @@ int main(int argc,char *argv[]) {
 
   SiteExit(0);
 
-  return (0);   
-} 
+  return (0);
+}
 
 void usage(void)
 {
