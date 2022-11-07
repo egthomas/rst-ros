@@ -116,26 +116,6 @@ program begins, and the user can override them using command line arguments
 to the control program.
 
 
-Running the radar
------------------
-
-Two scripts control the operation of the radar:
-
-start.radar   - starts the supporting tasks and scheduler process
-stop.radar    - stops all radar tasks
-
-Three scripts are available for testing the operation of the radar:
-
-test.radar    - tests the operation of both radars
-test.east     - tests the operation of the east radar
-test.west     - tests the operation of the west radar
-
-Note that when using the "dummy" radar simulator with the above test
-scripts, the ROS hostname (or IP address) should be set to localhost
-(or 127.0.0.1) using the "-ros" command line option with the appropriate
-control program in the schedule file (see below).
-
-
 Scheduling the radar
 --------------------
 
@@ -162,3 +142,25 @@ program and its command line options, e.g.,
 Note that unlike previous versions of the ROS, it is no longer necessary
 to specifiy the path where the control programs are located (this path
 is now set by default to the USR_BINPATH environment variable).
+
+
+Running the radar
+-----------------
+
+Two scripts control the operation of the radar:
+
+start.radar   - starts the supporting tasks and scheduler process
+stop.radar    - stops all radar tasks
+
+Three scripts are available for testing the operation of the radar:
+
+test.radar    - tests the operation of both radars
+test.east     - tests the operation of the east radar
+test.west     - tests the operation of the west radar
+
+Note that when using the "dummy" radar simulator with the above test
+scripts, the ROS hostname (or IP address) should be set to localhost
+(or 127.0.0.1) using the "-ros" command line option with the appropriate
+control program in the schedule file (see below). Alternatively, the
+"ros.host" value in the site configuration file can be set to 127.0.0.1
+instead.
