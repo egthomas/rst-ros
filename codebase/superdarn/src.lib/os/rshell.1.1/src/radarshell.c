@@ -255,7 +255,10 @@ int RadarShellParse(struct RShellTable *rptr,char *name,...) {
   lname=malloc(strlen(name)+1);
   strcpy(lname,name);
 
-  if (name==NULL) return 0;
+  if (name==NULL) {
+    free(lname);
+    return 0;
+  }
   va_start(ap,name);
 
   vname=strtok(lname," ");
@@ -275,7 +278,10 @@ int RadarShellParse(struct RShellTable *rptr,char *name,...) {
 
     if (data !=NULL) status=RadarShellAdd(rptr,vname,type,data);
 
-    if (status !=0) return -1;
+    if (status !=0) {
+      free(lname);
+      return -1;
+    }
 
     vname=strtok(NULL,DELIM);
   }
