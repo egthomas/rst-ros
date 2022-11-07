@@ -40,8 +40,6 @@ int exit_flag=0;
 struct timeval tock;
 
 config_t cfg;
-char *config_dir=NULL;
-char config_filepath[256];
 char station[10];
 
 
@@ -56,7 +54,7 @@ void SiteRosExit(int signum)
       printf("SiteRosExit: Sig 2: %d\n", exit_flag);
       if (cancel_count < 3) break;
     case 0:
-      /*printf("SiteRosExit: Sig 0: %d\n",exit_flag); */
+      printf("SiteRosExit: Sig 0: %d\n",exit_flag);
       if(exit_flag != 0) {
         msg.type = QUIT;
         TCPIPMsgSend(ros.sock, &msg, sizeof(struct ROSMsg));
@@ -99,6 +97,9 @@ int SiteRosStart(char *host,char *ststr)
   int n,ltemp,retval;
   const char *str;
   char *dfststr="tst";
+
+  char *config_dir=NULL;
+  char config_filepath[256];
 
   signal(SIGPIPE, SiteRosExit);
   signal(SIGINT,  SiteRosExit);
