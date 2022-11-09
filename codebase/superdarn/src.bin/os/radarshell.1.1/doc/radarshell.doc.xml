@@ -17,7 +17,7 @@
 </option>
 <synopsis><p>An interactive shell for manipulating radar operating parameters.</p></synopsis>
 
-<description><p>The interactive radarshell task allows the user to change the operating parameters of the radar while a control program is active.</p>
+<description><p>An interactive shell that allows the user to change the operating parameters of the radar while a control program is active.</p>
 <p>The shell supports three commands:</p>
 
 <quote>go
