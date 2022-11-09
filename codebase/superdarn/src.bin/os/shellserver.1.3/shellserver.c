@@ -26,9 +26,12 @@
 #include "option.h"
 #include "shmem.h"
 #include "tcpipmsg.h"
+#include "errlog.h"
 
 #include "errstr.h"
 #include "hlpstr.h"
+
+#include "version.h"
 
 #define DEF_CPPORT 44001
 #define DEF_RSPORT 44002
@@ -59,6 +62,15 @@ struct membuf {
   size_t offset[MAX_NUM];
   unsigned char buffer[BUF_SIZE/2];
 };
+
+char *taskname="shellserver";
+
+char *errhost=NULL;
+char *derrhost="127.0.0.1";
+int errport=44000;
+int errsock=-1;
+
+char errbuf[1024];
 
 
 void rootendprog(int signum) {
@@ -203,6 +215,8 @@ int operateRS(pid_t parent,int sock) {
   ptr->rsstate=0;
   ShMemFree(shm,shmem,BUF_SIZE,0,shmemfd);
 
+  ErrLog(errsock,taskname,"Closing radar shell connection.");
+
   return 0;
 }
 
@@ -248,6 +262,9 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"cp",'i',&port[0]);
   OptionAdd(&opt,"sp",'i',&port[1]);
 
+  OptionAdd(&opt,"eh",'t',&errhost);
+  OptionAdd(&opt,"ep",'i',&errport);
+
   OptionAdd(&opt,"sh",'t',&shmem);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
@@ -272,6 +289,13 @@ int main(int argc,char *argv[]) {
   }
 
   if (shmem==NULL) shmem=shmemd;
+
+  if (errhost==NULL) errhost=derrhost;
+  errsock=TCPIPMsgOpen(errhost,errport);
+
+  sprintf(errbuf,"Started (version %s.%s) listening on port %d for control program, and on port %d for radar shell",
+          MAJOR_VERSION,MINOR_VERSION,port[0],port[1]);
+  ErrLog(errsock,taskname,errbuf);
 
   signal(SIGCHLD,SIG_IGN);
   signal(SIGPIPE,SIG_IGN);
@@ -334,8 +358,7 @@ int main(int argc,char *argv[]) {
 
     /* Accept the connection from control program client */
     if (FD_ISSET(sock[0],&ready)) {
-
-      fprintf(stdout,"Accepting a new control program connection.\n");
+      ErrLog(errsock,taskname,"Accepting a new control program connection.");
       clength=sizeof(client);
       msgsock=accept(sock[0],(struct sockaddr *) &client,&clength);
 
@@ -353,7 +376,7 @@ int main(int argc,char *argv[]) {
     }
 
     if (FD_ISSET(sock[1],&ready)) {
-      fprintf(stdout,"Accepting a new radar shell connection.\n");
+      ErrLog(errsock,taskname,"Accepting a new radar shell connection.");
       clength=sizeof(client);
       msgsock=accept(sock[1],(struct sockaddr *) &client,&clength);
 

@@ -10,7 +10,7 @@ errlog -name cve -lp 44000 &
 sleep 1
 
 echo "Waiting for shellserver to start"
-shellserver -sh RadarShellA -cp 44001 -sp 45001 &
+shellserver -sh RadarShellA -cp 44001 -sp 45001 -ep 44000 &
 sleep 1
 
 # support tasks

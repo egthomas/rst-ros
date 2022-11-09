@@ -15,6 +15,10 @@
 </option>
 <option><on>-sp <ar>sport</ar></on><od>listen for radarshell clients on the local port number <ar>sport</ar> (default is 44002).</od>
 </option>
+<option><on>-eh <ar>ehost</ar></on><od>connect to the error logger at hostname or IP address <ar>ehost</ar> (default is localhost).</od>
+</option>
+<option><on>-ep <ar>eport</ar></on><od>connect to the error logger at port number <ar>eport</ar> (default is 44000).</od>
+</option>
 <option><on>-sh <ar>shmem</ar></on><od>assign the shell memory name <ar>shmem</ar> (default is RadarShell).</od>
 </option>
 <synopsis><p>A data relay task between the control program and interactive radarshell.</p></synopsis>
