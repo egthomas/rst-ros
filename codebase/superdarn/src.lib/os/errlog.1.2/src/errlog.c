@@ -48,7 +48,7 @@ int ErrLog(int sock,char *name,char *buffer) {
 
   if (s !=sizeof(int)) {
     fprintf(stderr,"WARNING: Error not logged\n");
-    fprintf(stderr,"%s: %d : %s :%s\n",ErrLogStrTime(),getpid(),name,buffer);
+    fprintf(stderr,"%s: %d : %s : %s\n",ErrLogStrTime(),getpid(),name,buffer);
     return -1;
   }
 
@@ -60,7 +60,7 @@ int ErrLog(int sock,char *name,char *buffer) {
 
   s=TCPIPMsgRecv(sock,&msg,sizeof(int));
 
-  fprintf(stderr,"%s: %d : %s :%s\n",ErrLogStrTime(),getpid(),name,buffer);
+  fprintf(stderr,"%s: %d : %s : %s\n",ErrLogStrTime(),getpid(),name,buffer);
 
   if ((s !=sizeof(int))  || (msg !=ERROR_OK)) {
     fprintf(stderr,"WARNING: Error not logged\n");
@@ -68,9 +68,4 @@ int ErrLog(int sock,char *name,char *buffer) {
   }
   return 0;
 }
-
-
-
-
-
 

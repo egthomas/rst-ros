@@ -124,8 +124,8 @@ int operate(pid_t parent,int sock) {
     fp=open_file();
     if (fp==NULL) fprintf(stderr,"WARNING : Error log not recording\n");
 
-    if (fp !=NULL) fprintf(fp,"%s : %s :%s\n",get_time(),name,buf);
-    fprintf(stderr,"%s : %s :%s\n",get_time(),name,buf);
+    if (fp !=NULL) fprintf(fp,"%s : %s : %s\n",get_time(),name,buf);
+
     if (fp !=NULL) fclose(fp);
 
     if (name !=NULL) free(name);
