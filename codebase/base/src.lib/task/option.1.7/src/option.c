@@ -350,7 +350,6 @@ void OptionFree(struct OptionData *opt) {
     }
     free(opt->ptr);
   }
-  
 
   opt->ptr=NULL;
 }
@@ -375,7 +374,19 @@ int OptionVersion(FILE *fp) {
     fclose(vfp);
   } else {
     fprintf(fp, "RST version file %s not found\n", vname);
-    return -1;
+  }
+
+  strcpy(vname, rst_path);
+  strcat(vname, "/.ros.version");
+
+  vfp=fopen(vname, "r");
+
+  if (vfp != NULL) {
+    while (fscanf(vfp,"%s",buff)==1);
+    fprintf(fp, "ROS version: %s\n",buff);
+    fclose(vfp);
+  } else {
+    fprintf(fp, "ROS version file %s not found\n", vname);
   }
 
   return 0;
