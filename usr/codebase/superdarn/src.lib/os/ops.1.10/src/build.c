@@ -124,6 +124,9 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
   char *badtradr=NULL;
   void *tmp=NULL;
 
+  iq->revision.major = 1;
+  iq->revision.minor = 0;
+
   iq->seqnum=nave;
   iq->chnnum=rxchn;
   iq->smpnum=smpnum;
@@ -169,6 +172,8 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
 
 
 void OpsBuildRaw(struct RawData *raw) {
+  raw->revision.major = 1;
+  raw->revision.minor = 0;
   RawSetPwr(raw,nrang,pwr0,0,NULL);
   RawSetACF(raw,nrang,mplgs,acfd,0,NULL);
   RawSetXCF(raw,nrang,mplgs,xcfd,0,NULL);
