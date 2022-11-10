@@ -17,10 +17,10 @@
 #define DEFAULT_INTSC       7       /* default INTT */
 #define DEFAULT_INTUS       0
 #define DEFAULT_TXPL        300
-#define DEFAULT_MPINC       2400
-#define DEFAULT_MPPUL       7
-#define DEFAULT_MPLGS       22
-#define DEFAULT_NRANG       70
+#define DEFAULT_MPINC       1500
+#define DEFAULT_MPPUL       8
+#define DEFAULT_MPLGS       23
+#define DEFAULT_NRANG       75
 #define DEFAULT_FRANG       180
 #define DEFAULT_RSEP        45
 #define DEFAULT_LAGFR       0
@@ -32,7 +32,7 @@
 #define DEFAULT_SCAN        0       /* default scan */
 #define DEFAULT_XCF         0
 #define DEFAULT_CP          0
-#define DEFAULT_RXRISE      100
+#define DEFAULT_RXRISE      0
 #define DEFAULT_MAX_ATTEN   2
 #define DEFAULT_PROT_ATTEN  3
 #define DEFAULT_RSEP_SWITCH 0
