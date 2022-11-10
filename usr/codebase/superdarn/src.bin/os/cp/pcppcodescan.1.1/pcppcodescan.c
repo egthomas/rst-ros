@@ -152,7 +152,7 @@ int main(int argc,char *argv[]) {
   intus=0;
   mppul=8;
   mplgs=23;
-  mpinc=1560;
+  mpinc=1500;
   nrang=565;        /* 3390 km range at 6 km range separation */
   nrang=750;        /* 4500 km range at 6 km range separation */
   rsep=6;
