@@ -92,7 +92,7 @@ FILE *open_file() {
 int operate(pid_t parent,int sock) {
 
   int s;
-  int msg;
+  int msg,pid;
   size_t nlen,blen;
   char *name=NULL,*buf=NULL;
   FILE *fp=NULL;
@@ -100,6 +100,9 @@ int operate(pid_t parent,int sock) {
   while(1) {
 
     s=TCPIPMsgRecv(sock,&msg,sizeof(int));
+    if (s !=sizeof(int)) break;
+
+    s=TCPIPMsgRecv(sock,&pid,sizeof(int));
     if (s !=sizeof(int)) break;
 
     s=TCPIPMsgRecv(sock,&nlen,sizeof(size_t));
@@ -124,7 +127,7 @@ int operate(pid_t parent,int sock) {
     fp=open_file();
     if (fp==NULL) fprintf(stderr,"WARNING : Error log not recording\n");
 
-    if (fp !=NULL) fprintf(fp,"%s : %s : %s\n",get_time(),name,buf);
+    if (fp !=NULL) fprintf(fp,"%s : %d : %s : %s\n",get_time(),pid,name,buf);
 
     if (fp !=NULL) fclose(fp);
 

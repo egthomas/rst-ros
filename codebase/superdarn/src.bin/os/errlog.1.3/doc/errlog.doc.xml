@@ -17,7 +17,7 @@
 </option>
 <synopsis><p>Prints error messages to the console and records them in a daily log.</p></synopsis>
 
-<description><p>Reports and logs errors sent from the other radar tasks. The log records the date and time at which the message was sent, the name of the task reporting the error, and a text string that describes the error.</p>
+<description><p>Reports and logs errors sent from the other radar tasks. The log records the date and time at which the message was sent, the process ID of the task reporting the error, the task name, and a text string that describes the error.</p>
 
 <p>Errors are printed to the console on which the <code>errlog</code> task runs and also recorded in a file stored in the directory defined by the <code>SD_ERRLOG_PATH</code> environment variable. Each day a new log file is created with the filename <code>errlog.<em>yyyymmdd</em></code>, where <em>yyyymmdd</em> is the date.</p>
 
