@@ -258,10 +258,9 @@ int main(int argc,char *argv[]) {
                   &frqrng,&xcnt);
 
   status=SiteSetupRadar();
- 
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit (1);
+    exit(1);
   }
 
   cp=PCPCPID;    /* why do we need this block? SGS */

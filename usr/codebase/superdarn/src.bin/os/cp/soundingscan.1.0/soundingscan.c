@@ -288,11 +288,12 @@ int main(int argc,char *argv[]) {
           &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);
 
   status = SiteSetupRadar();
-  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit (1);
+    exit(1);
   }
+
+  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
 
   beams = abs(ebm-sbm)+1;
   if (fast) {

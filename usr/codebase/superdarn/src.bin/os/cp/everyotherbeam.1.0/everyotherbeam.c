@@ -295,7 +295,7 @@ int main(int argc,char *argv[]) {
   
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit (1);
+    exit(1);
   }
 
   if (discretion) cp = -cp;
