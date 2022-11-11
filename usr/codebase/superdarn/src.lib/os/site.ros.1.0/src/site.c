@@ -55,7 +55,7 @@ void SiteRosExit(int signum)
       if (cancel_count < 3) break;
     case 0:
       if (debug) printf("SiteRosExit: Sig 0: %d\n",exit_flag);
-      if(exit_flag != 0) {
+      if (exit_flag != 0) {
         msg.type = QUIT;
         TCPIPMsgSend(ros.sock, &msg, sizeof(struct ROSMsg));
         TCPIPMsgRecv(ros.sock, &msg, sizeof(struct ROSMsg));
@@ -71,7 +71,7 @@ void SiteRosExit(int signum)
       }
       break;
     default:
-      if (debug) printf("SiteRosExit: Sig %d: %d\n",signum,exit_flag);
+      printf("SiteRosExit: Sig %d: %d\n",signum,exit_flag);
       if (exit_flag == 0) exit_flag = signum;
       if (exit_flag != 0) {
         msg.type = QUIT;

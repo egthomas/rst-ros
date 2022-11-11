@@ -40,8 +40,6 @@ int CVE_exit_flag=0;
 struct timeval tock;
 
 config_t cfg;
-char *config_dir=NULL;
-char config_filepath[256];
 char station[10];
 
 
@@ -53,11 +51,11 @@ void SiteCveExit(int signum)
     case 2:
       cancel_count++;
       CVE_exit_flag = signum;
-      printf("SiteCveExit: Sig 2: %d\n", CVE_exit_flag);
+      if (debug) printf("SiteCveExit: Sig 2: %d\n", CVE_exit_flag);
       if (cancel_count < 3) break;
     case 0:
-      /*printf("SiteCveExit: Sig 0: %d\n",CVE_exit_flag); */
-      if(CVE_exit_flag != 0) {
+      if (debug) printf("SiteCveExit: Sig 0: %d\n",CVE_exit_flag);
+      if (CVE_exit_flag != 0) {
         msg.type = QUIT;
         TCPIPMsgSend(ros.sock, &msg, sizeof(struct ROSMsg));
         TCPIPMsgRecv(ros.sock, &msg, sizeof(struct ROSMsg));
@@ -66,6 +64,7 @@ void SiteCveExit(int signum)
           fprintf(stderr,"QUIT:status=%d\n",msg.status);
         }
         close(ros.sock);
+        config_destroy(&cfg);
         if (samples != NULL)
           ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
         exit(errno);
@@ -83,6 +82,7 @@ void SiteCveExit(int signum)
           fprintf(stderr,"QUIT:status=%d\n",msg.status);
         }
         close(ros.sock);
+        config_destroy(&cfg);
         if (samples != NULL)
           ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
         exit(errno);
@@ -97,6 +97,9 @@ int SiteCveStart(char *host,char *ststr)
   int n,ltemp,retval;
   const char *str;
   char *dfststr="cve";
+
+  char *config_dir=NULL;
+  char config_filepath[256];
 
   signal(SIGPIPE, SiteCveExit);
   signal(SIGINT,  SiteCveExit);
@@ -119,7 +122,7 @@ int SiteCveStart(char *host,char *ststr)
   config_init(&cfg);
   retval = config_read_file(&cfg,config_filepath);
   if (retval == CONFIG_FALSE) {
-    fprintf(stderr,"cve.cfg file read error: %d - %s\n",
+    fprintf(stderr,"Site Cfg Read Error:: %d - %s\n",
             config_error_line(&cfg), config_error_text(&cfg));
   }
 
