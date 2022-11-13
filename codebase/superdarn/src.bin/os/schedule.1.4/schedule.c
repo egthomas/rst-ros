@@ -183,7 +183,7 @@ int main(int argc,char *argv[]) {
   do {
     if (schedule.pid ==-1) {
       log_info(0,"Control program not running - Failed or Died\n");
-      log_info(0," Waiting 5 seconds and trying to restart\n");
+      log_info(0,"Waiting 5 seconds and trying to restart\n");
       sleep(5);
       check_program(&schedule,schedule.cnt-1);
     }

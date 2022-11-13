@@ -57,7 +57,7 @@ void check_program(struct scd_blk *ptr,int cnt) {
     log_info(0,"Stopping current program");
     terminate(ptr->pid);
   }
-  sprintf(txt,"Starting program:%s",ptr->entry[cnt].command);
+  sprintf(txt,"Starting program : %s",ptr->entry[cnt].command);
   log_info(0,txt);
   if ((ptr->pid=execute(ptr->path,ptr->entry[cnt].command))==-1) {
     log_info(0,"Program failed to start - trying default program");

@@ -51,7 +51,7 @@ void print_schedule(struct scd_blk *ptr) {/* prints out the schedule */
     }
   } else log_info(1,"There are no pending programs");
 
-  sprintf(txt,"\nCurrent program ->%s",ptr->command);
+  sprintf(txt,"\nCurrent program -> %s",ptr->command);
   log_info(1,txt);
 
   sprintf(txt,"Schedule reloaded every %d seconds",ptr->refresh);
