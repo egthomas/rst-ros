@@ -709,8 +709,9 @@ int SiteCveIntegrate(int (*lags)[2])
     TCPIPMsgRecv(ros.sock,&dprm,sizeof(struct DataPRM));
     if (rdata.main) free(rdata.main);
     if (rdata.back) free(rdata.back);
-      if (debug) fprintf(stderr,"CVE GET_DATA: samples %d status %d\n",
-                         dprm.samples,dprm.status);
+    if (debug) fprintf(stderr,"CVE GET_DATA: samples %d status %d\n",
+                       dprm.samples,dprm.status);
+
     if (dprm.status == 0) {
       if (debug)
         fprintf(stderr,"CVE GET_DATA: rdata.main: uint32: %d array: %d\n",
@@ -780,7 +781,7 @@ int SiteCveIntegrate(int (*lags)[2])
         }
       }
 
-    /* decode phase coding here */
+      /* decode phase coding here */
       if (nbaud > 1) {
         code = pcode;
         for (n=0; n<(nsamp-nbaud); n++) {
@@ -824,8 +825,8 @@ int SiteCveIntegrate(int (*lags)[2])
         fflush(stderr);
       }
 
-    /* copy samples here */
-      seqoff[nave] = iqsze/2;/*Sequence offset in 16bit units */
+      /* copy samples here */
+      seqoff[nave] = iqsze/2;           /* Sequence offset in 16bit units */
       seqsze[nave] = total_samples*2*2; /* Sequence length in 16bit units */
 
       seqbadtr[nave].num    = badtrdat.length;
@@ -881,7 +882,7 @@ int SiteCveIntegrate(int (*lags)[2])
         fprintf(stderr,"CVE seq %d :: iqsze: %8d\n",nave,iqsze);
       }
 
-    /* calculate ACF */   
+      /* calculate ACF */
       if (mplgexs == 0) {
         dest = (void *)(samples);
         dest += iqoff;
@@ -925,41 +926,41 @@ int SiteCveIntegrate(int (*lags)[2])
     gettimeofday(&tick,NULL);
   }
 
-  /* Now divide by nave to get the average pwr0 and acfd values for the 
-     integration period */ 
+  /* Now divide by nave to get the average pwr0 and acfd values for the
+     integration period */
 
-   if (mplgexs == 0) {
-     if (nave > 0) {
-       ACFAverage(pwr0,acfd,xcfd,nave,tsgprm.nrang,mplgs);
+  if (mplgexs == 0) {
+    if (nave > 0) {
+      ACFAverage(pwr0,acfd,xcfd,nave,tsgprm.nrang,mplgs);
 /*
-       for(range=0; range < nrang;range++) {
-         pwr0[range]=(double)pwr0[range]/(double)nave;
+      for(range=0; range < nrang;range++) {
+        pwr0[range]=(double)pwr0[range]/(double)nave;
 
-         for(lag=0;lag < mplgs; lag++) {
-           acfd[range*(2*mplgs)+2*lag]= (double) acfd[range*(2*mplgs)+2*lag]/
-                                       (double) nave;
-           acfd[range*(2*mplgs)+2*lag+1]= (double) acfd[range*(2*mplgs)+2*lag+1]/
-                                       (double) nave;
-         }
-       }
+        for(lag=0;lag < mplgs; lag++) {
+          acfd[range*(2*mplgs)+2*lag]= (double) acfd[range*(2*mplgs)+2*lag]/
+                                      (double) nave;
+          acfd[range*(2*mplgs)+2*lag+1]= (double) acfd[range*(2*mplgs)+2*lag+1]/
+                                      (double) nave;
+        }
+      }
 */
-     }
-   } else if (nave > 0) {
-     /* ACFEX calculation */
-     ACFexCalculate(&tsgprm, (int16 *)samples,nave*smpnum,nave,smpnum,
-                    roff,ioff, mplgs,mplgexs,lagtable,lagsum, pwr0,acfd,&noise);
-   }
-   free(lagtable[0]);
-   free(lagtable[1]);
-   if (debug) {
-     fprintf(stderr,"CVE SiteIntegrate: iqsize in bytes: %d in 16bit samples:"
-                    "  %d in 32bit samples: %d\n",iqsze,iqsze/2,iqsze/4);
-     fprintf(stderr,"CVE SiteIntegrate: end\n");
-   }
+    }
+  } else if (nave > 0) {
+    /* ACFEX calculation */
+    ACFexCalculate(&tsgprm, (int16 *)samples,nave*smpnum,nave,smpnum,
+                   roff,ioff, mplgs,mplgexs,lagtable,lagsum, pwr0,acfd,&noise);
+  }
+  free(lagtable[0]);
+  free(lagtable[1]);
+  if (debug) {
+    fprintf(stderr,"CVE SiteIntegrate: iqsize in bytes: %d in 16bit samples:"
+                   "  %d in 32bit samples: %d\n",iqsze,iqsze/2,iqsze/4);
+    fprintf(stderr,"CVE SiteIntegrate: end\n");
+  }
 
-   SiteCveExit(0);
+  SiteCveExit(0);
 
-   return nave;
+  return nave;
 }
 
 
