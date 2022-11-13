@@ -45,7 +45,7 @@ void print_schedule(struct scd_blk *ptr) {/* prints out the schedule */
     for (c=ptr->cnt;c<ptr->num;c++) {
       if (ptr->entry[c].stime==-1) continue;
       TimeEpochToYMDHMS(ptr->entry[c].stime,&yr,&mo,&dy,&hr,&mt,&sc);
-      sprintf(txt,"%d : %d %d %d : %d %d -> %s",c,yr,mo,dy,hr,mt,
+      sprintf(txt,"%d : %d %02d %02d : %02d %02d -> %s",c,yr,mo,dy,hr,mt,
               ptr->entry[c].command);
       log_info(1,txt);
     }
