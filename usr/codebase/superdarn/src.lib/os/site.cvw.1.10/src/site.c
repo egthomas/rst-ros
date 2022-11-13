@@ -838,11 +838,11 @@ int SiteCvwIntegrate(int (*lags)[2])
       memcpy(seqbadtr[nave].length,badtrdat.duration_usec,
              sizeof(uint32)*badtrdat.length);
 
-/* AJ new way, does work for some reason */
-/* samples is natively an int16 pointer */
-/* rdata.main is natively an uint32 pointer */
-/* rdata.back is natively an uint32 pointer */
-/* total_samples*8 represents number of bytes for main and back samples */
+      /* AJ new way, does work for some reason */
+      /* samples is natively an int16 pointer */
+      /* rdata.main is natively an uint32 pointer */
+      /* rdata.back is natively an uint32 pointer */
+      /* total_samples*8 represents number of bytes for main and back samples */
 
       dest = (void *)(samples);  /* look iqoff bytes into samples area */
       dest += iqoff;
