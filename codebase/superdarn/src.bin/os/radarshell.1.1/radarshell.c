@@ -156,11 +156,9 @@ int main(int argc,char *argv[]) {
 
   s=shell(num,size,offset,buffer);
 
-  s=0;
-
   if (s !=0) {
-    fprintf(stderr,"Problem editing parameters.\n");
-    exit(1);
+    fprintf(stderr,"Closing shell without uploading parameters.\n");
+    exit(0);
   }
 
   smsg=SHELL_REPLY;

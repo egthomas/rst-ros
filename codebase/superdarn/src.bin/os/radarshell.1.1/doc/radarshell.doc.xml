@@ -18,11 +18,12 @@
 <synopsis><p>An interactive shell for manipulating radar operating parameters.</p></synopsis>
 
 <description><p>An interactive shell that allows the user to change the operating parameters of the radar while a control program is active.</p>
-<p>The shell supports three commands:</p>
+<p>The shell supports four commands:</p>
 
 <quote>go
 show [<em>variable</em>]
-<em>variable</em>=<em>value</em></quote>
+<em>variable</em>=<em>value</em>
+exit</quote>
 
 <p>Typing "<code>go</code>" will send the altered parameters back to the control program so they will take affect at the start of the next integration period.</p>
 <p>Typing "<code>show</code>" will list the values of the specified variables. If no names are listed then the entire set will be shown.</p>
@@ -32,6 +33,7 @@ show [<em>variable</em>]
 combf=Hello word</quote>
 
 <p>There should be no spaces between the value, the "<code>=</code>" sign, or the variable name.</p>
+<p>Typing "<code>exit</code>" will close the shell without uploading any parameters to the control program.</p>
 </description>
 
 <example>

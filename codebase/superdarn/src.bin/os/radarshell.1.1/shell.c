@@ -79,7 +79,10 @@ int shell(int num,size_t size,size_t *offset,char *buffer) {
     command=strtok(parse_line,DELIM);
 
     if (command !=NULL) {
-      if (strcmp(command,"go")==0) wait=0; /* return to control program */
+      if (strcmp(command,"exit")==0) {
+        RadarShellFree(&rstable); /* return to control program without changes */
+        return -1;
+      } else if (strcmp(command,"go")==0) wait=0; /* return to control program */
       else if (strcmp(command,"show")==0) { /* list variables */
         variable=strtok(NULL,DELIM);
         if (variable !=NULL) { /* list specific variable */
