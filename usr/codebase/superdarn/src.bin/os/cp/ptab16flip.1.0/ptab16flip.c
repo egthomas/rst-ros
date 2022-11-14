@@ -246,6 +246,10 @@ int main(int argc,char *argv[])
   int total_scan_usecs=0;
   int total_integration_usecs=0;
 
+  int total_skip_usecs=0;
+  int skipsc=0;
+  int skipus=0;
+
   int bufsc=4;    /* a buffer at the end of scan; historically this has   */
   int bufus=0;    /*   been set to 3.0s to account for what???            */
 
@@ -388,6 +392,10 @@ int main(int argc,char *argv[])
   intsc = total_integration_usecs/1e6;
   intus = total_integration_usecs - (intsc*1e6);
 
+  total_skip_usecs = 2*(intsc*1e6 + intus);
+  skipsc = total_skip_usecs/1e6;
+  skipus = total_skip_usecs - (skipsc*1e6);
+
   if (discretion) cp = -cp;
 
   txpl=(rsep*20)/3;
@@ -430,7 +438,7 @@ int main(int argc,char *argv[])
       } else xcf=0;
     } else xcf=0;
 
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
+    skip=OpsFindSkip(scnsc,scnus,skipsc,skipus,0);
 
     if (backward) {
       bmnum=sbm-skip;
