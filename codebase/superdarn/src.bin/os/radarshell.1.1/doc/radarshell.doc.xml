@@ -15,7 +15,7 @@
 </option>
 <option><on><ar>port</ar></on><od>port number of the shellserver to connect to on the system (default is 44002).</od>
 </option>
-<synopsis><p>An interactive shell for manipulating radar operating parameters.</p></synopsis>
+<synopsis><p>An interactive shell for manipulating radar operating parameters. The four available commands are 1: 'show' (list all parameters and their values), 2: '[variable]=[value]' (change parameter), 3: 'go' (upload parameters to control program), and 4: 'exit' (close shell without modifying parameters).</p></synopsis>
 
 <description><p>An interactive shell that allows the user to change the operating parameters of the radar while a control program is active.</p>
 <p>The shell supports four commands:</p>
