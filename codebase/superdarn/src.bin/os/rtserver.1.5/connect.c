@@ -41,7 +41,7 @@ void closesock(int i) {
   if ((i<msgmax) && (client[i].sock !=-1)) {
 
     char errbuf[256];
-    sprintf(errbuf,"%s : Close Connection.",client[i].host);
+    sprintf(errbuf,"%s : Close Connection (%d/%d).",client[i].host,i,CLIENT_MAX);
     ErrLog(errsock,taskname,errbuf);
 
     close(client[i].sock);
@@ -101,7 +101,7 @@ int opensock(int sock,fd_set *fdset) {
     return -1;
   }
 
-  sprintf(errbuf,"%s : Open Connection.",client[i].host);
+  sprintf(errbuf,"%s : Open Connection (%d/%d).",client[i].host,i,CLIENT_MAX);
   ErrLog(errsock,taskname,errbuf);
 
   if (i==msgmax) msgmax++;
