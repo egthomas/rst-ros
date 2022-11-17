@@ -64,6 +64,7 @@ void closesock(int i) {
 int opensock(int sock,fd_set *fdset) {
   int i,status;
   char logbuf[256];
+  char hostbuf[256];
   int temp;
   socklen_t clength;
 
@@ -74,9 +75,13 @@ int opensock(int sock,fd_set *fdset) {
   if (i>=CLIENT_MAX) { 
     /* dequeue the request here */
 
-    loginfo(logfname,"Too many clients attached - refusing connection.");
+    clength=sizeof(caddr);
+    temp=accept(sock,(struct sockaddr *) &caddr,&clength);
 
-    temp=accept(sock,0,0);
+    sprintf(hostbuf,"[%s]",inet_ntoa(caddr.sin_addr));
+    sprintf(logbuf,"%s : Too many clients attached - refusing connection.",hostbuf);
+    loginfo(logfname,logbuf);
+
     if (temp !=-1) close(temp);
     return -1;
   }

@@ -30,6 +30,7 @@ Modifications:
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 
 void loginfo(char *fname,char *str) {

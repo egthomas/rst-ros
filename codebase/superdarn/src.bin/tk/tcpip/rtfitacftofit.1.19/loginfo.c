@@ -46,7 +46,7 @@ void loginfo(char *fname,char *str) {
 
   date[strlen(date)-1]=0;
   
-  fprintf(stderr,"%s : %s\n",date);
+  fprintf(stderr,"%s : %s\n",date,str);
 
   sprintf(logpath,"%s.%.4d%.2d%.2d",fname,1900+
           time_of_day->tm_year,time_of_day->tm_mon+1,
@@ -61,13 +61,4 @@ void loginfo(char *fname,char *str) {
   fprintf(fp,"%s : %s\n",date,str);
   fclose(fp);
 }
-
-
-
-
-
-
-
-
-
 

@@ -45,7 +45,7 @@ void loginfo(char *fname,char *str) {
 
   date=asctime(time_of_day);  
 
-  date[strlen(date)-1]=':';
+  date[strlen(date)-1]=0;
   
   if (dotflag==1) fprintf(stderr,"\n");
   fprintf(stderr,"%s : %s\n",date,str);
