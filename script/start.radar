@@ -1,13 +1,16 @@
 #!/bin/bash
 
+east='cve'
+west='cvw'
+
 # dummy radar server
 #radar &
 
 # critical tasks
 
 echo "Waiting for errlog to start"
-errlog -name cve -lp 44000 &
-errlog -name cvw -lp 54000 &
+errlog -name $east -lp 44000 &
+errlog -name $west -lp 54000 &
 sleep 1
 
 echo "Waiting for shellserver to start"
@@ -38,6 +41,6 @@ rtserver -rp 54104 -ep 54000 -tp 1025 &
 sleep 2
 
 echo "Starting scheduler"
-schedule -name cve /data/ros/scd/cve.scd &
+schedule -name $east /data/ros/scd/${east}.scd &
 sleep 2
-schedule -name cvw /data/ros/scd/cvw.scd &
+schedule -name $west /data/ros/scd/${west}.scd &

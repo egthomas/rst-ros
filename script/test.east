@@ -1,12 +1,14 @@
 #!/bin/bash
 
+east='cve'
+
 # dummy radar server
 radar &
 
 # critical tasks
 
 echo "Waiting for errlog to start"
-errlog -name cve -lp 44000 &
+errlog -name $east -lp 44000 &
 sleep 1
 
 echo "Waiting for shellserver to start"
@@ -31,4 +33,4 @@ rtserver -rp 44104 -ep 44000 -tp 1024 &
 sleep 2
 
 echo "Ready for Control Programs"
-schedule -name cve /data/ros/scd/cve.scd &
+schedule -name $east /data/ros/scd/${east}.scd &
