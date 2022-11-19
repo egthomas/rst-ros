@@ -111,7 +111,7 @@ The site-specific configuration files are found in directories along the
 path defined by the SD_SITE_PATH environment variable (in .profile/ros.bash).
 Each configuration file includes site-specific values for operating the
 radar, which can now be modified without needing to recompile the site
-libraries (and control programs). These values are loaded when each control
+libraries (or control programs). These values are loaded when each control
 program begins, and the user can override them using command line arguments
 to the control program.
 
@@ -161,6 +161,5 @@ test.west     - tests the operation of the west radar
 Note that when using the "dummy" radar simulator with the above test
 scripts, the ROS hostname (or IP address) should be set to localhost
 (or 127.0.0.1) using the "-ros" command line option with the appropriate
-control program in the schedule file (see below). Alternatively, the
-"ros.host" value in the site configuration file can be set to 127.0.0.1
-instead.
+control program in the schedule file. Alternatively, the "ros.host" value
+in the site configuration file can be set to 127.0.0.1 instead.
