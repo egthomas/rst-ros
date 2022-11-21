@@ -745,7 +745,12 @@ int SiteRosIntegrate(int (*lags)[2])
       TCPIPMsgRecv(ros.sock, &num_transmitters, sizeof(int));
       TCPIPMsgRecv(ros.sock, &txstatus.AGC, sizeof(int)*num_transmitters);
       TCPIPMsgRecv(ros.sock, &txstatus.LOWPWR, sizeof(int)*num_transmitters);
+    } else {
+      fprintf(stderr,"%s SiteIntegrate:: Bad pulse sequence status: %d (nave: %d)\n",station,dprm.status,nave);
+      fflush(stderr);
+      return -1;
     }
+
     TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
     if (debug) {
       fprintf(stderr,"%s GET_DATA:type=%c\n",station,rmsg.type);
