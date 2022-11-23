@@ -210,7 +210,7 @@ int main(int argc,char *argv[]) {
   for (i=0; i<nintgs; i++)
     intgt[i] = i*(intsc + intus*1e-6);
 
-    if (ststr==NULL) ststr=dfststr;
+  if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
