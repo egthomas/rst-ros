@@ -63,7 +63,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalscan"};
+char progid[80]={"onebeamscan"};
 char progname[256];
 
 int arg=0;
