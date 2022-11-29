@@ -311,14 +311,6 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
-  /* dump beams to log file */
-  sprintf(progname,"rbspscan");
-  for (i=0; i<nintgs; i++){
-    sprintf(tempLog, "%3d", bms[i]);
-    strcat(logtxt, tempLog);
-  }
-  ErrLog(errlog.sock,progname,logtxt);
-
   /* IMPORTANT: sbm and ebm are reset by this function */
   status = SiteStart(roshost,ststr);
   if (status==-1) {
@@ -340,6 +332,14 @@ int main(int argc,char *argv[]) {
   }
 
   for (n=0;n<tnum;n++) task[n].port+=baseport;
+
+  /* dump beams to log file */
+  sprintf(progname,"rbspscan");
+  for (i=0; i<nintgs; i++){
+    sprintf(tempLog, "%3d", bms[i]);
+    strcat(logtxt, tempLog);
+  }
+  ErrLog(errlog.sock,progname,logtxt);
 
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src */
   OpsSetupCommand(argc,argv);
