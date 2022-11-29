@@ -178,7 +178,6 @@ int main(int argc,char *argv[]) {
   nrang  = 100;
   rsep   = 45;
   txpl   = 300;     /* note: recomputed below */
-  dfrq   = 10200;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
   OptionAdd(&opt,"di",    'x',&discretion);
