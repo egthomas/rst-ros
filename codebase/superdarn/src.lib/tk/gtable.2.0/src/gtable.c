@@ -323,6 +323,10 @@ int GridTableAddBeam(struct GridTable *ptr,
     /* Loop through range gates along beam */
     for (r=0;r<b->nrang;r++) {
 
+        /* If no scatter in beam/range gate cell then continue
+         * (filters in make_grid can also manually change sct value to 0) */
+        if (bm->sct[r]==0) continue;
+
         /* Calculate geographic azimuth and elevation to range/beam position */
         s=RPosRngBmAzmElv(b->bm,r,yr,pos,
                     b->frang,b->rsep,b->rxrise,
