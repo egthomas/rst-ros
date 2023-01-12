@@ -57,15 +57,30 @@ make_fit, time_plot, etc.).
 Installation
 ------------
 
-First install the required libraries for the RST (and libconfig-dev):
+1. Install the required libraries (as of Ubuntu 22.04):
 
-    https://radar-software-toolkit-rst.readthedocs.io/en/latest/user_guide/linux_install/#ubuntu
+    build-essential
+    libconfig-dev
+    libhdf5-dev
+    libncurses-dev
+    libnetcdf-dev
+    libpng-dev
+    libx11-dev
+    libxext-dev
+    netpbm
 
-Install the NASA CDF library:
+2. Download the NASA CDF library (cdf[XX_X]-dist-cdf.tar.gz) from:
 
-    https://radar-software-toolkit-rst.readthedocs.io/en/latest/user_guide/linux_install/#cdf-library
+    https://spdf.gsfc.nasa.gov/pub/software/cdf/dist/latest/linux/
 
-Load the RST-ROS environment variables by adding the following lines
+Unpack and install the CDF software:
+
+    tar -xzvf cdf[XX_X]-dist-cdf.tar.gz
+    cd cdfXX_X-dist
+    make OS=linux ENV=gnu all
+    sudo make INSTALLDIR=/usr/local/cdf install
+
+3. Load the RST-ROS environment variables by adding the following lines
 to ".bashrc":
 
     export RSTPATH="/home/radar_user/rst-ros"
@@ -73,11 +88,11 @@ to ".bashrc":
 
 Refresh the profile to make sure the environment variables are up to date.
 
-Next compile the build architecture by typing:
+4. Compile the build architecture by typing:
 
     make.build
 
-To compile all of the RST-ROS software type:
+5. Compile all of the RST-ROS software by typing:
 
     make.code
 
