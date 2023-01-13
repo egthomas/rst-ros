@@ -112,7 +112,7 @@ int operate(pid_t parent,int sock) {
         TCPIPMsgRecv(sock, &fprm, sizeof(struct CLRFreqPRM));
         dfreq=fprm.end-fprm.start;
         if (dfreq > 0) {
-          tfreq=fprm.start + (rand() % (fprm.end-fprm.start));
+          tfreq=fprm.start + (rand() % dfreq);
         } else {
           tfreq=fprm.start;
         }
@@ -298,6 +298,7 @@ int main(int argc,char *argv[]) {
 
   listen(sock,5); /* mark our socket willing to accept connections */
 
+  /* seed the random number generator for the clear frequency search */
   srand((unsigned) time(&t));
 
   do {
