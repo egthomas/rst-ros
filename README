@@ -119,7 +119,7 @@ directories are used:
 /data/ros/fitacf       - fitacf files
 /data/ros/snd          - snd files
 /data/ros/errlog       - error logs
-/data/ros/scdlogs      - scheduler logs
+/data/ros/scdlog       - scheduler logs
 
 
 Configuration Files
