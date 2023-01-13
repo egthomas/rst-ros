@@ -81,12 +81,15 @@ Unpack and install the CDF software:
     sudo make INSTALLDIR=/usr/local/cdf install
 
 3. Load the RST-ROS environment variables by adding the following lines
-to ".bashrc":
+to the end of ".bashrc":
 
     export RSTPATH="/home/radar_user/rst-ros"
     source $RSTPATH/.profile.bash
 
-Refresh the profile to make sure the environment variables are up to date.
+Refresh the profile to make sure the environment variables are up to date
+by closing and re-opening the terminal, or by typing:
+
+    source ~/.bashrc
 
 4. Compile the build architecture by typing:
 
