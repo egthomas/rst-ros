@@ -37,6 +37,7 @@
 struct OptionData opt;
 unsigned char vb;
 int tfreq=11800;
+time_t t;
 
 
 int operate(pid_t parent,int sock) {
@@ -109,7 +110,7 @@ int operate(pid_t parent,int sock) {
       case REQUEST_CLEAR_FREQ_SEARCH:
         if (vb) fprintf(stderr,"REQUEST_CLEAR_FREQ_SEARCH\n");
         TCPIPMsgRecv(sock, &fprm, sizeof(struct CLRFreqPRM));
-        tfreq=fprm.start;
+        tfreq=fprm.start + (rand() % (fprm.end-fprm.start));
         break;
 
       case REQUEST_ASSIGNED_FREQ:
@@ -291,6 +292,8 @@ int main(int argc,char *argv[]) {
   }
 
   listen(sock,5); /* mark our socket willing to accept connections */
+
+  srand((unsigned) time(&t));
 
   do {
 
