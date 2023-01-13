@@ -52,7 +52,7 @@ int operate(pid_t parent,int sock) {
   struct DataPRM dprm;
   struct TRTimes badtrdat;
 
-  int rnum,cnum,s;
+  int dfreq,rnum,cnum,s;
   float noise=0.5;
 
   int32 temp_int32,data_length;
@@ -110,7 +110,12 @@ int operate(pid_t parent,int sock) {
       case REQUEST_CLEAR_FREQ_SEARCH:
         if (vb) fprintf(stderr,"REQUEST_CLEAR_FREQ_SEARCH\n");
         TCPIPMsgRecv(sock, &fprm, sizeof(struct CLRFreqPRM));
-        tfreq=fprm.start + (rand() % (fprm.end-fprm.start));
+        dfreq=fprm.end-fprm.start;
+        if (dfreq > 0) {
+          tfreq=fprm.start + (rand() % (fprm.end-fprm.start));
+        } else {
+          tfreq=fprm.start;
+        }
         break;
 
       case REQUEST_ASSIGNED_FREQ:
