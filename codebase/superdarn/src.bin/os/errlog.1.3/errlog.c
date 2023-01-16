@@ -64,14 +64,14 @@ FILE *open_file() {
 
   if ((gmt->tm_yday + 1) != yday) {
     strcpy(name, getenv("SD_ERRLOG_PATH"));
-    strcat(name, "/errlog.");
+    sprintf(daynum, "/%.4d%.2d%.2d.", 1900+gmt->tm_year,gmt->tm_mon+1,
+                                      gmt->tm_mday);
+    strcat(name, daynum);       /* create name of new log file */
     if (radar !=NULL) {
       strcat(name,radar);
       strcat(name,".");
     }
-    sprintf(daynum, "%.4d%.2d%.2d", 1900+gmt->tm_year,gmt->tm_mon+1,
-                                    gmt->tm_mday);
-    strcat(name, daynum);       /* create name of new log file */
+    strcat(name, "errlog");
     if (access(name,F_OK) == -1)
       strcpy(mode,"w");
     else strcpy(mode,"a");
