@@ -40,7 +40,7 @@ struct scd_blk schedule;
 struct scd_blk save_sched;
 
 char *logname=NULL;
-char dlogname[]="scdlog";
+char *logpath=NULL;
 
 
 void child_handler(int signum) {
@@ -72,6 +72,7 @@ int main(int argc,char *argv[]) {
 
   char logtxt[256];
   char name[256];
+  char tmp[256];
   char *radar=NULL;
   char *path;
 
@@ -131,17 +132,19 @@ int main(int argc,char *argv[]) {
   path = getenv("SD_SCDLOG_PATH");
   if (path == NULL) {
     fprintf(stderr,"SD_SCDLOG_PATH not found\n");
-    strcpy(name,"/");
+    strcpy(tmp,"/data/ros/scdlog/");
   } else {
-    strcpy(name,path);
-    strcat(name,"/");
+    strcpy(tmp,path);
+    strcat(tmp,"/");
   }
+  logpath=tmp;
 
   if (radar !=NULL) {
-    strcat(name,radar);
-    strcat(name,".");
+    strcpy(name,radar);
+    strcat(name,".scdlog");
+  } else {
+    strcpy(name,".scdlog");
   }
-  strcat(name,dlogname);
   logname=name;
 
   if (dyflg) schedule.refresh=24*3600;

@@ -17,11 +17,12 @@
 #include <unistd.h>
 
 extern char *logname;
+extern char *logpath;
 
 void log_info(int flg,char *str) {
   FILE *fp;
   char *date;
-  char logpath[256];
+  char lpath[256];
   time_t ltime;
   struct tm *time_of_day;
 
@@ -33,10 +34,10 @@ void log_info(int flg,char *str) {
   if (flg==0) fprintf(stderr,"%s : %d : %s\n",date,getpid(),str);
   else fprintf(stderr,"%s\n",str);
 
-  sprintf(logpath,"%s.%.4d%.2d%.2d",logname,1900+
+  sprintf(lpath,"%s%.4d%.2d%.2d.%s",logpath,1900+
           time_of_day->tm_year,time_of_day->tm_mon+1,
-          time_of_day->tm_mday);
-  fp=fopen(logpath,"a");
+          time_of_day->tm_mday,logname);
+  fp=fopen(lpath,"a");
   if (fp !=NULL) {
     if (flg==0) fprintf(fp,"%s : %d : %s\n",date,getpid(),str);
     else fprintf(fp,"%s\n",str);
