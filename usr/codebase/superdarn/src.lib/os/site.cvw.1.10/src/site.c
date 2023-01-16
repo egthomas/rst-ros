@@ -111,7 +111,7 @@ int SiteCvwStart(char *host,char *ststr)
 
   config_dir = getenv("SD_SITE_PATH");
   if (config_dir == NULL) {
-    fprintf(stderr,"Environment varaible 'SD_SITE_PATH' not defined\nSiteCvwStart aborting\n");
+    fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined\nSiteCvwStart aborting\n");
     return -1;
   }
 
