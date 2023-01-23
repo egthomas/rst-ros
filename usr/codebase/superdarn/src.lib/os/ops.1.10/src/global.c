@@ -57,7 +57,7 @@ unsigned char command[128];
 int debug=0;
 
 int rnum=1;
-int cnum=1;
+int cnum=0;
 
 int tsgid=0;
 int stid=0;

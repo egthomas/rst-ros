@@ -117,7 +117,11 @@ int SiteCvwStart(char *host,char *ststr)
 
   if (ststr==NULL) ststr=dfststr;
 
-  sprintf(config_filepath,"%s/site.%s/%s.cfg",config_dir,ststr,ststr);
+  if (cnum == 0) {
+    sprintf(config_filepath,"%s/site.%s/%s.cfg",config_dir,ststr,ststr);
+  } else {
+    sprintf(config_filepath,"%s/site.%s/%s.%c.cfg",config_dir,ststr,ststr,cnum+96);
+  }
 
   config_init(&cfg);
   retval = config_read_file(&cfg,config_filepath);
