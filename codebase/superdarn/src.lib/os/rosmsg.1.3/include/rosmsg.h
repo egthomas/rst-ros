@@ -28,9 +28,12 @@ struct RXFESettings {
 };
 
 struct SiteSettings {
-     char name[80];
      uint32 num_radars;
      uint32 ifmode;
+     uint32 use_beam_table;
+     char name[80];
+     char beam_table_1[256];
+     char beam_table_2[256];
      struct RXFESettings rf_settings;  /* reciever front end settings for this site */
      struct RXFESettings if_settings;  /* reciever front end settings for this site */
 };
