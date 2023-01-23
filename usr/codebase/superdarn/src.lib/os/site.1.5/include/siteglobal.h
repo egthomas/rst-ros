@@ -23,6 +23,7 @@ extern struct TRTimes badtrdat;
 extern struct TXStatus txstatus;
 extern struct SiteLibrary sitelib;
 extern int cancel_count;
+extern int dmatch;
 
 extern struct TCPIPMsgHost ros;
 extern struct TCPIPMsgHost errlog;

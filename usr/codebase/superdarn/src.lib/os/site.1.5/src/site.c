@@ -42,6 +42,7 @@ struct TRTimes badtrdat;
 struct TXStatus txstatus;
 struct SiteLibrary sitelib;
 int cancel_count=0;
+int dmatch=0;
 
 struct TCPIPMsgHost ros={"127.0.0.1",45000,-1};
 struct TCPIPMsgHost errlog={"127.0.0.1",44100,-1};

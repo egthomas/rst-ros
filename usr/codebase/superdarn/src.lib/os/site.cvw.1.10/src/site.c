@@ -224,6 +224,14 @@ int SiteCvwStart(char *host,char *ststr)
     fprintf(stderr,"Site Cfg Warning:: 'invert' setting undefined in site cfg file, using: %d\n",invert);
   }
 
+  /* Get the match filter value */
+  if (config_lookup_int(&cfg, "match_filter", &ltemp)) {
+    dmatch = ltemp;
+  } else {
+    dmatch = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'match_filter' setting undefined in site cfg file, using: %d\n",dmatch);
+  }
+
   /* Get the number of rx channels (typically 1) */
   if (config_lookup_int(&cfg, "rxchn", &ltemp)) {
     rxchn = ltemp;
@@ -412,7 +420,7 @@ int SiteCvwStartIntt(int sec,int usec)
   rprm.trise = 5000;
   rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
   rprm.filter_bandwidth    = rprm.baseband_samplerate;
-  rprm.match_filter        = 1;
+  rprm.match_filter        = dmatch;
   rprm.number_of_samples   = total_samples + nbaud + 10;
   rprm.priority            = cnum;
   rprm.buffer_index        = 0;
@@ -453,7 +461,7 @@ int SiteCvwFCLR(int stfreq,int edfreq)
   rprm.trise = 5000;
   rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
   rprm.filter_bandwidth    = rprm.baseband_samplerate;
-  rprm.match_filter        = 1;
+  rprm.match_filter        = dmatch;
   rprm.number_of_samples   = total_samples + nbaud + 10;
   rprm.priority            = cnum;
   rprm.buffer_index        = 0;
@@ -672,7 +680,7 @@ int SiteCvwIntegrate(int (*lags)[2])
     rprm.trise = 5000;
     rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
     rprm.filter_bandwidth    = rprm.baseband_samplerate;
-    rprm.match_filter        = 1;
+    rprm.match_filter        = dmatch;
     rprm.number_of_samples   = total_samples + nbaud + 10;
     rprm.priority            = cnum;
     rprm.buffer_index        = 0;
