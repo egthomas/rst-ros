@@ -54,7 +54,7 @@ struct RosData {
 
 struct DataPRM {
   uint32 event_secs;
-  uint32 event_usecs; 
+  uint32 event_nsecs;
   int32 samples;
   int32 shm_memory;
   int32 status;
