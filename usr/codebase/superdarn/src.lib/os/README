@@ -1,0 +1,9 @@
+By default, all control programs use the generic "ros" site library
+which is compatible with any radar and reads from the site-specific
+configuration files (found along SD_SITE_PATH).
+
+Note the legacy "cve" and "cvw" site libraries are retained in this
+directory for reference purposes only. They can however still be used
+instead of the generic "ros" site library by modifying the 'libstr'
+value in the appropriate radar control program (either in the source
+code or as a command line argument).
