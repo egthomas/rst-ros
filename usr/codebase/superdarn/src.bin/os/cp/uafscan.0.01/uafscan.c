@@ -31,12 +31,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
-#include <argtable2.h>
 #include <zlib.h>
 #include <math.h>
 
 /* Includes provided by the RST */ 
 #include "rtypes.h"
+#include "option.h"
 #include "rtime.h"
 #include "dmap.h"
 #include "limit.h"
@@ -58,15 +58,25 @@
 #include "sync.h"
 #include "site.h"
 #include "sitebuild.h"
+#include "siteglobal.h"
 
 /* sorry, included for checking sanity checking pcode sequences with --test (JTK)*/
 #include "tsg.h" 
 #include "maketsg.h"
 
-/* Argtable define for argument error parsing */
-#define ARG_MAXERRORS 30
-
 #define MAX_INTEGRATIONS_PER_SCAN 100
+
+int arg=0;
+struct OptionData opt;
+
+void usage(void);
+
+int rst_opterr(char *txt) {
+  fprintf(stderr,"Option not recognized: %s\n",txt);
+  fprintf(stderr,"Please try: uafscan --help\n");
+  return(-1);
+}
+
 
 int main(int argc,char *argv[]) {
   char progid[80]={"uafscan"};
@@ -74,17 +84,26 @@ int main(int argc,char *argv[]) {
   char modestr[32];
 
   char *roshost=NULL;
-  char *droshost={"127.0.0.1"};
 
   char *ststr=NULL;
+  char *dfststr="tst";
 
-  char *libstr=NULL;
-  char *verstr=NULL;
-  char *beampattern=NULL;
+  char *libstr="ros";
+  char *beampattern="normal";
+
+  unsigned char help=0;
+  unsigned char option=0;
+  unsigned char test=0;
+
+  unsigned char fast=0;
+  unsigned char discretion=0;
 
   int status=0,n,i;
-  int nerrors=0;
   int exitpoll=0;
+  int nowait=0;
+  int onesec=0;
+  int clrscan=0;
+  int cpid=0;
 
   /* Variables need for interprocess communications */
   char logtxt[1024];
@@ -94,12 +113,6 @@ int main(int argc,char *argv[]) {
   struct TCPIPMsgHost shell={"127.0.0.1",44101,-1};
 */
   int tnum=4;      
-  struct TCPIPMsgHost task[4]={
-    {"127.0.0.1",1,-1}, /* iqwrite */
-    {"127.0.0.1",2,-1}, /* rawacfwrite */
-    {"127.0.0.1",3,-1}, /* fitacfwrite */
-    {"127.0.0.1",4,-1}  /* rtserver */
-  };
 
 /* Define the available barker codes for phasecoding*/
   int *bcode=NULL;
@@ -165,64 +178,18 @@ int main(int argc,char *argv[]) {
   /* Variables for controlling clear frequency search */
   struct timeval t0,t1;
   int elapsed_secs=0;
+  int clrskip=-1;
   int default_clrskip_secs=30;
   int startup=1;
+  int fixfrq=-1;
+
+  int camp=-1;
+  int meribm=10;    /* meridional beam */
+  int westbm=9;     /* west beam */
+  int eastbm=11;    /* east beam */
 
   /* XCF processing variables */
   int cnt=0;
-
-  /* create commandline argument structs */
-  /* First lets define a help argument */
-  struct arg_lit  *al_help       = arg_lit0(NULL, "help", "Prints help infomation and then exits");
-  /* Now lets define the keyword arguments */
-  struct arg_lit  *al_debug      = arg_lit0(NULL, "debug","Enable debugging messages");
-  struct arg_lit  *al_test       = arg_lit0(NULL, "test","Test-only, report parameter settings and exit without connecting to ros server");
-  struct arg_lit  *al_discretion = arg_lit0(NULL, "di","Flag this is discretionary time operation"); 
-  struct arg_lit  *al_fast       = arg_lit0(NULL, "fast","Flag this as fast 1-minute scan duration"); 
-  struct arg_lit  *al_nowait     = arg_lit0(NULL, "nowait","Do not wait for minute scan boundary"); 
-  struct arg_lit  *al_onesec     = arg_lit0(NULL, "onesec","Use one second integration times"); 
-  struct arg_lit  *al_clrscan    = arg_lit0(NULL, "clrscan","Force clear frequency search at start of scan"); 
-  /* Now lets define the integer valued arguments */
-  struct arg_int  *ai_baud       = arg_int0(NULL, "baud", NULL,"Baud to use for phasecoded sequences"); /*OptionAdd( &opt, "baud", 'i', &nbaud);*/
-  struct arg_int  *ai_tau        = arg_int0(NULL, "tau", NULL,"Lag spacing in usecs"); /*OptionAdd( &opt, "tau", 'i', &mpinc);*/
-  struct arg_int  *ai_nrang      = arg_int0(NULL, "nrang", NULL,"Number of range cells"); /*OptionAdd(&opt,"nrang",'i',&nrang);*/
-  struct arg_int  *ai_frang      = arg_int0(NULL, "frang", NULL,"Distance to first range cell in km"); /*OptionAdd(&opt,"frang",'i',&frang); */
-  struct arg_int  *ai_rsep       = arg_int0(NULL, "rsep", NULL,"Range cell extent in km"); /*OptionAdd(&opt,"rsep",'i',&rsep); */
-  struct arg_int  *ai_dt         = arg_int0(NULL, "dt", NULL,"UTC Hour indicating start of day time operation"); /*OptionAdd( &opt, "dt", 'i', &day); */
-  struct arg_int  *ai_nt         = arg_int0(NULL, "nt", NULL,"UTC Hour indicating start of night time operation"); /*OptionAdd( &opt, "nt", 'i', &night); */
-  struct arg_int  *ai_df         = arg_int0(NULL, "df", NULL,"Day time transmit frequency in kHz"); /*OptionAdd( &opt, "df", 'i', &dfrq); */
-  struct arg_int  *ai_nf         = arg_int0(NULL, "nf", NULL,"Night time transmit frequency in KHz"); /*OptionAdd( &opt, "nf", 'i', &nfrq); */
-  struct arg_int  *ai_fixfrq     = arg_int0(NULL, "fixfrq", NULL,"Fixes the transmit frequency of the radar to one frequency, in KHz"); /*OptionAdd( &opt, "fixfrq", 'i', &fixfrq); */
-  struct arg_int  *ai_xcf        = arg_int0(NULL, "xcf", NULL,"Enable xcf, --xcf 1: for all sequences --xcf 2: for every other sequence, etc..."); /*OptionAdd( &opt, "xcf", 'i', &xcnt); */
-  struct arg_int  *ai_ep         = arg_int0(NULL, "ep", NULL,"Local TCP port for errorlog process"); /*OptionAdd(&opt,"ep",'i',&errlog.port); */
-  struct arg_int  *ai_sp         = arg_int0(NULL, "sp", NULL,"Local TCP port for radarshall process"); /*OptionAdd(&opt,"sp",'i',&shell.port); */
-  struct arg_int  *ai_bp         = arg_int0(NULL, "bp", NULL,"Local TCP port for start of support task proccesses"); /*OptionAdd(&opt,"bp",'i',&baseport); */
-  struct arg_int  *ai_sb         = arg_int0(NULL, "sb", NULL,"Limits the minimum beam to the given value."); /*OptionAdd(&opt,"sb",'i',&sbm); */
-  struct arg_int  *ai_eb         = arg_int0(NULL, "eb", NULL,"Limits the maximum beam number to the given value."); /*OptionAdd(&opt,"eb",'i',&ebm); */
-  struct arg_int  *ai_camp       = arg_int0(NULL, "camp",NULL,"Camping on one beam (camp overwrites sb and eb), or camping beam for themisscan beam pattern."); 
-  struct arg_int  *ai_cnum       = arg_int0("c",  "cnum", NULL,"Radar Channel number, minimum value 1"); /*OptionAdd(&opt,"c",'i',&cnum); */
-  struct arg_int  *ai_clrskip    = arg_int0(NULL, "clrskip",NULL,"Minimum number of seconds to skip between clear frequency search"); /*OptionAdd(&opt, "clrskip", 'i', &clrskip_secs); */
-  struct arg_int  *ai_cpid       = arg_int0(NULL, "cpid",NULL,"Select control program ID number"); /*OptionAdd(&opt, "cpid", 'i', &cpid); */
-  struct arg_int  *ai_meribm     = arg_int0(NULL, "meribm", NULL, "Only used for RBSP scan: meridional beam");
-  struct arg_int  *ai_westbm     = arg_int0(NULL, "westbm", NULL, "Only used for RBSP scan: west beam");
-  struct arg_int  *ai_eastbm     = arg_int0(NULL, "eastbm", NULL, "Only used for RBSP scan: east beam");
-
-  /* Now lets define the string valued arguments */
-  struct arg_str  *as_ros        = arg_str0(NULL, "ros", NULL,        "IP address of ROS server process"); /* OptionAdd(&opt,"ros",'t',&roshost); */
-  struct arg_str  *as_ststr      = arg_str0(NULL, "stid", NULL,       "The station ID string. For example, use aze for azores east."); /* OptionAdd(&opt,"stid",'t',&ststr); */
-  struct arg_str  *as_libstr     = arg_str0(NULL, "lib", NULL,        "The site library string. For example, use ros for for common libsite.ros"); 
-  struct arg_str  *as_verstr     = arg_str0(NULL, "version", NULL,    "The site library version string. Defaults to: \"1\" "); 
-  struct arg_str  *as_beampattern= arg_str0(NULL, "beampattern", NULL,"The beam pattern to use. (normal, themis, interleave, rbsp)"); 
-
-  /* required end argument */
-  struct arg_end  *ae_argend     = arg_end(ARG_MAXERRORS);
-
-  /* create list of all arguement structs */
-  void* argtable[] = {al_help,al_debug,al_test,al_discretion, al_fast, al_nowait, al_onesec, \
-                      ai_baud, ai_tau, ai_nrang, ai_frang, ai_rsep, ai_dt, ai_nt, ai_df, ai_nf, ai_fixfrq, ai_xcf, ai_ep, ai_sp, ai_bp, ai_sb, ai_eb, ai_camp, ai_cnum, \
-                      as_ros, as_ststr, as_libstr,as_verstr,as_beampattern, ai_clrskip,al_clrscan,ai_cpid, ai_meribm, ai_eastbm, ai_westbm, ae_argend};
-
-/* END of variable defines */
 
 /* Set default values of globally defined variables here*/
   cp     = 9000;    /*unused Alaska cpid, will be reset below  */
@@ -237,114 +204,82 @@ int main(int argc,char *argv[]) {
   txpl   = 300;
   nbaud  = 1;
 
-/* Set default values for all the cmdline options */
-  al_discretion->count = 0;
-  al_fast->count = 0;
-  al_nowait->count = 0;
-  al_onesec->count = 0;
-  al_clrscan->count = 0;
-  al_debug->count = 0;
-  ai_bp->ival[0] = 44100;
-  ai_fixfrq->ival[0] = -1;
-  ai_baud->ival[0] = nbaud;
-  ai_tau->ival[0] = mpinc;
-  ai_nrang->ival[0] = nrang;
-  ai_frang->ival[0] = frang;
-  ai_rsep->ival[0] = rsep;
-  ai_dt->ival[0] = day;
-  ai_nt->ival[0] = night;
-  ai_df->ival[0] = dfrq;
-  ai_nf->ival[0] = nfrq;
-  ai_xcf->ival[0] = xcnt;
-  ai_ep->ival[0] = errlog.port;
-  ai_sp->ival[0] = shell.port;
-  ai_sb->ival[0] = sbm;
-  ai_eb->ival[0] = ebm;
-  ai_cnum->ival[0] = cnum;
-  ai_clrskip->ival[0] = -1;
-  ai_cpid->ival[0] = 0;
+  /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 
- /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
-  nerrors = arg_parse(argc,argv,argtable);
+  OptionAdd(&opt, "-help", 'x', &help);
+  OptionAdd(&opt, "-option", 'x', &option);
 
-  if (nerrors > 0) {
-    arg_print_errors(stdout,ae_argend,"uafscan");
-    return -1;
+  OptionAdd(&opt, "debug", 'x', &debug);
+  OptionAdd(&opt, "test", 'x', &test);
+  OptionAdd(&opt, "di", 'x', &discretion);
+  OptionAdd(&opt, "fast", 'x', &fast);
+  OptionAdd(&opt, "nowait", 'x', &nowait);
+  OptionAdd(&opt, "onesec", 'x', &onesec);
+  OptionAdd(&opt, "clrscan", 'x', &clrscan);
+
+  OptionAdd(&opt, "baud", 'i', &nbaud);
+  OptionAdd(&opt, "tau", 'i',  &mpinc);
+  OptionAdd(&opt, "nrang", 'i', &nrang);
+  OptionAdd(&opt, "frang", 'i', &frang);
+  OptionAdd(&opt, "rsep", 'i', &rsep);
+  OptionAdd(&opt, "dt", 'i', &day);
+  OptionAdd(&opt, "nt", 'i', &night);
+  OptionAdd(&opt, "df", 'i', &dfrq);
+  OptionAdd(&opt, "nf", 'i', &nfrq);
+  OptionAdd(&opt, "fixfrq", 'i', &fixfrq);
+  OptionAdd(&opt, "xcf", 'i', &xcnt);
+  OptionAdd(&opt, "ep", 'i', &errlog.port);
+  OptionAdd(&opt, "sp", 'i', &shell.port);
+  OptionAdd(&opt, "bp", 'i', &baseport);
+  OptionAdd(&opt, "sb", 'i', &sbm);
+  OptionAdd(&opt, "eb", 'i', &ebm);
+  OptionAdd(&opt, "camp", 'i', &camp);
+  OptionAdd(&opt, "c",'i',&cnum);
+  OptionAdd(&opt, "clrskip", 'i', &clrskip);
+  OptionAdd(&opt, "cpid", 'i', &cpid);
+  OptionAdd(&opt, "meribm", 'i', &meribm);
+  OptionAdd(&opt, "westbm", 'i', &westbm);
+  OptionAdd(&opt, "eastbm", 'i', &eastbm);
+
+  OptionAdd(&opt, "ros", 't', &roshost);
+  OptionAdd(&opt, "stid", 't', &ststr);
+  OptionAdd(&opt, "lib", 't', &libstr);
+  OptionAdd(&opt, "beampattern", 't', &beampattern);
+
+  /* process the commandline; need this for setting errlog port */
+  arg = OptionProcess(1,argc,argv,&opt,rst_opterr);
+
+  if (arg==-1) {
+    exit(-1);
   }
-  
-  if (argc == 1) {
-    printf("No arguements found, try running %s with --help for more information.\n", progid);
-    return -1;
+
+  if (option==1) {
+    OptionDump(stdout,&opt);
+    exit(0);
   }
 
   /* print help */
-  if(al_help->count > 0) {
+  if(help) {
     printf("UAFSCAN: One control program to emulate the behaviour of all control programs.\n Supported modes: ... \n\n");
     printf(" Usage: %s", progid);
-    arg_print_syntax(stdout,argtable,"\n");
-    arg_print_glossary(stdout,argtable,"  %-25s %s\n");
-    arg_freetable(argtable, sizeof(argtable)/sizeof(argtable[0]));
+    usage();
     return 0;
   }
 
-  /* Set debug flag from command line arguement */
-  if (al_debug->count) {
-    debug = al_debug->count;
-  }
-
-  /* Load roshost argument here */
-  if(strlen(as_ros->sval[0])) {
-    roshost = malloc((strlen(as_ros->sval[0]) + 1) * sizeof(char));
-    strcpy(roshost, as_ros->sval[0]);
-  } else {
-    roshost = getenv("ROSHOST");
-    if (roshost == NULL) roshost = droshost;
-  }
-
-  /* Load station string argument here */
-  if(strlen(as_ststr->sval[0])) {
-    ststr = malloc((strlen(as_ststr->sval[0]) + 1) * sizeof(char));
-    strcpy(ststr, as_ststr->sval[0]);
-  } else {
-    ststr = getenv("STSTR");
-  }
-
   /* Load site library argument here */
-  if(strlen(as_libstr->sval[0])) {
-    libstr = malloc((strlen(as_libstr->sval[0]) + 1) * sizeof(char));
-    strcpy(libstr, as_libstr->sval[0]);
-  } else {
-    libstr = getenv("LIBSTR");
-    if (libstr == NULL) libstr=ststr;
-  }
-  if(strlen(as_verstr->sval[0])) {
-    verstr = malloc((strlen(as_verstr->sval[0]) + 1) * sizeof(char));
-    strcpy(verstr, as_verstr->sval[0]);
-  } else {
-    verstr = NULL;
-  }
-  if(strlen(as_beampattern->sval[0])) {
-    beampattern = malloc((strlen(as_beampattern->sval[0]) + 1) * sizeof(char));
-    strcpy(beampattern, as_beampattern->sval[0]);
-  } else {
-    beampattern = malloc(7 * sizeof(char));
-    strcpy(beampattern, "normal");
-  }
+  if (ststr==NULL) ststr=dfststr;
 
 
-  printf("Requested :: ststr: %s libstr: %s verstr: %s\n",ststr,libstr,verstr);
+  printf("Requested :: ststr: %s libstr: %s\n",ststr,libstr);
 /* This loads Radar Site information from hdw.dat files */
   OpsStart(ststr);
 
 /* This loads Site library via dlopen and maps: site library specific functions into Site name space */
-  status=SiteBuild(libstr,verstr); /* second argument is version string */
+  status=SiteBuild(libstr);
   if (status==-1) {
     fprintf(stderr,"Could not load requested site library\n");
     exit(1);
   }
-
-  /* cnum is needed to know the config file name */
-  if (ai_cnum->count) cnum = ai_cnum->ival[0];
 
 
 /* Run SiteStart library function to load Site specific default values for global variables
@@ -359,21 +294,7 @@ int main(int argc,char *argv[]) {
   }
 
 /* load any provided argument values overriding default values provided by SiteStart */ 
-  if (ai_xcf->count)  xcnt = ai_xcf->ival[0];
-  if (ai_baud->count) nbaud = ai_baud->ival[0];
-  if (ai_tau->count) mpinc = ai_tau->ival[0];
-  if (ai_nrang->count) nrang = ai_nrang->ival[0];
-  if (ai_frang->count) frang = ai_frang->ival[0];
-  if (ai_rsep->count) rsep = ai_rsep->ival[0];
-  if (ai_dt->count) day = ai_dt->ival[0];
-  if (ai_nt->count) night = ai_nt->ival[0];
-  if (ai_df->count) dfrq = ai_df->ival[0];
-  if (ai_nf->count) nfrq = ai_nf->ival[0];
-  if (ai_ep->count) errlog.port = ai_ep->ival[0];
-  if (ai_sp->count) shell.port = ai_sp->ival[0];
-  if (ai_sb->count) sbm = ai_sb->ival[0];
-  if (ai_eb->count) ebm = ai_eb->ival[0];
-  if (ai_bp->count) baseport=ai_bp->ival[0];
+  arg = OptionProcess(1,argc,argv,&opt,NULL);
 
  /* ========= SET PARAMETER TO EMULATE OTHER CONTROL PROGRAMS ============= */
 
@@ -396,7 +317,7 @@ int main(int argc,char *argv[]) {
       sync_scan = 0; 
  
       /* FAST option */  
-      if (al_fast->count) {     /* If fast option selected use 1 minute scan boundaries */
+      if (fast) {     /* If fast option selected use 1 minute scan boundaries */
         cp    = 151;
         intsc = 3;
         intus = 500000; 
@@ -406,7 +327,7 @@ int main(int argc,char *argv[]) {
         strncat(progname,modestr,strlen(modestr)+1);
       } 
 
-      if (al_onesec->count) {    /* If onesec option selected , no longer wait for scan boundaries, activate clear frequency skip option*/
+      if (onesec) {    /* If onesec option selected , no longer wait for scan boundaries, activate clear frequency skip option*/
         cp    = 152;
         intsc = 1;
         intus = 0;
@@ -414,29 +335,29 @@ int main(int argc,char *argv[]) {
         scnus = 0;
         sprintf(modestr," (onesec)");
         strncat(progname,modestr,strlen(modestr)+1);
-        al_nowait->count = 1;
-        if(ai_clrskip->ival[0] < 0)
-            ai_clrskip->ival[0] = default_clrskip_secs;
+        nowait = 1;
+        if(clrskip < 0)
+            clrskip = default_clrskip_secs;
       }
       
 
-      if (ai_camp->count || nBeams_per_scan == 1) {   /* Camping Beam, no longer wait for scan boundaries, activate clear frequency skip option */ 
+      if (camp >= 0 || nBeams_per_scan == 1) {   /* Camping Beam, no longer wait for scan boundaries, activate clear frequency skip option */
          fprintf(stderr, "Initializing one camping beam...\n");
          sprintf(modestr," (camp)");
          strncat(progname,modestr,strlen(modestr)+1);
 
          cp = 153;
-         al_nowait->count = 1;
-         if(ai_clrskip->ival[0] < 0)
-             ai_clrskip->ival[0] = default_clrskip_secs;
-         if (ai_camp->count){
-             current_beam = ai_camp->ival[0];
+         nowait = 1;
+         if(clrskip < 0)
+             clrskip = default_clrskip_secs;
+         if (camp){
+             current_beam = camp;
              nBeams_per_scan = 1; 
          } 
 
          sprintf(logtxt,"uafscan configured for camping beam");
          ErrLog(errlog.sock,progname,logtxt);
-         sprintf(logtxt," fast: %d onesec: %d cp: %d clrskip_secs: %d intsc: %d",al_fast->count,al_onesec->count,cp,ai_clrskip->ival[0],intsc);
+         sprintf(logtxt," fast: %d onesec: %d cp: %d clrskip_secs: %d intsc: %d",fast,onesec,cp,clrskip,intsc);
          ErrLog(errlog.sock,progname,logtxt);
 
       }
@@ -492,8 +413,8 @@ int main(int argc,char *argv[]) {
      nBeams_per_scan = 38;
      int camping_beam= 7; /* Default Camping Beam */
 
-     if (ai_camp->count) 
-        camping_beam = ai_camp->ival[0];
+     if (camp >= 0)
+        camping_beam = camp;
      
 
      /* Second within the 2min interval at which this beam is supposed to start */
@@ -561,13 +482,6 @@ int main(int argc,char *argv[]) {
      int isecond, ithird, tempF, tempB;                     /* used in beam progression */
      int *fbms;                                              /* forward  scanning beams */
      int *bbms;                                              /* backward scanning beams */
-     int meribm=10;                                          /* meridional beam */
-     int westbm=9;                                           /* west beam */
-     int eastbm=11;                                          /* east beam */
-
-     if (ai_meribm->count) meribm = ai_meribm->ival[0];
-     if (ai_westbm->count) westbm = ai_westbm->ival[0];
-     if (ai_eastbm->count) eastbm = ai_eastbm->ival[0];
 
      /* number of integration periods possible in scan time. basing this off of intsc and intus to reflect the integration
         used by the radar -KTS 25Sept2012 */
@@ -700,7 +614,7 @@ int main(int argc,char *argv[]) {
   
 
   if(nBeams_per_scan > 16) {  /* if number of beams in scan greater than legacy 16, recalculate beam dwell time to avoid over running scan boundary if scan boundary wait is active. */ 
-      if (al_nowait->count==0 && al_onesec->count==0) {
+      if (nowait==0 && onesec==0) {
         total_scan_usecs = (scnsc-3)*1E6+scnus;
         total_integration_usecs = total_scan_usecs/nBeams_per_scan;
         intsc = total_integration_usecs/1E6;
@@ -745,11 +659,11 @@ int main(int argc,char *argv[]) {
   }
 
   /* Set special cpid if provided on commandline */
-  if(ai_cpid->count > 0) 
-     cp=ai_cpid->ival[0];
+  if(cpid > 0)
+     cp=cpid;
 
   /* Set cp to negative value indication discretionary period */
-  if (al_discretion->count) 
+  if (discretion)
      cp= -cp;
 
 
@@ -783,16 +697,16 @@ int main(int argc,char *argv[]) {
      SiteExit(0);
   }
 
-  if(al_test->count > 0) {
+  if(test) {
         
     fprintf(stdout,"Control Program Argument Parameters::\n");
-    fprintf(stdout,"  xcf arg:: count: %d value: %d xcnt: %d\n",ai_xcf->count,ai_xcf->ival[0],xcnt);
-    fprintf(stdout,"  baud arg:: count: %d value: %d nbaud: %d\n",ai_baud->count,ai_baud->ival[0],nbaud);
-    fprintf(stdout,"  clrskip arg:: count: %d value: %d\n",ai_clrskip->count,ai_clrskip->ival[0]);
+    fprintf(stdout,"  xcf arg:: xcnt: %d\n",xcnt);
+    fprintf(stdout,"  baud arg:: nbaud: %d\n",nbaud);
+    fprintf(stdout,"  clrskip arg:: value: %d\n",clrskip);
     fprintf(stdout,"  cpid: %d progname: \'%s\'\n",cp,progname);
     fprintf(stdout,"Scan Sequence Parameters::\n");
     fprintf(stdout,"  txpl: %d mpinc: %d nbaud: %d rsep: %d\n",txpl,mpinc,nbaud,rsep);
-    fprintf(stdout,"  intsc: %d intus: %d scnsc: %d scnus: %d nowait: %d\n",intsc,intus,scnsc,scnus,al_nowait->count);
+    fprintf(stdout,"  intsc: %d intus: %d scnsc: %d scnus: %d nowait: %d\n",intsc,intus,scnsc,scnus,nowait);
     fprintf(stdout,"  sbm: %d ebm: %d  nBeams_per_scan: %d\n",sbm,ebm,nBeams_per_scan);
     
     /* TODO: ADD PARAMETER CHECKING, SEE IF PCODE IS SANE AND WHATNOT */
@@ -842,10 +756,6 @@ int main(int argc,char *argv[]) {
         fprintf(stdout,"WARNING: nbaud needs to be  > 0\n");
     }
 
-    if (nerrors > 0) {
-        fprintf(stdout,"Errors found in commandline arguements: \n");
-        arg_print_errors(stdout,ae_argend,"uafscan");
-    }
     OpsFitACFStart();
  
     fprintf(stdout,"Test option enabled, exiting\n");
@@ -876,13 +786,14 @@ int main(int argc,char *argv[]) {
     }
 
     /* Set iBeam for scan loop  */ 
-    if(al_nowait->count==0) 
-       iBeam = OpsFindSkip(scnsc,scnus);
+    if(nowait==0)
+       iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,0);
     else 
        iBeam = 0;
 
     /* send stan data to usrp_sever */
-    if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list, scan_clrfreq_bandwidth_list, ai_fixfrq->ival[0], sync_scan, scan_times, scnsc, scnus, intsc, intus, iBeam) !=0){
+    //if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list, scan_clrfreq_bandwidth_list, ai_fixfrq->ival[0], sync_scan, scan_times, scnsc, scnus, intsc, intus, iBeam) !=0){
+    if (SiteStartScan() !=0){
          ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");  
          sleep(1);
          continue;
@@ -901,7 +812,7 @@ int main(int argc,char *argv[]) {
 
     scan=1;
     ErrLog(errlog.sock,progname,"Starting scan.");
-    if(al_clrscan->count) startup=1;
+    if(clrscan) startup=1;
     if (xcnt>0) {
       cnt++;
       if (cnt==xcnt) {
@@ -936,15 +847,15 @@ int main(int argc,char *argv[]) {
 
       /* TODO: JDS: You can not make any day night changes that impact TR gate timing at dual site locations. Care must be taken with day night operation*/ 
       stfrq = scan_clrfreq_fstart_list[iBeam];
-      if(ai_fixfrq->ival[0]>0) {
-        stfrq=ai_fixfrq->ival[0];
-        tfreq=ai_fixfrq->ival[0];
+      if(fixfrq>0) {
+        stfrq=fixfrq;
+        tfreq=fixfrq;
         noise=0; 
       }
 
       ErrLog(errlog.sock,progname,"Starting Integration.");
       sprintf(logtxt," Int parameters:: rsep: %d mpinc: %d sbm: %d ebm: %d nrang: %d nbaud: %d scannowait: %d clrskip_secs: %d clrscan: %d cpid: %d",
-              rsep,mpinc,sbm,ebm,nrang,nbaud,al_nowait->count,ai_clrskip->ival[0],al_clrscan->count,cp);
+              rsep,mpinc,sbm,ebm,nrang,nbaud,nowait,clrskip,clrscan,cp);
       ErrLog(errlog.sock,progname,logtxt);
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum, intsc,intus,hr,mt,sc,us);
@@ -955,13 +866,13 @@ int main(int argc,char *argv[]) {
       gettimeofday(&t1,NULL);
       elapsed_secs=t1.tv_sec-t0.tv_sec;
       if (elapsed_secs<0) elapsed_secs=0;
-      if ((elapsed_secs >= ai_clrskip->ival[0]) || (startup==1)) {
+      if ((elapsed_secs >= clrskip) || (startup==1)) {
           startup = 0;
           ErrLog(errlog.sock,progname,"Doing clear frequency search.");  
           sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
           ErrLog(errlog.sock,progname, logtxt);
   
-          if (ai_fixfrq->ival[0]<=0) {
+          if (fixfrq<=0) {
               tfreq=SiteFCLR(stfrq,stfrq+frqrng);
           }
           t0.tv_sec  = t1.tv_sec;
@@ -983,7 +894,8 @@ int main(int argc,char *argv[]) {
       OpsBuildPrm(prm,ptab,lags);    
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
-      FitACF(prm,raw,fblk,fit);
+      FitACF(prm,raw,fblk,fit,site,tdiff,-999);
+      FitSetAlgorithm(fit,"fitacf2");
       
       msg.num   = 0;
       msg.tsize = 0;
@@ -1023,15 +935,14 @@ int main(int argc,char *argv[]) {
 
     } while (1);
 
-    if ((exitpoll==0) && (al_nowait->count==0)) {
+    if ((exitpoll==0) && (nowait==0)) {
       ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-      SiteEndScan(scnsc,scnus);
+      SiteEndScan(scnsc,scnus,5000);
     }
   } while (exitpoll==0);
   for (n=0;n<tnum;n++) RMsgSndClose(task[n].sock);
   
-  /* free argtable and space allocated for arguements */
-  arg_freetable(argtable, sizeof(argtable)/sizeof(argtable[0]));
+  /* free space allocated for arguements */
   free(ststr);
   free(roshost);
   
@@ -1041,4 +952,46 @@ int main(int argc,char *argv[]) {
   SiteExit(0);
 
   return 0;   
-} 
+}
+
+
+void usage(void)
+{
+  printf(" --help     : Prints help information and then exits\n");
+  printf(" -debug     : Enable debugging messages\n");
+  printf("  -test     : Test-only, report parameter settings and exit without connecting to ros server\n");
+  printf("    -di     : Flag this is discretionary time operation\n");
+  printf("  -fast     : Flag this as fast 1-minute scan duration\n");
+  printf("-nowait     : Do not wait for minute scan boundary\n");
+  printf("-onesec     : Use one second integration times\n");
+  printf("-clrscan    : Force clear frequency search at start of scan\n");
+  printf("  -baud int : Baud to use for phasecoded sequences\n");
+  printf("   -tau int : Lag spacing in usecs\n");
+  printf(" -nrang int : Number of range cells\n");
+  printf(" -frang int : Distance to first range cell in km\n");
+  printf("  -rsep int : Range cell extent in km\n");
+  printf("    -dt int : UTC Hour indicating start of day time operation\n");
+  printf("    -nt int : UTC Hour indicating start of night time operation\n");
+  printf("    -df int : Day time transmit frequency in kHz\n");
+  printf("    -nf int : Night time transmit frequency in kHz\n");
+  printf("-fixfrq int : Fixes the transmit frequency of the radar to one frequency, in kHz\n");
+  printf("   -xcf int : Enable xcf, -xcf 1: for all sequences -xcf 2: for every other sequence, etc...\n");
+  printf("    -ep int : Local TCP port for errlog process\n");
+  printf("    -sp int : Local TCP port for radarshell process\n");
+  printf("    -bp int : Local TCP port for start of support task processes\n");
+  printf("    -sb int : Limits the minimum beam to the given value\n");
+  printf("    -eb int : Limits the maximum beam number to the given value\n");
+  printf("  -camp int : Camping on one beam (camp overwrites sb and eb), or camping beam for themisscan beam pattern\n");
+  printf("  -cnum int : Radar Channel number, minimum value 1\n");
+  printf("-clrskip int : Minimum number of seconds to skip between clear frequency search\n");
+  printf("  -cpid int : Select control program ID number\n");
+  printf("-meribm int : Only used for RBSP scan: meridional beam\n");
+  printf("-westbm int : Only used for RBSP scan: west beam\n");
+  printf("-eastbm int : Only used for RBSP scan: east beam\n");
+  printf("  -ros char : IP address of ROS server process\n");
+  printf(" -stid char : The station ID string. For example, use aze for azores east.\n");
+  printf("-libstr char : The site library string. For example, use ros for common libsite.ros\n");
+  printf("-beampattern char : The beam pattern to use. (normal, themis, interleave, rbsp)\n");
+  printf("\n");
+}
+
