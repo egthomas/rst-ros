@@ -186,6 +186,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "bp",  'i', &baseport);
   OptionAdd(&opt, "stid",'t', &ststr);
   OptionAdd(&opt, "fast",'x', &fast);
+  OptionAdd(&opt, "c"  , 'i', &cnum);
   OptionAdd(&opt, "ros", 't', &roshost);  /* Set the roshost IP address */
   OptionAdd(&opt, "debug",'x', &debug);
   OptionAdd(&opt, "-option",'x', &option);

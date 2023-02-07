@@ -186,6 +186,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"stid",  't',&ststr);
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);   /* fix the transmit frequency */
   OptionAdd(&opt,"ros",   't',&roshost);  /* Set the roshost IP address */
+  OptionAdd(&opt,"c"  ,   'i',&cnum);
   OptionAdd(&opt,"debug", 'x',&debug);
   OptionAdd(&opt,"-help", 'x',&hlp);      /* just dump some parameters */
   OptionAdd(&opt,"-option",'x',&option);
@@ -495,7 +496,8 @@ void usage(void)
     printf("    -bp int : base port (must be set here for dual radars)\n");
     printf("  -stid char: radar string (must be set here for dual radars)\n");
     printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
-    printf("  -ros char : change the roshost IP address\n");
+    printf("     -c int : channel number for multi-channel radars.\n");
+    printf("   -ros char: change the roshost IP address\n");
     printf(" --help     : print this message and quit.\n");
     printf("\n");
 }

@@ -215,6 +215,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "frqrng", 'i', &frqrng);     /* fix the FCLR window [kHz] */
   OptionAdd(&opt, "sfrqrng",'i', &snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt, "sndsc",  'i', &snd_sc);     /* sounding duration per scan [sec] */
+  OptionAdd(&opt, "c"  ,    'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);    /* Set the roshost IP address */
   OptionAdd(&opt, "debug",  'x', &debug);
   OptionAdd(&opt, "-help",  'x', &hlp);        /* just dump some parameters */
@@ -667,7 +668,8 @@ void usage(void)
     printf("-frqrng int : set the clear frequency search window (kHz)\n");
     printf("-sfrqrng int: set the sounding FCLR search window (kHz)\n");
     printf(" -sndsc int : set the sounding duration per scan (sec)\n");
-    printf("  -ros char : change the roshost IP address\n");
+    printf("     -c int : channel number for multi-channel radars.\n");
+    printf("   -ros char: change the roshost IP address\n");
     printf(" --help     : print this message and quit.\n");
     printf("\n");
 }

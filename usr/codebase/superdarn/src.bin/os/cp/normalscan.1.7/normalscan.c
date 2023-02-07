@@ -223,6 +223,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "scnsc",  'i', &scnsc);     /* set the scan time */
   OptionAdd(&opt, "scnus",  'i', &scnus);
 
+  OptionAdd(&opt, "c"  ,    'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address  */
   OptionAdd(&opt, "debug",  'x', &debug);
 
@@ -546,12 +547,13 @@ void usage(void)
   printf("-nowait     : do not wait at end of scan boundary.\n");
   printf("-rxonly     : bistatic RX only mode.\n");
   printf("-bm_sync    : set to enable beam syncing.\n");
-  printf("-bmsc   int : beam syncing interval seconds.\n");
-  printf("-bmus   int : beam syncing interval microseconds.\n");
+  printf("  -bmsc int : beam syncing interval seconds.\n");
+  printf("  -bmus int : beam syncing interval microseconds.\n");
   printf("-setintt    : set to enable integration period override.\n");
-  printf("-intsc  int : integration period seconds.\n");
-  printf("-intus  int : integration period microseconds.\n");
-  printf("  -ros char : change the roshost IP address\n");
+  printf(" -intsc int : integration period seconds.\n");
+  printf(" -intus int : integration period microseconds.\n");
+  printf("     -c int : channel number for multi-channel radars.\n");
+  printf("   -ros char: change the roshost IP address\n");
   printf(" --help     : print this message and quit.\n");
   printf("\n");
 }

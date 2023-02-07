@@ -982,7 +982,7 @@ void usage(void)
   printf("    -sb int : Limits the minimum beam to the given value\n");
   printf("    -eb int : Limits the maximum beam number to the given value\n");
   printf("  -camp int : Camping on one beam (camp overwrites sb and eb), or camping beam for themisscan beam pattern\n");
-  printf("  -cnum int : Radar Channel number, minimum value 1\n");
+  printf("     -c int : Radar Channel number, minimum value 1\n");
   printf("-clrskip int : Minimum number of seconds to skip between clear frequency search\n");
   printf("  -cpid int : Select control program ID number\n");
   printf("-meribm int : Only used for RBSP scan: meridional beam\n");
