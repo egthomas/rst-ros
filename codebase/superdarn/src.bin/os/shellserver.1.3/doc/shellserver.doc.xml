@@ -23,4 +23,11 @@
 </option>
 <synopsis><p>A data relay task between the control program and interactive radarshell.</p></synopsis>
 
+<description><p>A data relay task between the control program and interactive radarshell.</p></description>
+
+<example>
+<command>shellserver -sh RadarShellA -cp 44001 -sp 45001 -ep 44000 &amp</command>
+<description>Start the <code>shellserver</code> task listening for the control program on the local port number <code>44001</code>, radarshell clients on the local port number <code>45001</code>, and the error logger on the local port number <code>44000</code>. Assign the string "<code>RadarShellA</code>" to the shell memory name.</description>
+</example>
+
 </binary>

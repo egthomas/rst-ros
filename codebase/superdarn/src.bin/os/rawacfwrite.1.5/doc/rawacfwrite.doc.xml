@@ -23,4 +23,12 @@
 </option>
 <synopsis><p>Stores raw ACF data in <code>rawacf</code> files.</p></synopsis>
 
+<description><p>Stores raw ACF data in <code>rawacf</code> files, opening a new file every 2 hours.</p>
+</description>
+
+<example>
+<command>rawacfwrite -lp 44102 -ep 44000 &amp</command>
+<description>Connect to the raw ACF data stream from the active control program at the local port number <code>44102</code> and write the data to a new <code>rawacf</code> file every 2 hours. Error messages are sent to the error logger on port number <code>44000</code>.</description>
+</example>
+
 </binary>

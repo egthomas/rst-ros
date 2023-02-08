@@ -15,7 +15,7 @@
 </option>
 <option><on>-h</on><od>reload the schedule once an hour.</od>
 </option>
-<option><on>-t</on><od>reload the schedule once every 10 minutes.</od>
+<option><on>-t</on><od>reload the schedule once every 10 minutes (default).</od>
 </option>
 <option><on>-m</on><od>reload the schedule once a minute.</od>
 </option>
@@ -24,5 +24,17 @@
 <option><on><ar>schedule</ar></on><od>read the schedule from the file <ar>schedule</ar>.</od>
 </option>
 <synopsis><p>Schedules the running of control programs.</p></synopsis>
+
+<description><p>The scheduler uses a script called a schedule file that specifies what time and date a program is due to start and what command line to use to execute the program. Periodically the scheduler reloads and re-processes the schedule file. This allows any alterations or additions to the schedule to be correctly identified and acted upon.</p>
+
+<p>The scheduler will record all of its actions in a special log file stored in the directory defined by the SD_SCDLOG_PATH environment variable. Each day a new log file is created with the filename <code><em>yyyymmdd</em>.scdlog</code> where <em>yyyymmdd</em> is the date.</p>
+
+<p>If the "<code>-name</code>" option is specified, the log file is created with the filename <code><em>yyyymmdd</em>.<em>rad</em>.scdlog</code>, where <em>rad</em> is the three-letter station ID code provided by the user (or any other string).</p>
+</description>
+
+<example>
+<command>schedule -name cve /data/ros/scd/cve.scd &amp</command>
+<description>Load the schedule file located at <code>/data/ros/scd/cve.scd</code> and add the string "<code>cve</code>" to the filename of the daily log files.</description>
+</example>
 
 </binary>

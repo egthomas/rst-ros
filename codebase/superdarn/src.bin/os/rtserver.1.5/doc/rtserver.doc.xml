@@ -23,4 +23,12 @@
 </option>
 <synopsis><p>A data relay task for distributing fitted data over the internet.</p></synopsis>
 
+<description><p>A data relay task for distributing fitted data over the internets.</p>
+</description>
+
+<example>
+<command>rtserver -rp 44104 -ep 44000 -tp 1024 &amp</command>
+<description>Connect to the fitted data stream from the active control program at the local port number <code>44104</code> and serve the data for clients on the local port number <code>1024</code>. Error messages are sent to the error logger on port number <code>44000</code>.</description>
+</example>
+
 </binary>

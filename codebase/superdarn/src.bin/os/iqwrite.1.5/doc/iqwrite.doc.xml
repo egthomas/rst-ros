@@ -23,4 +23,12 @@
 </option>
 <synopsis><p>Stores raw I&Q sample data in <code>iqdat</code> files.</p></synopsis>
 
+<description><p>Stores raw I&Q sample data in <code>iqdat</code> files, opening a new file every 2 hours.</p>
+</description>
+
+<example>
+<command>iqwrite -lp 44101 -ep 44000 &amp</command>
+<description>Connect to the raw I&Q sample data stream from the active control program at the local port number <code>44101</code> and write the data to a new <code>iqdat</code> file every 2 hours. Error messages are sent to the error logger on port number <code>44000</code>.</description>
+</example>
+
 </binary>

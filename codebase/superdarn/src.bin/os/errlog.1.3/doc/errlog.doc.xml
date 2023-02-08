@@ -19,9 +19,9 @@
 
 <description><p>Reports and logs errors sent from the other radar tasks. The log records the date and time at which the message was sent, the process ID of the task reporting the error, the task name, and a text string that describes the error.</p>
 
-<p>Errors are printed to the console on which the <code>errlog</code> task runs and also recorded in a file stored in the directory defined by the <code>SD_ERRLOG_PATH</code> environment variable. Each day a new log file is created with the filename <code>errlog.<em>yyyymmdd</em></code>, where <em>yyyymmdd</em> is the date.</p>
+<p>Errors are printed to the console on which the <code>errlog</code> task runs and also recorded in a file stored in the directory defined by the <code>SD_ERRLOG_PATH</code> environment variable. Each day a new log file is created with the filename <code><em>yyyymmdd</em>.errlog</code>, where <em>yyyymmdd</em> is the date.</p>
 
-<p>If the "<code>-name</code>" option is specified, the log file is created with the filename <code>errlog.<em>rad</em>.<em>yyyymmdd</em></code>, where <em>rad</em> is the three-letter station ID code provided by the user (or any other string).</p>
+<p>If the "<code>-name</code>" option is specified, the log file is created with the filename <code><em>yyyymmdd</em>.<em>rad</em>.errlog</code>, where <em>rad</em> is the three-letter station ID code provided by the user (or any other string).</p>
 </description>
 
 <example>
