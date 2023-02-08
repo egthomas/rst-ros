@@ -399,7 +399,7 @@ int SiteRosStartIntt(int sec,int usec)
   double secs;
 
   SiteRosExit(0);
-  if (debug) fprintf(stderr,"SiteRosStartInt: start\n");
+  if (debug) fprintf(stderr,"%s SiteStartIntt: start\n",station);
 
   total_samples = tsgprm.samples + tsgprm.smdelay;
   smsg.type = PING;
@@ -443,7 +443,7 @@ int SiteRosStartIntt(int sec,int usec)
   tock.tv_sec  += floor(secs);
   tock.tv_usec += (secs-floor(secs))*1E6;
 
-  if (debug) fprintf(stderr,"SiteRosStartInt: end\n");
+  if (debug) fprintf(stderr,"%s SiteStartIntt: end\n",station);
 
   return 0;
 }

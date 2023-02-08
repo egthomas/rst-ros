@@ -399,7 +399,7 @@ int SiteCveStartIntt(int sec,int usec)
   double secs;
 
   SiteCveExit(0);
-  if (debug) fprintf(stderr,"SiteCveStartInt: start\n");
+  if (debug) fprintf(stderr,"SiteCveStartIntt: start\n");
 
   total_samples = tsgprm.samples + tsgprm.smdelay;
   smsg.type = PING;
@@ -443,7 +443,7 @@ int SiteCveStartIntt(int sec,int usec)
   tock.tv_sec  += floor(secs);
   tock.tv_usec += (secs-floor(secs))*1E6;
 
-  if (debug) fprintf(stderr,"SiteCveStartInt: end\n");
+  if (debug) fprintf(stderr,"SiteCveStartIntt: end\n");
 
   return 0;
 }

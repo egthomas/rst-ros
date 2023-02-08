@@ -228,20 +228,20 @@ int SiteCvwStart(char *host,char *ststr)
     fprintf(stderr,"Site Cfg Warning:: 'invert' setting undefined in site cfg file, using: %d\n",invert);
   }
 
-  /* Get the match filter value */
-  if (config_lookup_int(&cfg, "match_filter", &ltemp)) {
-    dmatch = ltemp;
-  } else {
-    dmatch = 1;
-    fprintf(stderr,"Site Cfg Warning:: 'match_filter' setting undefined in site cfg file, using: %d\n",dmatch);
-  }
-
   /* Get the number of rx channels (typically 1) */
   if (config_lookup_int(&cfg, "rxchn", &ltemp)) {
     rxchn = ltemp;
   } else {
     rxchn = 1;
     fprintf(stderr,"Site Cfg Warning:: 'rxchn' setting undefined in site cfg file, using: %d\n",rxchn);
+  }
+
+  /* Get the match filter value */
+  if (config_lookup_int(&cfg, "match_filter", &ltemp)) {
+    dmatch = ltemp;
+  } else {
+    dmatch = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'match_filter' setting undefined in site cfg file, using: %d\n",dmatch);
   }
 
   /* Get the ROS server address */
@@ -399,7 +399,7 @@ int SiteCvwStartIntt(int sec,int usec)
   double secs;
 
   SiteCvwExit(0);
-  if (debug) fprintf(stderr,"SiteCvwStartInt: start\n");
+  if (debug) fprintf(stderr,"SiteCvwStartIntt: start\n");
 
   total_samples = tsgprm.samples + tsgprm.smdelay;
   smsg.type = PING;
@@ -443,7 +443,7 @@ int SiteCvwStartIntt(int sec,int usec)
   tock.tv_sec  += floor(secs);
   tock.tv_usec += (secs-floor(secs))*1E6;
 
-  if (debug) fprintf(stderr,"SiteCvwStartInt: end\n");
+  if (debug) fprintf(stderr,"SiteCvwStartIntt: end\n");
 
   return 0;
 }
