@@ -1,6 +1,6 @@
 <!--TOP-->
 <head>
-<title>SuperDARN RST Documentation</title>
+<title>SuperDARN RST-ROS Documentation</title>
 <link rel=stylesheet href="<!--URLBASE-->/css/doc.css" type=text/css>
 </head>
 
@@ -19,7 +19,7 @@
 </div>
 
 <div id="main">
-<h3>SuperDARN Radar Software Toolkit (RST) Documentation</h3>
+<h3>SuperDARN RST Radar Operating Software (RST-ROS) Documentation</h3>
 <left>Navigate by clicking on the links below:</left>
 <ul>
 <!--TOP-->
@@ -34,7 +34,29 @@
 <left>Here are a few shortcuts to several commonly used routines:</left>
 <br><br>
 
-<table style="width:40%">
+<table style="width:50%">
+  <tr>
+    <th style="text-align:left">Radar Operations:</th>
+  <tr>
+    <td><a href="<!--URLBASE-->/superdarn/src.bin/os/schedule/index.html">schedule</a></td>
+    <td>Schedule the running of control programs</td>
+  </tr>
+  <tr>
+    <td><a href="<!--URLBASE-->/superdarn/src.bin/os/radarshell/index.html">radarshell</a></td>
+    <td>Modify radar operating parameters from interactive shell</td>
+  </tr>
+  <tr>
+    <td><a href="<!--URLBASE-->/superdarn/src.bin/os/rtserver/index.html">rtserver</a></td>
+    <td>Distribute real-time fitted data over the internet</td>
+  </tr>
+  <tr>
+    <td><a href="<!--URLBASE-->/superdarn/src.bin/tk/tcpip/fitacfclientgui/index.html">fitacfclientgui</a></td>
+    <td>Display real-time fitted data in terminal</td>
+  </tr>
+  <tr>
+    <td><a href="<!--URLBASE-->/superdarn/src.bin/os/radar/index.html">radar</a></td>
+    <td>Simulate radar operations without connecting to hardware</td>
+  </tr>
   <tr>
     <th style="text-align:left">Data Processing:</th>
   <tr>
