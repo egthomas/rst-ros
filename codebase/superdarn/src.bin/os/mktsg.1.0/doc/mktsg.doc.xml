@@ -15,6 +15,8 @@
 </option>
 <option><on>-longpulse</on><od>use the extended 16-pulse sequence.</od>
 </option>
+<option><on>-old</on><od>use the old 7-pulse sequence.</od>
+</option>
 <option><on>-baud <ar>nbaud</ar></on><od>set the number of baud in the Barker phase code to <ar>nbaud</ar> (default is 1, ie no phase coding). Valid options are 1,2,3,4,5,7,11,13.</od>
 </option>
 <option><on>-rsep <ar>rsep</ar></on><od>set the range resolution to <ar>rsep</ar> km (default is 45).</od>
@@ -23,7 +25,7 @@
 </option>
 <option><on>-frang <ar>frang</ar></on><od>set the distance to the first range gate to <ar>frang</ar> km (default is 180).</od>
 </option>
-<option><on>-mpinc <ar>mpinc</ar></on><od>set the multipulse increment to <ar>mpinc</ar> microseconds (default is 2400).</od>
+<option><on>-mpinc <ar>mpinc</ar></on><od>set the multipulse increment to <ar>mpinc</ar> microseconds (default is 1500).</od>
 </option>
 <synopsis><p>Determines the timing sequence for a given pulse sequence and writes it to standard output.</p></synopsis>
 

@@ -34,7 +34,7 @@ int main(int argc,char *argv[]) {
   int frang=180;
   int rsep=45;
   int smsep=300;
-  int mpinc=2400;
+  int mpinc=1500;
   int mppul=8;
 
   int flag;
@@ -42,6 +42,7 @@ int main(int argc,char *argv[]) {
   int *pcode;
   int nbaud=1;
   int txpl;
+  int old=0;
   int longpulse=0;
   int tauscan=0;
 
@@ -55,6 +56,7 @@ int main(int argc,char *argv[]) {
   int bcode11[11]={1,1,1,-1,-1,-1,1,-1,-1,1,-1};
   int bcode13[13]={1,1,1,1,1,-1,-1,1,1,-1,1,-1,1};
 
+  int patn_old[7]   = {0,9,12,20,22,26,27};
   int patn_short[8] = {0,14,22,24,27,31,42,43};
   int patn_long[16] = {0,4,19,42,78,127,191,270,364,474,600,745,905,1083,1280,1495};
   int patn_tau[11]  = {0,10,13,14,19,21,31,33,38,39,42};
@@ -68,6 +70,7 @@ int main(int argc,char *argv[]) {
 
   OptionAdd(&opt, "tauscan",   'x', &tauscan);
   OptionAdd(&opt, "longpulse", 'x', &longpulse);
+  OptionAdd(&opt, "old",       'x', &old);
 
   OptionAdd(&opt, "baud",      'i', &nbaud);
   OptionAdd(&opt, "rsep",      'i', &rsep);
@@ -105,6 +108,9 @@ int main(int argc,char *argv[]) {
     smsep = 100;
     mpinc = 100;
     mppul = 16;
+  } else if (old) {
+    mpinc = 2400;
+    mppul = 7;
   }
 
   /* Re-process the command line options for custom nrang, rsep, etc */
@@ -153,6 +159,8 @@ int main(int argc,char *argv[]) {
     for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_tau[i];
   } else if (longpulse) {
     for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_long[i];
+  } else if (old) {
+    for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_old[i];
   } else {
     for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_short[i];
   }
