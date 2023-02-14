@@ -9,7 +9,11 @@
 
 int SiteRosStart(char *host,char *ststr);
 int SiteRosSetupRadar();
-int SiteRosStartScan();
+int SiteRosStartScan(int32_t periods_per_scan, int32_t *scan_beam_list,
+                     int32_t *clrfreq_fstart_list, int32_t *clrfreq_bandwidth_list,
+                     int32_t fixFreq, int32_t sync_scan, int32_t *beam_times,
+                     int32_t scn_sc, int32_t scn_us, int32_t int_sc, int32_t int_us,
+                     int32_t start_period);
 int SiteRosStartIntt(int intsc,int intus);
 int SiteRosFCLR(int stfreq,int edfreq);
 int SiteRosTimeSeq(int *ptab);

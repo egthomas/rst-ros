@@ -380,15 +380,38 @@ int SiteRosSetupRadar()
 }
 
 
-int SiteRosStartScan()
+int SiteRosStartScan(int32_t periods_per_scan, int32_t *scan_beam_list,
+                     int32_t *clrfreq_fstart_list, int32_t *clrfreq_bandwidth_list,
+                     int32_t fixFreq, int32_t sync_scan, int32_t *beam_times,
+                     int32_t scn_sc, int32_t scn_us, int32_t int_sc, int32_t int_us,
+                     int32_t start_period)
 {
   struct ROSMsg smsg,rmsg;
 
   smsg.type = SET_ACTIVE;
   TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
+
+  TCPIPMsgSend(ros.sock, &periods_per_scan, sizeof(int32_t));    /* number of periods */
+
+  TCPIPMsgSend(ros.sock, &fixFreq,  sizeof(int32_t));    /* fixed frequency or -1 for clear_frequency search */
+  TCPIPMsgSend(ros.sock, &clrfreq_fstart_list[0], periods_per_scan * sizeof(int32_t));    /* start frequency of clrfreq */
+  TCPIPMsgSend(ros.sock, &clrfreq_bandwidth_list[0], periods_per_scan * sizeof(int32_t));    /* bandwidth of clrfreq in hertz */
+  TCPIPMsgSend(ros.sock, &scan_beam_list[0], periods_per_scan * sizeof(int32_t));    /* start frequency of clrfreq */
+
+  TCPIPMsgSend(ros.sock, &sync_scan, sizeof(int32_t));    /* if the periods/beams should start at fixed times*/
+  TCPIPMsgSend(ros.sock, &scn_sc, sizeof(int32_t));    /* scan and inetegration times */
+  TCPIPMsgSend(ros.sock, &scn_us, sizeof(int32_t));
+  TCPIPMsgSend(ros.sock, &int_sc, sizeof(int32_t));
+  TCPIPMsgSend(ros.sock, &int_us, sizeof(int32_t));
+
+  TCPIPMsgSend(ros.sock, &start_period, sizeof(int32_t));
+  if (sync_scan == 1) {
+    TCPIPMsgSend(ros.sock, &beam_times[0], periods_per_scan * sizeof(int32_t));
+  }
+
   TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
 
-  return 0;
+  return rmsg.status;
 }
 
 
