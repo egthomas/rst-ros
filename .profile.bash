@@ -7,6 +7,10 @@ export VISUAL="vim"
 export EDITOR="$VISUAL"
 export PATH="${PATH}:/opt/local/bin:/usr/bin/:${HOME}/bin:${HOME}/script"
 
+if [ -z "${RSTPATH}" ] ; then
+  export RSTPATH="/home/radar_user/rst-ros"
+fi
+
 . $RSTPATH/.profile/ros.bash
 . $RSTPATH/.profile/rst.bash
 . $RSTPATH/.profile/base.bash
