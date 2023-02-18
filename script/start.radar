@@ -3,9 +3,6 @@
 east='cve'
 west='cvw'
 
-# dummy radar server
-#radar &
-
 # critical tasks
 
 echo "Waiting for errlog to start"
