@@ -1,5 +1,5 @@
-/* normalsound_cv.c
-   ================
+/* normalsound.c
+   =============
    Author: E.G.Thomas
 
 */
@@ -61,7 +61,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalsound 2022/10/25"};
+char progid[80]={"normalsound 2023/02/18"};
 char progname[256];
 
 int arg=0;
@@ -123,7 +123,7 @@ int main(int argc,char *argv[])
   unsigned char discretion=0;
   int fixfrq=0;
 
-  int n;
+  int i,n;
   int status=0;
 
   int beams=0;
@@ -249,10 +249,14 @@ int main(int argc,char *argv[])
   if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
-  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
+  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     snd_bms = snd_bmse;
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
     snd_bms = snd_bmsw;
+  } else if (strcmp(ststr,"fhw") == 0) {
+    snd_bms = snd_bmsw;
+    for (i=0; i<snd_bms_tot; i++)
+      snd_bms[i] -= 2;
   } else {
     printf("Error: Not intended for station %s\n", ststr);
     return (-1);

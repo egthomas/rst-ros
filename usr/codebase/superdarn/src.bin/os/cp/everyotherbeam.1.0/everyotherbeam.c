@@ -216,12 +216,19 @@ int main(int argc,char *argv[]) {
   if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
-  if (strcmp(ststr,"cve") == 0) {
+  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"fhe") == 0)) {
     bms = bmse;   /* 1-min sequence */
   } else if (strcmp(ststr,"cvw") == 0) {
     bms = bmsw;   /* 1-min sequence */
+  } else if (strcmp(ststr,"fhw") == 0) {
+    bms = bmsw;   /* 1-min sequence */
+    for (i=0; i<nintgs/2; i++) {
+      bms[i*2] -= 2;
+      if (bms[i*2] == 11) bms[i*2] -= 2;
+    }
   } else {
-    printf("Error: Not intended for station %s\n", ststr);
+    if (hlp) usage();
+    else     printf("Error: Not intended for station %s\n", ststr);
     return (-1);
   }
 

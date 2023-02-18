@@ -1,5 +1,5 @@
-/* interleavesound_cv.c
- ======================
+/* interleavesound.c
+ ===================
  Author: E.G.Thomas
 
  */
@@ -57,7 +57,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2022/10/25"};
+char progid[80]={"interleavesound 2023/02/18"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -130,7 +130,7 @@ int main(int argc,char *argv[]) {
 
   /*
     beam sequences for 24-beam MSI radars but only using 20 most meridional
-      beams; 
+      beams;
    */
   /* count     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 */
   /*          21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 */
@@ -227,12 +227,19 @@ int main(int argc,char *argv[]) {
   if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
-  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
+  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     bms = bmse;
     snd_bms = snd_bmse;
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
     bms = bmsw;
     snd_bms = snd_bmsw;
+  } else if (strcmp(ststr,"fhw") == 0) {
+    bms = bmsw;
+    snd_bms = snd_bmsw;
+    for (i=0; i<nintgs; i++)
+      bms[i] -= 2;
+    for (i=0; i<snd_bms_tot; i++)
+      snd_bms[i] -= 2;
   } else {
     printf("Error: Not intended for station %s\n", ststr);
     return (-1);

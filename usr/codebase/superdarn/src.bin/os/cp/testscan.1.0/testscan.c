@@ -214,7 +214,8 @@ int main(int argc,char *argv[]) {
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
     bms = bmsw;     /* 1-min sequence */
   } else {
-    printf("Error: Not intended for station %s\n", ststr);
+    if (hlp) usage();
+    else     printf("Error: Not intended for station %s\n", ststr);
     return (-1);
   }
 

@@ -268,7 +268,8 @@ int main(int argc,char *argv[]) {
       cbm[2] =  8;
     }
   } else {
-    printf("Error: Not intended for station %s\n", ststr);
+    if (hlp) usage();
+    else     printf("Error: Not intended for station %s\n", ststr);
     return (-1);
   }
 
