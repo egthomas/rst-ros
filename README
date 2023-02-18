@@ -79,7 +79,7 @@ account called "radar_user".
 Unpack and install the CDF software:
 
     tar -xzvf cdf[XX_X]-dist-cdf.tar.gz
-    cd cdfXX_X-dist
+    cd cdf[XX_X]-dist
     make OS=linux ENV=gnu all
     sudo make INSTALLDIR=/usr/local/cdf install
 
