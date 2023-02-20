@@ -663,6 +663,10 @@ int main(int argc,char *argv[]) {
   int minbeam=0;
   int maxbeam=-1;
 
+  unsigned char databeam=0;
+  int scan_minbeam=100;
+  int scan_maxbeam=-1;
+
   char *chnstr=NULL;
 
   char *dname=NULL,*iname=NULL;
@@ -886,6 +890,7 @@ int main(int argc,char *argv[]) {
 
   OptionAdd(&opt,"minbeam",'i',&minbeam);
   OptionAdd(&opt,"maxbeam",'i',&maxbeam);
+  OptionAdd(&opt,"databeam",'x',&databeam);
 
   OptionAdd(&opt,"gscol",'t',&gscol_txt);
 
@@ -1722,6 +1727,11 @@ int main(int argc,char *argv[]) {
                                  rfov,1);
 
       for (c=0;c<scn->num;c++) {
+        if (scn->bm[c].bm < scan_minbeam) scan_minbeam=scn->bm[c].bm;
+        if (scn->bm[c].bm > scan_maxbeam) scan_maxbeam=scn->bm[c].bm;
+      }
+
+      for (c=0;c<scn->num;c++) {
         if ((sflg) && (scn->bm[c].scan !=scan)) continue;
         if ((nsflg) && (scn->bm[c].scan<0)) continue;
         if ((cpid !=-1) && (scn-> bm[c].cpid !=cpid)) continue;
@@ -1746,7 +1756,10 @@ int main(int argc,char *argv[]) {
                                    wbox-2*pad,hbox-2*pad,vsf,tfunc,marg,find_color,
                                    &vkey,gscol,gsflg,0.5,vecr);
 
-        if (maxbeam==-1) maxbeam=site->maxbeam;
+        if (databeam) {
+          minbeam=scan_minbeam;
+          maxbeam=scan_maxbeam+1;
+        } else if (maxbeam==-1) maxbeam=site->maxbeam;
 
         if (fanflg) plot_outline(plot,&scn->bm[c],&geol.bm[n],0,
                                  magflg,minbeam,maxbeam,xbox+pad,ybox+pad,
