@@ -142,6 +142,7 @@ int main(int argc,char *argv[]) {
   unsigned char discretion=0;
 
   unsigned char option=0;
+  unsigned char version=0;
 
   int status=0,n,i;
 
@@ -190,6 +191,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "ros", 't', &roshost);  /* Set the roshost IP address */
   OptionAdd(&opt, "debug",'x', &debug);
   OptionAdd(&opt, "-option",'x', &option);
+  OptionAdd(&opt, "-version",'x', &version);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -199,6 +201,11 @@ int main(int argc,char *argv[]) {
 
   if (option==1) {
     OptionDump(stdout,&opt);
+    exit(0);
+  }
+
+  if (version==1) {
+    OptionVersion(stdout);
     exit(0);
   }
  

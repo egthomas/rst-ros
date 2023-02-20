@@ -140,6 +140,7 @@ int main(int argc,char *argv[]) {
   int bufus=0;        /*  been set to 3.0s to account for what???           */
   unsigned char hlp=0;
   unsigned char option=0;
+  unsigned char version=0;
 
   /*
     beam sequences for 24-beam MSI radars but only using 20 most meridional
@@ -183,6 +184,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"debug", 'x',&debug);
   OptionAdd(&opt,"-help", 'x',&hlp);        /* just dump some parameters */
   OptionAdd(&opt,"-option",'x',&option);
+  OptionAdd(&opt,"-version",'x',&version);
 
   /* Process all of the command line options
      Important: need to do this here because we need stid and ststr */
@@ -194,6 +196,11 @@ int main(int argc,char *argv[]) {
 
   if (option==1) {
     OptionDump(stdout,&opt);
+    exit(0);
+  }
+
+  if (version==1) {
+    OptionVersion(stdout);
     exit(0);
   }
 

@@ -264,6 +264,7 @@ int main(int argc,char *argv[])
 
   unsigned char hlp=0;
   unsigned char option=0;
+  unsigned char version=0;
 
   if (debug) {
     printf("Size of int %lu\n",sizeof(int));
@@ -309,6 +310,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "debug",  'x', &debug);
   OptionAdd(&opt, "-help",  'x', &hlp);        /* just dump some parameters */
   OptionAdd(&opt, "-option",'x', &option);
+  OptionAdd(&opt,"-version",'x', &version);
 
   /* process the commandline; need this for setting errlog port */
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
@@ -319,6 +321,11 @@ int main(int argc,char *argv[])
 
   if (option==1) {
     OptionDump(stdout,&opt);
+    exit(0);
+  }
+
+  if (version==1) {
+    OptionVersion(stdout);
     exit(0);
   }
 
