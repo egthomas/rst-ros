@@ -662,10 +662,7 @@ int main(int argc,char *argv[]) {
 
   int minbeam=0;
   int maxbeam=-1;
-
   unsigned char databeam=0;
-  int scan_minbeam=100;
-  int scan_maxbeam=-1;
 
   char *chnstr=NULL;
 
@@ -1726,9 +1723,14 @@ int main(int argc,char *argv[]) {
                                  ffovcol,0x0f,0.5,NULL,
                                  rfov,1);
 
-      for (c=0;c<scn->num;c++) {
-        if (scn->bm[c].bm < scan_minbeam) scan_minbeam=scn->bm[c].bm;
-        if (scn->bm[c].bm > scan_maxbeam) scan_maxbeam=scn->bm[c].bm;
+      if (databeam) {
+        minbeam=999;
+        maxbeam=-1;
+        for (c=0;c<scn->num;c++) {
+          if (scn->bm[c].bm < minbeam) minbeam=scn->bm[c].bm;
+          if (scn->bm[c].bm > maxbeam) maxbeam=scn->bm[c].bm;
+        }
+        maxbeam=maxbeam+1;
       }
 
       for (c=0;c<scn->num;c++) {
@@ -1756,10 +1758,7 @@ int main(int argc,char *argv[]) {
                                    wbox-2*pad,hbox-2*pad,vsf,tfunc,marg,find_color,
                                    &vkey,gscol,gsflg,0.5,vecr);
 
-        if (databeam) {
-          minbeam=scan_minbeam;
-          maxbeam=scan_maxbeam+1;
-        } else if (maxbeam==-1) maxbeam=site->maxbeam;
+        if (maxbeam==-1) maxbeam=site->maxbeam;
 
         if (fanflg) plot_outline(plot,&scn->bm[c],&geol.bm[n],0,
                                  magflg,minbeam,maxbeam,xbox+pad,ybox+pad,
