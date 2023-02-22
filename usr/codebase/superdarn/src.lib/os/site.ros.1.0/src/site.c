@@ -42,6 +42,8 @@ struct timeval tock;
 config_t cfg;
 char station[10];
 
+int iqbufsize=0;
+
 
 void SiteRosExit(int signum)
 {
@@ -66,7 +68,7 @@ void SiteRosExit(int signum)
         close(ros.sock);
         config_destroy(&cfg);
         if (samples != NULL)
-          ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
+          ShMemFree((unsigned char *)samples,sharedmemory,iqbufsize,1,shmemfd);
         exit(errno);
       }
       break;
@@ -84,7 +86,7 @@ void SiteRosExit(int signum)
         close(ros.sock);
         config_destroy(&cfg);
         if (samples != NULL)
-          ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
+          ShMemFree((unsigned char *)samples,sharedmemory,iqbufsize,1,shmemfd);
         exit(errno);
       }
       break;
@@ -248,6 +250,7 @@ int SiteRosStart(char *host,char *ststr)
   if (config_lookup_int(&cfg, "smsep", &ltemp)) {
     smsep = ltemp;
   } else {
+    smsep = 0;
     fprintf(stderr,"Site Cfg Warning:: 'smsep' setting undefined in site cfg file, using: %d\n",smsep);
   }
 
@@ -346,7 +349,7 @@ int SiteRosSetupRadar()
   returned_entry_type  = ' ';
   temp32 = -1;
   ifmode = -1;
-  data_length = strlen(ini_entry_name);
+  data_length = strlen(ini_entry_name)+1;
   TCPIPMsgSend(ros.sock, &data_length, sizeof(int32));
   TCPIPMsgSend(ros.sock, &ini_entry_name, data_length*sizeof(char));
   TCPIPMsgSend(ros.sock, &requested_entry_type, sizeof(char));
@@ -380,8 +383,16 @@ int SiteRosSetupRadar()
 
   sprintf(sharedmemory,"IQBuff_%s_%d_%d",station,rnum,cnum);
 
+  /* calculate size of IQ buffer (JTK) */
+  iqbufsize = 2 * (mppul) * sizeof(int32) * 1e6 * (intsc + intus/1e6) * nbaud / mpinc;
+
   samples=(int16 *)
-    ShMemAlloc(sharedmemory,IQBUFSIZE,O_RDWR | O_CREAT,1,&shmemfd);
+    ShMemAlloc(sharedmemory,iqbufsize,O_RDWR | O_CREAT,1,&shmemfd);
+
+  if (samples==NULL) {
+    fprintf(stderr,"IQBuffer %s is Null\n",sharedmemory);
+    SiteRosExit(-1);
+  }
 
   return 0;
 }
@@ -916,7 +927,7 @@ int SiteRosIntegrate(int (*lags)[2])
 
       dest = (void *)(samples);  /* look iqoff bytes into samples area */
       dest += iqoff;
-      if ((iqoff+total_samples*2*sizeof(uint32)) < IQBUFSIZE) {
+      if ((iqoff+total_samples*2*sizeof(uint32)) < iqbufsize) {
         memmove(dest,rdata.main,total_samples*sizeof(uint32));
         /* skip ahead number of samples * 32 bit per sample to account for
            rdata.main */
