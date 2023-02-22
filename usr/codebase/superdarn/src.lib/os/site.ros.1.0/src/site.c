@@ -244,6 +244,13 @@ int SiteRosStart(char *host,char *ststr)
     fprintf(stderr,"Site Cfg Warning:: 'match_filter' setting undefined in site cfg file, using: %d\n",dmatch);
   }
 
+  /* Get the sample separation value */
+  if (config_lookup_int(&cfg, "smsep", &ltemp)) {
+    smsep = ltemp;
+  } else {
+    fprintf(stderr,"Site Cfg Warning:: 'smsep' setting undefined in site cfg file, using: %d\n",smsep);
+  }
+
   /* Get the ROS server address */
   if (host !=NULL) {
     strcpy(ros.host,host);
