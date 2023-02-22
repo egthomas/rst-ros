@@ -558,7 +558,7 @@ int SiteRosTimeSeq(int *ptab)
   tsgprm.mlag    = 0;
   tsgprm.nbaud   = nbaud;
   tsgprm.code    = pcode;
-  tsgprm.pat = malloc(sizeof(int)*tsgprm.mppul);
+  tsgprm.pat     = malloc(sizeof(int)*tsgprm.mppul);
   for (i=0; i<tsgprm.mppul; i++) tsgprm.pat[i] = ptab[i];
 
   tsgbuf = TSGMake(&tsgprm,&flag);
@@ -580,6 +580,27 @@ int SiteRosTimeSeq(int *ptab)
   TCPIPMsgSend(ros.sock, &tprm, sizeof(struct SeqPRM));
   TCPIPMsgSend(ros.sock, tsgbuf->rep, sizeof(unsigned char)*tprm.len);
   TCPIPMsgSend(ros.sock, tsgbuf->code, sizeof(unsigned char)*tprm.len);
+
+  if (debug) {
+    fprintf(stderr,"REGISTER_SEQ:intsc=%d\n",intsc);
+    fprintf(stderr,"REGISTER_SEQ:intus=%d\n",intus);
+  }
+
+  TCPIPMsgSend(ros.sock, &intsc, sizeof(int));
+  TCPIPMsgSend(ros.sock, &intus, sizeof(int));
+
+  TCPIPMsgSend(ros.sock, &nrang, sizeof(int));
+  TCPIPMsgSend(ros.sock, &mpinc, sizeof(int));
+  TCPIPMsgSend(ros.sock, &smsep, sizeof(int));
+  TCPIPMsgSend(ros.sock, &lagfr, sizeof(int));
+  TCPIPMsgSend(ros.sock, &mppul, sizeof(int));
+  for (i=0; i<mppul; i++)
+    TCPIPMsgSend(ros.sock, &tsgprm.pat[i], sizeof(int));
+
+  TCPIPMsgSend(ros.sock, &nbaud, sizeof(int));
+  for (i=0; i<nbaud; i++)
+    TCPIPMsgSend(ros.sock, &pcode[i], sizeof(int));
+
   TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
   if (debug) {
     fprintf(stderr,"REGISTER_SEQ:type=%c\n",rmsg.type);
