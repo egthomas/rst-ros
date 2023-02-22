@@ -493,6 +493,7 @@ int SiteRosFCLR(int stfreq,int edfreq)
   rprm.priority            = cnum;
   rprm.buffer_index        = 0;
 
+/* Not needed with SwingBuffer
   smsg.type = SET_PARAMETERS;
   TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
   TCPIPMsgSend(ros.sock,&rprm,sizeof(struct ControlPRM));
@@ -501,6 +502,7 @@ int SiteRosFCLR(int stfreq,int edfreq)
     fprintf(stderr,"SET_PARAMETERS:type=%c\n",rmsg.type);
     fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
   }
+*/
 
   fprm.start = stfreq;
   fprm.end   = edfreq;
