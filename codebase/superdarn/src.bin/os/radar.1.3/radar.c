@@ -36,7 +36,6 @@
 
 struct OptionData opt;
 unsigned char vb;
-int tfreq=11800;
 time_t t;
 
 
@@ -52,7 +51,7 @@ int operate(pid_t parent,int sock) {
   struct DataPRM dprm;
   struct TRTimes badtrdat;
 
-  int dfreq,rnum,cnum,s;
+  int tfreq,dfreq,rnum,cnum,s;
   float noise=0.5;
 
   int32 temp_int32,data_length;
