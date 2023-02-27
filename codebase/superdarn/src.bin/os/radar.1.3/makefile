@@ -10,7 +10,7 @@ SRC=hlpstr.h errstr.h radar.c
 
 DSTPATH = $(BINPATH)
 OUTPUT = radar
-LIBS=-ltsg.1 -ltcpipmsg.1 -lrtime.1 -lopt.1
+LIBS=-ltsg.1 -ltcpipmsg.1 -lfreq.1 -lrtime.1 -lopt.1
 SLIB=-lm
 
 include $(MAKEBIN).$(SYSTEM)
