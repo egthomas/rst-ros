@@ -1,0 +1,65 @@
+<head>
+<title>rtserver</title>
+<link rel=stylesheet href="../../../../css/doc.css" type=text/css>
+</head>
+<body>
+<div id="root">
+
+<div id="banner">
+
+</div>
+
+<div id="location">
+<table width=100% class="location"><tr>
+<td><a href="../../../../index.html">Home</a><td>|</td>
+<td><a href=../../../../superdarn/index.html>superdarn</a></td>
+<td>|</td><td><a href=../../../../superdarn/src.bin/index.html>src.bin</a></td><td>|</td><td><a href=../../../../superdarn/src.bin/os/index.html>os</a></td><td>|</td>
+<td>rtserver</td>
+<td width=100% align=right><a href=../../../../superdarn/src.bin/indexdoc.html>Index</a></td>
+</tr>
+</table>
+</div>
+
+<div id="main">
+<h2 class="doctitle">rtserver</h2>
+<table>
+<tr><td class="docsubtitle" valign=top>Syntax</td></tr>
+<tr><td></td><td width=80% class="docbox" style="font-family: courier;">
+rtserver --help<br>rtserver [<em>options</em>]<br></td></tr>
+<tr><td class="docsubtitle">Synopsis</td></tr>
+<tr><td></td><td><p>A data relay task for distributing fitted data over the internet.</p></td></tr>
+
+<tr><td class="docsubtitle">Options</td></tr>
+<tr><td></td><td>
+<table width=100%><tr><td width="150" valign="top"><code>--help</code></td><td valign="top">print the help message and exit.</td></tr>
+<tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
+<tr><td width="150" valign="top"><code>-rp <em>rport</em></code></td><td valign="top">listen for fitted data on the local port number <em>rport</em> (default is 44103).</td></tr>
+<tr><td width="150" valign="top"><code>-tp <em>tport</em></code></td><td valign="top">serve the fitted data for clients on the local port number <em>tport</em> (default is 1024).</td></tr>
+<tr><td width="150" valign="top"><code>-eh <em>ehost</em></code></td><td valign="top">connect to the error logger at hostname or IP address <em>ehost</em> (default is localhost).</td></tr>
+<tr><td width="150" valign="top"><code>-ep <em>eport</em></code></td><td valign="top">connect to the error logger at port number <em>eport</em> (default is 44000).</td></tr>
+<tr><td width="150" valign="top"><code>-c <em>chn</em></code></td><td valign="top">filter the data and only serve data from channel <em>chn</em>.</td></tr>
+</table></td></tr>
+<tr><td class="docsubtitle">Description</td></tr>
+<tr><td></td><td><p>A data relay task for distributing fitted data over the internets.</p>
+</td></tr>
+<tr><td class="docsubtitle">Examples</td></tr>
+<tr><td></td><td>
+<table ><tr><td class="docbox" ><pre width="80">rtserver -rp 44104 -ep 44000 -tp 1024 &amp</pre></td></tr></table>
+<p>Connect to the fitted data stream from the active control program at the local port number <code>44104</code> and serve the data for clients on the local port number <code>1024</code>. Error messages are sent to the error logger on port number <code>44000</code>.</p>
+</td></tr>
+
+
+</table>
+<br><br>
+</div>
+
+<div id="tail">
+</div>
+
+</div>
+
+</body>
+
+
+
+

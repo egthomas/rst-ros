@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>radarshell</name>
+<location>src.bin/os/radarshell</location>
+
+<syntax>radarshell --help</syntax>
+<syntax>radarshell <ar>host</ar> <ar>port</ar></syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on><ar>host</ar></on><od>hostname or IP address of the shellserver to connect to (default is localhost).</od>
+</option>
+<option><on><ar>port</ar></on><od>port number of the shellserver to connect to on the system (default is 44002).</od>
+</option>
+<synopsis><p>An interactive shell for manipulating radar operating parameters. The four available commands are 1: 'show' (list all parameters and their values), 2: '[variable]=[value]' (change parameter), 3: 'go' (upload parameters to control program), and 4: 'exit' (close shell without modifying parameters).</p></synopsis>
+
+<description><p>An interactive shell that allows the user to change the operating parameters of the radar while a control program is active.</p>
+<p>The shell supports four commands:</p>
+
+<quote>go
+show [<em>variable</em>]
+<em>variable</em>=<em>value</em>
+exit</quote>
+
+<p>Typing "<code>go</code>" will send the altered parameters back to the control program so they will take affect at the start of the next integration period.</p>
+<p>Typing "<code>show</code>" will list the values of the specified variables. If no names are listed then the entire set will be shown.</p>
+<p>A new value is assigned to a variable by using the "<code>=</code>" sign:</p>
+
+<quote>bmnum=12
+combf=Hello word</quote>
+
+<p>There should be no spaces between the value, the "<code>=</code>" sign, or the variable name.</p>
+<p>Typing "<code>exit</code>" will close the shell without uploading any parameters to the control program.</p>
+</description>
+
+<example>
+<command>radarshell localhost 44002</command>
+<description>Connect to the shellserver on <code>localhost</code> at port <code>44002</code> and start a new interactive shell session.</description>
+</example>
+
+</binary>

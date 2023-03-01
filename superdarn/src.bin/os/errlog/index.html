@@ -1,0 +1,66 @@
+<head>
+<title>errlog</title>
+<link rel=stylesheet href="../../../../css/doc.css" type=text/css>
+</head>
+<body>
+<div id="root">
+
+<div id="banner">
+
+</div>
+
+<div id="location">
+<table width=100% class="location"><tr>
+<td><a href="../../../../index.html">Home</a><td>|</td>
+<td><a href=../../../../superdarn/index.html>superdarn</a></td>
+<td>|</td><td><a href=../../../../superdarn/src.bin/index.html>src.bin</a></td><td>|</td><td><a href=../../../../superdarn/src.bin/os/index.html>os</a></td><td>|</td>
+<td>errlog</td>
+<td width=100% align=right><a href=../../../../superdarn/src.bin/indexdoc.html>Index</a></td>
+</tr>
+</table>
+</div>
+
+<div id="main">
+<h2 class="doctitle">errlog</h2>
+<table>
+<tr><td class="docsubtitle" valign=top>Syntax</td></tr>
+<tr><td></td><td width=80% class="docbox" style="font-family: courier;">
+errlog --help<br>errlog [<em>options</em>]<br></td></tr>
+<tr><td class="docsubtitle">Synopsis</td></tr>
+<tr><td></td><td><p>Prints error messages to the console and records them in a daily log.</p></td></tr>
+
+<tr><td class="docsubtitle">Options</td></tr>
+<tr><td></td><td>
+<table width=100%><tr><td width="150" valign="top"><code>--help</code></td><td valign="top">print the help message and exit.</td></tr>
+<tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
+<tr><td width="150" valign="top"><code>-lp <em>lport</em></code></td><td valign="top">listen for error messages on the local port number <em>lport</em> (default is 44000).</td></tr>
+<tr><td width="150" valign="top"><code>-name <em>stid</em></code></td><td valign="top">add the three-letter station ID code <em>stid</em> to the errlog filename.</td></tr>
+</table></td></tr>
+<tr><td class="docsubtitle">Description</td></tr>
+<tr><td></td><td><p>Reports and logs errors sent from the other radar tasks. The log records the date and time at which the message was sent, the process ID of the task reporting the error, the task name, and a text string that describes the error.</p>
+
+<p>Errors are printed to the console on which the <code>errlog</code> task runs and also recorded in a file stored in the directory defined by the <code>SD_ERRLOG_PATH</code> environment variable. Each day a new log file is created with the filename <code><em>yyyymmdd</em>.errlog</code>, where <em>yyyymmdd</em> is the date.</p>
+
+<p>If the "<code>-name</code>" option is specified, the log file is created with the filename <code><em>yyyymmdd</em>.<em>rad</em>.errlog</code>, where <em>rad</em> is the three-letter station ID code provided by the user (or any other string).</p>
+</td></tr>
+<tr><td class="docsubtitle">Examples</td></tr>
+<tr><td></td><td>
+<table ><tr><td class="docbox" ><pre width="80">errlog -name cve -lp 44000 &amp</pre></td></tr></table>
+<p>Start the <code>errlog</code> task listening for error messages on the local port number <code>44000</code> and add the string "<code>cve</code>" to the filename of the daily log files.</p>
+</td></tr>
+
+
+</table>
+<br><br>
+</div>
+
+<div id="tail">
+</div>
+
+</div>
+
+</body>
+
+
+
+

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<binary>
+<project>superdarn</project>
+<name>fitacfwrite</name>
+<location>src.bin/os/fitacfwrite</location>
+
+<syntax>fitacfwrite --help</syntax>
+<syntax>fitacfwrite [<ar>options</ar>]</syntax>
+
+<option><on>--help</on><od>print the help message and exit.</od>
+</option>
+<option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on>-lp <ar>lport</ar></on><od>listen for fitted data on the local port number <ar>lport</ar> (default is 44102).</od>
+</option>
+<option><on>-eh <ar>ehost</ar></on><od>connect to the error logger at hostname or IP address <ar>ehost</ar> (default is localhost).</od>
+</option>
+<option><on>-ep <ar>eport</ar></on><od>connect to the error logger at port number <ar>eport</ar> (default is 44000).</od>
+</option>
+<option><on>-c <ar>chn</ar></on><od>append an optional channel identifier <ar>chn</ar> to the output filename.</od>
+</option>
+<synopsis><p>Stores fitted data in <code>fitacf</code> files.</p></synopsis>
+
+<description><p>Stores fitted data in <code>fitacf</code> files, opening a new file every 2 hours.</p>
+</description>
+
+<example>
+<command>fitacfwrite -lp 44103 -ep 44000 &amp</command>
+<description>Connect to the fitted data stream from the active control program at the local port number <code>44103</code> and write the data to a new <code>fitacf</code> file every 2 hours. Error messages are sent to the error logger on port number <code>44000</code>.</description>
+</example>
+
+</binary>

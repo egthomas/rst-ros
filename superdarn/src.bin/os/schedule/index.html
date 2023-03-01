@@ -1,0 +1,70 @@
+<head>
+<title>schedule</title>
+<link rel=stylesheet href="../../../../css/doc.css" type=text/css>
+</head>
+<body>
+<div id="root">
+
+<div id="banner">
+
+</div>
+
+<div id="location">
+<table width=100% class="location"><tr>
+<td><a href="../../../../index.html">Home</a><td>|</td>
+<td><a href=../../../../superdarn/index.html>superdarn</a></td>
+<td>|</td><td><a href=../../../../superdarn/src.bin/index.html>src.bin</a></td><td>|</td><td><a href=../../../../superdarn/src.bin/os/index.html>os</a></td><td>|</td>
+<td>schedule</td>
+<td width=100% align=right><a href=../../../../superdarn/src.bin/indexdoc.html>Index</a></td>
+</tr>
+</table>
+</div>
+
+<div id="main">
+<h2 class="doctitle">schedule</h2>
+<table>
+<tr><td class="docsubtitle" valign=top>Syntax</td></tr>
+<tr><td></td><td width=80% class="docbox" style="font-family: courier;">
+schedule --help<br>schedule [<em>options</em>] <em>schedule</em><br></td></tr>
+<tr><td class="docsubtitle">Synopsis</td></tr>
+<tr><td></td><td><p>Schedules the running of control programs.</p></td></tr>
+
+<tr><td class="docsubtitle">Options</td></tr>
+<tr><td></td><td>
+<table width=100%><tr><td width="150" valign="top"><code>--help</code></td><td valign="top">print the help message and exit.</td></tr>
+<tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
+<tr><td width="150" valign="top"><code>-d</code></td><td valign="top">reload the schedule once a day.</td></tr>
+<tr><td width="150" valign="top"><code>-h</code></td><td valign="top">reload the schedule once an hour.</td></tr>
+<tr><td width="150" valign="top"><code>-t</code></td><td valign="top">reload the schedule once every 10 minutes (default).</td></tr>
+<tr><td width="150" valign="top"><code>-m</code></td><td valign="top">reload the schedule once a minute.</td></tr>
+<tr><td width="150" valign="top"><code>-name <em>stid</em></code></td><td valign="top">add the three-letter station ID code <em>stid</em> to the scdlog filename.</td></tr>
+<tr><td width="150" valign="top"><code><em>schedule</em></code></td><td valign="top">read the schedule from the file <em>schedule</em>.</td></tr>
+</table></td></tr>
+<tr><td class="docsubtitle">Description</td></tr>
+<tr><td></td><td><p>The scheduler uses a script called a schedule file that specifies what time and date a program is due to start and what command line to use to execute the program. Periodically the scheduler reloads and re-processes the schedule file. This allows any alterations or additions to the schedule to be correctly identified and acted upon.</p>
+
+<p>The scheduler will record all of its actions in a special log file stored in the directory defined by the SD_SCDLOG_PATH environment variable. Each day a new log file is created with the filename <code><em>yyyymmdd</em>.scdlog</code> where <em>yyyymmdd</em> is the date.</p>
+
+<p>If the "<code>-name</code>" option is specified, the log file is created with the filename <code><em>yyyymmdd</em>.<em>rad</em>.scdlog</code>, where <em>rad</em> is the three-letter station ID code provided by the user (or any other string).</p>
+</td></tr>
+<tr><td class="docsubtitle">Examples</td></tr>
+<tr><td></td><td>
+<table ><tr><td class="docbox" ><pre width="80">schedule -name cve /data/ros/scd/cve.scd &amp</pre></td></tr></table>
+<p>Load the schedule file located at <code>/data/ros/scd/cve.scd</code> and add the string "<code>cve</code>" to the filename of the daily log files.</p>
+</td></tr>
+
+
+</table>
+<br><br>
+</div>
+
+<div id="tail">
+</div>
+
+</div>
+
+</body>
+
+
+
+

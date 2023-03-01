@@ -1,0 +1,65 @@
+<head>
+<title>rawacfwrite</title>
+<link rel=stylesheet href="../../../../css/doc.css" type=text/css>
+</head>
+<body>
+<div id="root">
+
+<div id="banner">
+
+</div>
+
+<div id="location">
+<table width=100% class="location"><tr>
+<td><a href="../../../../index.html">Home</a><td>|</td>
+<td><a href=../../../../superdarn/index.html>superdarn</a></td>
+<td>|</td><td><a href=../../../../superdarn/src.bin/index.html>src.bin</a></td><td>|</td><td><a href=../../../../superdarn/src.bin/os/index.html>os</a></td><td>|</td>
+<td>rawacfwrite</td>
+<td width=100% align=right><a href=../../../../superdarn/src.bin/indexdoc.html>Index</a></td>
+</tr>
+</table>
+</div>
+
+<div id="main">
+<h2 class="doctitle">rawacfwrite</h2>
+<table>
+<tr><td class="docsubtitle" valign=top>Syntax</td></tr>
+<tr><td></td><td width=80% class="docbox" style="font-family: courier;">
+rawacfwrite --help<br>rawacfwrite [<em>options</em>]<br></td></tr>
+<tr><td class="docsubtitle">Synopsis</td></tr>
+<tr><td></td><td><p>Stores raw ACF data in <code>rawacf</code> files.</p></td></tr>
+
+<tr><td class="docsubtitle">Options</td></tr>
+<tr><td></td><td>
+<table width=100%><tr><td width="150" valign="top"><code>--help</code></td><td valign="top">print the help message and exit.</td></tr>
+<tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
+<tr><td width="150" valign="top"><code>-lp <em>lport</em></code></td><td valign="top">listen for raw ACF data on the local port number <em>lport</em> (default is 44101).</td></tr>
+<tr><td width="150" valign="top"><code>-eh <em>ehost</em></code></td><td valign="top">connect to the error logger at hostname or IP address <em>ehost</em> (default is localhost).</td></tr>
+<tr><td width="150" valign="top"><code>-ep <em>eport</em></code></td><td valign="top">connect to the error logger at port number <em>eport</em> (default is 44000).</td></tr>
+<tr><td width="150" valign="top"><code>-t <em>thr</em></code></td><td valign="top">apply a threshold of <em>thr</em> to determine if the data are saved.</td></tr>
+<tr><td width="150" valign="top"><code>-c <em>chn</em></code></td><td valign="top">append an optional channel identifier <em>chn</em> to the output filename.</td></tr>
+</table></td></tr>
+<tr><td class="docsubtitle">Description</td></tr>
+<tr><td></td><td><p>Stores raw ACF data in <code>rawacf</code> files, opening a new file every 2 hours.</p>
+</td></tr>
+<tr><td class="docsubtitle">Examples</td></tr>
+<tr><td></td><td>
+<table ><tr><td class="docbox" ><pre width="80">rawacfwrite -lp 44102 -ep 44000 &amp</pre></td></tr></table>
+<p>Connect to the raw ACF data stream from the active control program at the local port number <code>44102</code> and write the data to a new <code>rawacf</code> file every 2 hours. Error messages are sent to the error logger on port number <code>44000</code>.</p>
+</td></tr>
+
+
+</table>
+<br><br>
+</div>
+
+<div id="tail">
+</div>
+
+</div>
+
+</body>
+
+
+
+

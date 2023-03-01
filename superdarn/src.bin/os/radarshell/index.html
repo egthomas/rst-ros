@@ -1,0 +1,78 @@
+<head>
+<title>radarshell</title>
+<link rel=stylesheet href="../../../../css/doc.css" type=text/css>
+</head>
+<body>
+<div id="root">
+
+<div id="banner">
+
+</div>
+
+<div id="location">
+<table width=100% class="location"><tr>
+<td><a href="../../../../index.html">Home</a><td>|</td>
+<td><a href=../../../../superdarn/index.html>superdarn</a></td>
+<td>|</td><td><a href=../../../../superdarn/src.bin/index.html>src.bin</a></td><td>|</td><td><a href=../../../../superdarn/src.bin/os/index.html>os</a></td><td>|</td>
+<td>radarshell</td>
+<td width=100% align=right><a href=../../../../superdarn/src.bin/indexdoc.html>Index</a></td>
+</tr>
+</table>
+</div>
+
+<div id="main">
+<h2 class="doctitle">radarshell</h2>
+<table>
+<tr><td class="docsubtitle" valign=top>Syntax</td></tr>
+<tr><td></td><td width=80% class="docbox" style="font-family: courier;">
+radarshell --help<br>radarshell <em>host</em> <em>port</em><br></td></tr>
+<tr><td class="docsubtitle">Synopsis</td></tr>
+<tr><td></td><td><p>An interactive shell for manipulating radar operating parameters. The four available commands are 1: 'show' (list all parameters and their values), 2: '[variable]=[value]' (change parameter), 3: 'go' (upload parameters to control program), and 4: 'exit' (close shell without modifying parameters).</p></td></tr>
+
+<tr><td class="docsubtitle">Options</td></tr>
+<tr><td></td><td>
+<table width=100%><tr><td width="150" valign="top"><code>--help</code></td><td valign="top">print the help message and exit.</td></tr>
+<tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
+<tr><td width="150" valign="top"><code><em>host</em></code></td><td valign="top">hostname or IP address of the shellserver to connect to (default is localhost).</td></tr>
+<tr><td width="150" valign="top"><code><em>port</em></code></td><td valign="top">port number of the shellserver to connect to on the system (default is 44002).</td></tr>
+</table></td></tr>
+<tr><td class="docsubtitle">Description</td></tr>
+<tr><td></td><td><p>An interactive shell that allows the user to change the operating parameters of the radar while a control program is active.</p>
+<p>The shell supports four commands:</p>
+
+<center><table><tr><td  class="docbox" style="font-family: courier;"><pre>go
+show [<em>variable</em>]
+<em>variable</em>=<em>value</em>
+exit</pre></td></tr></table></center>
+
+<p>Typing "<code>go</code>" will send the altered parameters back to the control program so they will take affect at the start of the next integration period.</p>
+<p>Typing "<code>show</code>" will list the values of the specified variables. If no names are listed then the entire set will be shown.</p>
+<p>A new value is assigned to a variable by using the "<code>=</code>" sign:</p>
+
+<center><table><tr><td  class="docbox" style="font-family: courier;"><pre>bmnum=12
+combf=Hello word</pre></td></tr></table></center>
+
+<p>There should be no spaces between the value, the "<code>=</code>" sign, or the variable name.</p>
+<p>Typing "<code>exit</code>" will close the shell without uploading any parameters to the control program.</p>
+</td></tr>
+<tr><td class="docsubtitle">Examples</td></tr>
+<tr><td></td><td>
+<table ><tr><td class="docbox" ><pre width="80">radarshell localhost 44002</pre></td></tr></table>
+<p>Connect to the shellserver on <code>localhost</code> at port <code>44002</code> and start a new interactive shell session.</p>
+</td></tr>
+
+
+</table>
+<br><br>
+</div>
+
+<div id="tail">
+</div>
+
+</div>
+
+</body>
+
+
+
+
