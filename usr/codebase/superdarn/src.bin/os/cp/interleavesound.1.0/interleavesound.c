@@ -28,6 +28,8 @@
 #include "fitblk.h"
 #include "fitdata.h"
 #include "fitacf.h"
+#include "snddata.h"
+#include "sndwrite.h"
 #include "errlog.h"
 #include "freq.h"
 #include "tcpipmsg.h"
@@ -38,17 +40,13 @@
 #include "global.h"
 #include "reopen.h"
 #include "setup.h"
+#include "snd.h"
 #include "sync.h"
 #include "site.h"
 #include "sitebuild.h"
 #include "siteglobal.h"
 
-#include "sndwrite.h"
-
 #define MAX_SND_FREQS 12
-
-void write_snd_record(char *progname, struct RadarParm *prm,
-                      struct FitData *fit);
 
 #define RT_TASK 3
 
@@ -57,7 +55,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2023/02/18"};
+char progid[80]={"interleavesound 2023/03/03"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -342,6 +340,7 @@ int main(int argc,char *argv[]) {
   }
 
   OpsFitACFStart();
+  OpsSndStart();
 
   do {
 
@@ -546,8 +545,10 @@ int main(int argc,char *argv[]) {
         prm->scan = 0;
       }
 
+      OpsBuildSnd(prm,fit);
+
       /* save the sounding mode data */
-      write_snd_record(progname, prm, fit);
+      write_snd_record(errlog.sock, progname, snd, ststr);
 
       ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
 
@@ -615,55 +616,3 @@ void usage(void)
     printf("\n");
 }
 
-
-/********************** function write_snd_record() ************************/
-/* changed the output to dmap format */
-
-void write_snd_record(char *progname, struct RadarParm *prm, struct FitData *fit) {
-
-  char data_path[100], data_filename[50], filename[80];
-
-  char *snd_dir;
-  FILE *out;
-
-  char logtxt[1024]="";
-  int status;
-
-  /* set up the data directory */
-  /* get the snd data dir */
-  snd_dir = getenv("SD_SND_PATH");
-  if (snd_dir == NULL)
-    sprintf(data_path,"/data/ros/snd/");
-  else {
-    memcpy(data_path,snd_dir,strlen(snd_dir));
-    data_path[strlen(snd_dir)] = '/';
-    data_path[strlen(snd_dir)+1] = 0;
-  }
-
-  /* make up the filename */
-  /* YYYYMMDD.HH.rad.snd */
-  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/ 2)* 2, ststr);
-
-  /* finally make the filename */
-  sprintf(filename, "%s%s.snd", data_path, data_filename);
-
-  /* open the output file */
-  fprintf(stderr,"Sounding Data File: %s\n",filename);
-  out = fopen(filename,"a");
-  if (out == NULL) {
-    /* crap. might as well go home */
-    sprintf(logtxt,"Unable to open sounding file:%s",filename);
-    ErrLog(errlog.sock,progname,logtxt);
-    return;
-  }
-
-  /* write the sounding record */
-  status = SndFwrite(out, prm, fit);
-  if (status == -1) {
-    ErrLog(errlog.sock,progname,"Error writing sounding record.");
-  } else {
-    ErrLog(errlog.sock,progname,"Sounding record successfully written.");
-  }
-
-  fclose(out);
-}
