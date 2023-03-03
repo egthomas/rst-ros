@@ -43,7 +43,7 @@ void OpsBuildSnd(struct RadarParm *prm, struct FitData *fit) {
 
 void write_snd_record(int sock, char *progname, struct SndData *snd, char *ststr) {
 
-  char data_path[100], data_filename[50], filename[80];
+  char data_path[60], data_filename[40], filename[105];
 
   char *snd_dir;
   FILE *out;

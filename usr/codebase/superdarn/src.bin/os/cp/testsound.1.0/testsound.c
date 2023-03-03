@@ -677,7 +677,7 @@ void usage(void)
 
 void write_raw_snd_record(char *progname, struct RadarParm *prm, struct RawData *raw) {
 
-  char data_path[100], data_filename[50], filename[80];
+  char data_path[60], data_filename[40], filename[110];
 
   char *snd_dir;
   FILE *out;
