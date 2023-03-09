@@ -144,6 +144,9 @@ int main(int argc,char *argv[]) {
   int i,n;
   unsigned char fast=0;
   unsigned char pfisr=0;
+  unsigned char tromso=0;               /* ICE beams over Tromso heater */
+  unsigned char risr=0;                 /* ICW beams over RISR-N & -C   */
+  unsigned char lyr=0;                  /* ICE beams over Longyearbyen  */
   unsigned char discretion=0;
   int status=0;
   int fixfrq=0;
@@ -173,9 +176,27 @@ int main(int argc,char *argv[]) {
   int bmsw[40] =
              {22,23,21,20,18,19,22,17,21,16,18,15,22,14,21,13,18,12,22,11,
               21,10,18, 9,22, 8,21, 7,18, 6,22, 5,21, 4,18, 3,22, 2,21,18};
+  /* ICE camping beams over Tromso and Skiboten: 20, 21, 22 */
+  int eiscatbms[40] =
+             {20, 0,21, 1,22, 2,20, 3,21, 4,22, 5,20, 6,21, 7,22, 8,20, 9,
+              21,10,22,11,20,12,21,13,22,14,20,15,21,16,22,17,20,18,21,19};
+  /*
+   * alt that 'camps' on 19,20,21
+  int eiscatbms[40] =
+             {19, 0,20, 1,21, 2,19, 3,20, 4,21, 5,19, 6,20, 7,21, 8,19, 9,
+              20,10,21,11,19,12,20,13,21,14,19,15,20,16,21,17,19,18,20,21};
+   */
+  /* ICE camping beams over Longyearbyen: 11, 12, 13 */
+  int lyrbms[40] =
+             {11, 0,12, 1,13, 2,11, 3,12, 4,13, 5,11, 6,12, 7,13, 8,11, 9,
+              12,10,13,14,11,15,12,16,13,17,11,18,12,19,13,20,11,21,12,13};
+  /* ICW camping beams over RISR: 17, 16, 15 */
+  int rbisr[40] =
+             {17,23,16,22,15,22,17,20,16,19,15,18,17,14,16,13,15,12,17,11,
+              16,10,15, 9,17, 8,16, 7,15, 6,17, 5,16, 4,15, 3,17, 2,16,15};
   /* cvw camping beams over PFISR: 12, 10, 8 */
   int pbisr[40] =
-             {12,23,10,22, 8,22,12,20,10,19, 8,18,12,17,10,16, 8,15,12,14,
+             {12,23,10,22, 8,21,12,20,10,19, 8,18,12,17,10,16, 8,15,12,14,
               10,13, 8,11,12, 9,10, 7, 8, 6,12, 5,10, 4, 8, 3,12, 2,10, 8};
 
   /* use odd/even beams to generate a 1-min scan at lower spatial resolution */
@@ -202,6 +223,9 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"di",    'x',&discretion);
   OptionAdd(&opt,"fast",  'x',&fast);
   OptionAdd(&opt,"pfisr", 'x',&pfisr);
+  OptionAdd(&opt,"tromso",'x',&tromso);
+  OptionAdd(&opt,"risr",  'x',&risr);
+  OptionAdd(&opt,"lyr",   'x',&lyr);
   OptionAdd(&opt,"frang", 'i',&frang);
   OptionAdd(&opt,"rsep",  'i',&rsep);
   OptionAdd(&opt,"dt",    'i',&day);
@@ -260,6 +284,17 @@ int main(int argc,char *argv[]) {
       bms = alte;       /* odd/even beam sequence */
     else
       bms = bmse;       /* standard 2-min sequence */
+    if (tromso) {	/* ICE camp over Tromso and Skiboten */
+      bms = eiscatbms;
+      cbm[0] = 20;
+      cbm[1] = 21;
+      cbm[2] = 22;
+    } else if (lyr) {	/* ICE camping beams over Longyearbyen */
+      bms = lyrbms;
+      cbm[0] = 11;
+      cbm[1] = 12;
+      cbm[2] = 13;
+    }
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
     cbm[0] = 22;
     cbm[1] = 21;
@@ -273,6 +308,11 @@ int main(int argc,char *argv[]) {
       cbm[0] = 12;
       cbm[1] = 10;
       cbm[2] =  8;
+    } else if (risr) {	/* ICW camping beams over RISR */
+      bms = rbisr;
+      cbm[0] = 17;
+      cbm[1] = 16;
+      cbm[2] = 15;
     }
   } else {
     if (hlp) usage();
@@ -280,6 +320,7 @@ int main(int argc,char *argv[]) {
     return (-1);
   }
 
+  /* SGS: this will likely break... */
   if (strcmp(ststr,"fhw") == 0) {
     for (i=0; i<nintgs; i++)
       bms[i] -= 2; /* decrement beams by 2 for 22 beam radar */
