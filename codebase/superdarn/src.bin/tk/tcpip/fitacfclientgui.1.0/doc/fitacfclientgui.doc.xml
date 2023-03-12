@@ -15,6 +15,8 @@
 </option>
 <option><on>-color</on><od>display the data stream in color according to the selected parameter (default is power).</od>
 </option>
+<option><on>-gs</on><od>color ground scatter white (velocity only).</od>
+</option>
 <option><on>-p</on><od>plot power.</od>
 </option>
 <option><on>-v</on><od>plot velocity.</od>
