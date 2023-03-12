@@ -290,6 +290,34 @@ int main(int argc,char *argv[]) {
             smin=-100;
           }
         }
+      } else if (c == KEY_RIGHT) {
+        if (pwrflg) {
+          pwrflg=0;
+          velflg=1;
+        } else if (velflg) {
+          velflg=0;
+          widflg=1;
+        } else if (widflg) {
+          widflg=0;
+          elvflg=1;
+        } else if (elvflg) {
+          elvflg=0;
+          pwrflg=1;
+        }
+      } else if (c == KEY_LEFT) {
+        if (pwrflg) {
+          pwrflg=0;
+          elvflg=1;
+        } else if (velflg) {
+          velflg=0;
+          pwrflg=1;
+        } else if (widflg) {
+          widflg=0;
+          velflg=1;
+        } else if (elvflg) {
+          elvflg=0;
+          widflg=1;
+        }
       } else if (c != ERR) break;
     } else if (c != ERR) break;
 
