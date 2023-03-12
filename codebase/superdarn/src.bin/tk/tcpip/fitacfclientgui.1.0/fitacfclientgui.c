@@ -269,22 +269,22 @@ int main(int argc,char *argv[]) {
       } else if (c == 'g') {
         gflg = !gflg;
       } else if (c == KEY_UP) {
-        if (pwrflg || elvflg ) smax=smax+5;
-        else if (widflg) smax=smax+50;
+        if (pwrflg || elvflg ) smax += 5;
+        else if (widflg) smax += 50;
         else if (velflg) {
-          smax=smax+100;
-          smin=smin-100;
+          smax += 100;
+          smin -= 100;
         }
       } else if (c == KEY_DOWN) {
         if (pwrflg || elvflg ) {
-          smax=smax-5;
+          smax -= 5;
           if (smax < 5) smax=5;
         } else if (widflg) {
-          smax=smax-50;
+          smax -= 50;
           if (smax < 50) smax=50;
         } else if (velflg) {
-          smax=smax-100;
-          smin=smin+100;
+          smax -= 100;
+          smin += 100;
           if (smax < 100) {
             smax=100;
             smin=-100;
@@ -347,11 +347,13 @@ int main(int argc,char *argv[]) {
       for (i=0; i<nrng; i++) {
         if ((i >= prm->nrang) || (i >= MAX_RANGE)) break;
         buffer.qflg[prm->bmnum][i]=fit->rng[i].qflg;
-        buffer.gsct[prm->bmnum][i]=fit->rng[i].gsct;
-        buffer.pow[prm->bmnum][i]=fit->rng[i].p_l;
-        buffer.vel[prm->bmnum][i]=fit->rng[i].v;
-        buffer.wid[prm->bmnum][i]=fit->rng[i].w_l;
-        if (prm->xcf !=0) buffer.elv[prm->bmnum][i]=fit->elv[i].normal;
+        if (fit->rng[i].qflg == 1) {
+          buffer.gsct[prm->bmnum][i]=fit->rng[i].gsct;
+          buffer.pow[prm->bmnum][i]=fit->rng[i].p_l;
+          buffer.vel[prm->bmnum][i]=fit->rng[i].v;
+          buffer.wid[prm->bmnum][i]=fit->rng[i].w_l;
+          if (prm->xcf !=0 && fit->elv !=NULL) buffer.elv[prm->bmnum][i]=fit->elv[i].normal;
+        }
       }
 
       /* Print date/time and radar operating parameters */
