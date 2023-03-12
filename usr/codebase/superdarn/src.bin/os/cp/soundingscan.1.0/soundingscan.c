@@ -142,9 +142,16 @@ int main(int argc,char *argv[]) {
   int bmus    = 0;
 
   /* Soundingscan specific parameters  */
+  /* bistatic frequencies ?
   int sndfreqs[] = {10250, 10725, 11500, 11925, 12375,
                     12800, 13550, 14450, 15200, 15800};
   int nfreqs  = 10;
+  */
+
+  /* Iceland test frequencies */
+  int sndfreqs[] = {10200, 10400, 10600, 10800, 11000};
+  int nfreqs  = 5;
+
   /*
   int sndfreqs[] = {10250, 10725, 11800, 12800, 13800, 14500, 15200, 15800};
   int nfreqs  = 8;
@@ -201,6 +208,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "sb",     'i', &sbm);
   OptionAdd(&opt, "eb",     'i', &ebm);
   OptionAdd(&opt, "fixfrq", 'x', &fixfrq);   /* fix the transmit frequency  */
+  OptionAdd(&opt, "frqrng", 'i', &frqrng);   /* fix the FCLR window [kHz]   */
   OptionAdd(&opt, "cpid",   'i', &cpid);     /* allow user to specify CPID, *
                                                 e.g., RX-only               */
   OptionAdd(&opt, "rxonly", 'x', &rxonly);   /* RX-only mode                */
@@ -538,6 +546,7 @@ void usage(void)
   printf("  -stid char: radar string (must be set here for dual radars)\n");
   printf("  -cpid int : set to override control program idx \n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
+  printf("-frqrng int : set the clear frequency search window (kHz)\n");
   printf("-nowait     : do not wait at end of scan boundary.\n");
   printf("-rxonly     : bistatic RX only mode.\n");
   printf("-bm_sync    : set to enable beam syncing.\n");
