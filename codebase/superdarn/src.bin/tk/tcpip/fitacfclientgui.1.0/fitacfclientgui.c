@@ -294,29 +294,45 @@ int main(int argc,char *argv[]) {
         if (pwrflg) {
           pwrflg=0;
           velflg=1;
+          smin=vmin;
+          smax=vmax;
         } else if (velflg) {
           velflg=0;
           widflg=1;
+          smin=wmin;
+          smax=wmax;
         } else if (widflg) {
           widflg=0;
           elvflg=1;
+          smin=emin;
+          smax=emax;
         } else if (elvflg) {
           elvflg=0;
           pwrflg=1;
+          smin=pmin;
+          smax=pmax;
         }
       } else if (c == KEY_LEFT) {
         if (pwrflg) {
           pwrflg=0;
           elvflg=1;
+          smin=emin;
+          smax=emax;
         } else if (velflg) {
           velflg=0;
           pwrflg=1;
+          smin=pmin;
+          smax=pmax;
         } else if (widflg) {
           widflg=0;
           velflg=1;
+          smin=vmin;
+          smax=vmax;
         } else if (elvflg) {
           elvflg=0;
           widflg=1;
+          smin=wmin;
+          smax=wmax;
         }
       } else if (c != ERR) break;
     } else if (c != ERR) break;
