@@ -417,7 +417,10 @@ int main(int argc,char *argv[]) {
       /* Draw beam and gate labels */
       move(12, 0);
       printw("B\\G 0         ");
-      for (i=1;i*10<nrng;i++) printw("%d        ",i*10);
+      for (i=1;i*10<nrng;i++) {
+        if (i*10 < 100) printw("%d        ",i*10);
+        else            printw("%d       ",i*10);
+      }
       printw("\n");
 
       if (colorflg) {
