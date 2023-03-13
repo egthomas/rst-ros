@@ -140,7 +140,7 @@ program begins, and the user can override them using command line arguments
 to the control program.
 
 
-Scheduling the radar
+Scheduling the Radar
 --------------------
 
 The schedule files contain a list of starting times and control programs.
@@ -168,7 +168,7 @@ to specifiy the path where the control programs are located (this path
 is now set by default to the USR_BINPATH environment variable).
 
 
-Running the radar
+Running the Radar
 -----------------
 
 Two scripts control the operation of the radar:
@@ -188,3 +188,28 @@ scripts, the ROS hostname should be set to the localhost IP address
 appropriate control program in the schedule file. Alternatively, the
 "ros.host" value in the site configuration file can be set to 127.0.0.1
 instead.
+
+
+Monitoring the Data
+-------------------
+
+If rtserver is enabled in the start.radar (or test.radar) script,
+the fitted data can be monitored in real-time from the terminal
+using the command
+
+    fitacfclientgui -color localhost [port]
+
+where [port] is specified by the "-tp" option to rtserver (default
+is 1024). Radar operating parameters are displayed at the top of the
+screen, and ground and ionospheric scatter are displayed with range
+gates running horizontally and beams running vertically down the
+screen. The number of range gates can be adjusted with the "-nrange"
+option. Press any key to exit the program.
+
+By setting the "-color" option to enable color mode support, different
+fitted parameters can be displayed by pressing the 'p' (power), 'v'
+(velocity), 'w' (spectral width), or 'e' (elevation angle) keys.
+The right and left arrow keys can also be used to cycle through the
+fitted parameters, and the up and down arrow keys can be used to adjust
+the color scale. When displaying velocity, the 'g' key can be used to
+toggle the ground scatter flag. Press any other key to quit.
