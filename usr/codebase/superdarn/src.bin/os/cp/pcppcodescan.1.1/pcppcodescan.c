@@ -243,6 +243,8 @@ int main(int argc,char *argv[]) {
 
   arg=OptionProcess(1,argc,argv,&opt,NULL);  /* this fixes it... SGS */
 
+  sprintf(progname,"pcppcodescan");
+
   strncpy(combf,progid,80);
 
   if ((errlog.sock=TCPIPMsgOpen(errlog.host,errlog.port))==-1) {
@@ -280,8 +282,6 @@ int main(int argc,char *argv[]) {
   if (discretion) cp= -cp;
 
   txpl=(nbaud*rsep*20)/3;
-
-  sprintf(progname,"pcppcodescan");
 
   OpsLogStart(errlog.sock,progname,argc,argv);
 

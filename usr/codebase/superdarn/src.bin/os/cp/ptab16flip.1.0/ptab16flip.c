@@ -362,6 +362,8 @@ int main(int argc,char *argv[])
   arg=OptionProcess(1,argc,argv,&opt,NULL);
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
+  sprintf(progname,"ptab16flip");
+
   printf("Station ID: %s  %d\n",ststr,stid);
   strncpy(combf,progid,80);
 
@@ -407,8 +409,6 @@ int main(int argc,char *argv[])
   if (discretion) cp = -cp;
 
   txpl=(rsep*20)/3;
-
-  sprintf(progname,"ptab16flip");
 
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);

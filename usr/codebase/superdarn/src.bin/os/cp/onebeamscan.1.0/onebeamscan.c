@@ -248,6 +248,9 @@ int main(int argc,char *argv[]) {
   /* reprocess the commandline since some things are reset by SiteStart */
   arg = OptionProcess(1, argc, argv, &opt, NULL);  
 
+  if (fast) sprintf(progname,"onebeamscan (fast)");
+  else sprintf(progname,"onebeamscan");
+
   printf("Station ID: %s  %d\n", ststr, stid);
   strncpy(combf, progid, 80);   
  
@@ -298,9 +301,6 @@ int main(int argc,char *argv[]) {
   if (discretion) cp = -cp;
 
   txpl=(rsep*20)/3;
-
-  if (fast) sprintf(progname,"onebeamscan (fast)");
-  else sprintf(progname,"onebeamscan");
 
   OpsLogStart(errlog.sock,progname,argc,argv);  
   OpsSetupTask(tnum,task,errlog.sock,progname);

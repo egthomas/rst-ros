@@ -219,8 +219,10 @@ int main(int argc,char *argv[]) {
   /* Important: need to do this for command line arguments to work */
   arg=OptionProcess(1,argc,argv,&opt,NULL);
 
-  printf("Station ID: %s %d\n" ,ststr, stid);
+  if (fast) sprintf(progname,"tauscan_11 (fast)");
+  else sprintf(progname,"tauscan_11");
 
+  printf("Station ID: %s %d\n" ,ststr, stid);
   strncpy(combf,progid,80);
 
   if ((errlog.sock=TCPIPMsgOpen(errlog.host,errlog.port))==-1) {
@@ -269,9 +271,6 @@ int main(int argc,char *argv[]) {
   if (discretion) cp= -cp;
 
   txpl=(rsep*20)/3;
-
-  if (fast) sprintf(progname,"tauscan_11 (fast)");
-  else sprintf(progname,"tauscan_11");
 
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
