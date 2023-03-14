@@ -35,6 +35,7 @@ fitacfclientgui --help<br>fitacfclientgui <em>host</em> <em>port</em><br></td></
 <tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
 <tr><td width="150" valign="top"><code>-nrange <em>nrng</em></code></td><td valign="top">set the maximum number of range gates to display to <em>nrng</em> (default is 75).</td></tr>
 <tr><td width="150" valign="top"><code>-color</code></td><td valign="top">display the data stream in color according to the selected parameter (default is power).</td></tr>
+<tr><td width="150" valign="top"><code>-gs</code></td><td valign="top">color ground scatter white (velocity only).</td></tr>
 <tr><td width="150" valign="top"><code>-p</code></td><td valign="top">plot power.</td></tr>
 <tr><td width="150" valign="top"><code>-v</code></td><td valign="top">plot velocity.</td></tr>
 <tr><td width="150" valign="top"><code>-w</code></td><td valign="top">plot spectral width.</td></tr>
@@ -51,7 +52,7 @@ fitacfclientgui --help<br>fitacfclientgui <em>host</em> <em>port</em><br></td></
 <tr><td width="150" valign="top"><code><em>port</em></code></td><td valign="top">port number to connect to on the system.</td></tr></table></td></tr>
 <tr><td class="docsubtitle">Description</td></tr>
 <tr><td></td><td><p>Graphical client program for <code>fitacf</code> TCP/IP data streams.</p>
-<p>The program dumps an ASCII representation of the <code>fitacf</code> data stream to standard output. When color mode is enabled, users can toggle between power, velocity, spectral width, and elevation angle by pressing 'p', 'v', w', or 'e', respectively. Press any other key to exit the program.</p>
+<p>The program dumps an ASCII representation of the <code>fitacf</code> data stream to standard output. When color mode is enabled, users can toggle between power, velocity, spectral width, and elevation angle by pressing 'p', 'v', w', or 'e', respectively. The 'g' key toggles the ground scatter flag, while the up/down arrow keys adjust the color scale maximum and right/left arrow keys cycle through parameters. Press any other key to exit the program.</p>
 </td></tr>
 <tr><td class="docsubtitle">Examples</td></tr>
 <tr><td></td><td>
