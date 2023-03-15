@@ -148,10 +148,10 @@ int SiteRosStart(char *host,char *ststr)
 
   /* Get the XCF (ie elevation angle) collection option */
   if (config_lookup_int(&cfg, "xcf", &ltemp)) {
-    xcf = ltemp;
+    xcnt = ltemp;
   } else {
-    xcf = 1;
-    fprintf(stderr,"Site Cfg Warning:: 'xcf' setting undefined in site cfg file, using: %d\n",xcf);
+    xcnt = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'xcf' setting undefined in site cfg file, using: %d\n",xcnt);
   }
 
   /* Get the starting beam number */
