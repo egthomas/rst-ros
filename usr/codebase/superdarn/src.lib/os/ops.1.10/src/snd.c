@@ -20,9 +20,43 @@
 #include "sndwrite.h"
 #include "errlog.h"
 #include "global.h"
+#include "snd.h"
 
+
+int snd_freqs_tot=8;
+int snd_freqs[MAX_SND_FREQS]= {11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 0, 0, 0, 0 };
 
 struct SndData *snd;
+
+
+void OpsLoadSndFreqs(char *ststr) {
+  char snd_filename[100];
+  FILE *snd_dat;
+  char *path;
+
+  int snd_freq_cnt=0;
+
+  /* load the sounder frequencies from file in site directory if present */
+  path = getenv("SD_SITE_PATH");
+  if (path == NULL) {
+    fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined.\n");
+  }
+
+  sprintf(snd_filename,"%s/site.%s/sounder_%s.dat", path, ststr, ststr);
+  fprintf(stderr,"Checking Sounder File: %s\n",snd_filename);
+  snd_dat = fopen(snd_filename, "r");
+  if (snd_dat != NULL) {
+    fscanf(snd_dat, "%d", &snd_freqs_tot);
+    if (snd_freqs_tot > MAX_SND_FREQS) snd_freqs_tot = MAX_SND_FREQS;
+    for (snd_freq_cnt=0; snd_freq_cnt < snd_freqs_tot; snd_freq_cnt++)
+      fscanf(snd_dat, "%d", &snd_freqs[snd_freq_cnt]);
+    fclose(snd_dat);
+    fprintf(stderr,"Sounder File: %s read\n",snd_filename);
+  } else {
+    fprintf(stderr,"Sounder File: %s not found\n",snd_filename);
+  }
+
+}
 
 
 int OpsSndStart() {
@@ -41,7 +75,7 @@ void OpsBuildSnd(struct RadarParm *prm, struct FitData *fit) {
 }
 
 
-void write_snd_record(int sock, char *progname, struct SndData *snd, char *ststr) {
+void OpsWriteSnd(int sock, char *progname, struct SndData *snd, char *ststr) {
 
   char data_path[60], data_filename[40], filename[105];
 
@@ -75,7 +109,7 @@ void write_snd_record(int sock, char *progname, struct SndData *snd, char *ststr
   out = fopen(filename,"a");
   if (out == NULL) {
     /* crap. might as well go home */
-    sprintf(logtxt,"Unable to open sounding file:%s",filename);
+    sprintf(logtxt,"Unable to open sounding file: %s",filename);
     ErrLog(sock,progname,logtxt);
     return;
   }

@@ -46,8 +46,6 @@
 #include "rosmsg.h"
 #include "tsg.h"
 
-#define MAX_SND_FREQS 12
-
 #define RT_TASK 3
 
 
@@ -152,12 +150,6 @@ int main(int argc,char *argv[])
 
 
   /* ---------------- Variables for sounding --------------- */
-  char snd_filename[100];
-  FILE *snd_dat;
-  /* If the file $SD_SND_PATH/sounder_[rad].dat exists, the next two parameters are read from it */
-  /* the file contains one integer value per line */
-  int snd_freqs_tot=8;
-  int snd_freqs[MAX_SND_FREQS]= {11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 0, 0, 0, 0 };
   int *snd_bms;
   int snd_bmse[]={0,2,4,6,8,10,12,14,16,18};   /* beam sequences for 24-beam MSI radars using only */
   int snd_bmsw[]={22,20,18,16,14,12,10,8,6,4}; /*  the 20 most meridional beams */
@@ -170,8 +162,6 @@ int main(int argc,char *argv[])
   int snd_intt_sc=1;
   int snd_intt_us=500000;
   float snd_time, snd_intt, time_needed=1.25;
-
-  char *path;
 
   snd_intt = snd_intt_sc + snd_intt_us*1e-6;
   /* ------------------------------------------------------- */
@@ -266,26 +256,8 @@ int main(int argc,char *argv[])
     return (-1);
   }
 
-  /* load the sounder frequencies from file in site directory if present */
-  path = getenv("SD_SITE_PATH");
-  if (path == NULL) {
-    fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined.\n");
-  }
-
-  sprintf(snd_filename,"%s/site.%s/sounder_%s.dat", path, ststr, ststr);
-  fprintf(stderr,"Checking Sounder File: %s\n",snd_filename);
-  snd_dat = fopen(snd_filename, "r");
-  if (snd_dat != NULL) {
-    fscanf(snd_dat, "%d", &snd_freqs_tot);
-    if (snd_freqs_tot > 12) snd_freqs_tot = 12;
-    for (snd_freq_cnt=0; snd_freq_cnt < snd_freqs_tot; snd_freq_cnt++)
-      fscanf(snd_dat, "%d", &snd_freqs[snd_freq_cnt]);
-    snd_freq_cnt = 0;
-    fclose(snd_dat);
-    fprintf(stderr,"Sounder File: %s read\n",snd_filename);
-  } else {
-    fprintf(stderr,"Sounder File: %s not found\n",snd_filename);
-  }
+  /* Load the sounding frequencies */
+  OpsLoadSndFreqs(ststr);
 
   OpsStart(ststr);
 
@@ -616,7 +588,7 @@ int main(int argc,char *argv[])
       OpsBuildSnd(prm,fit);
 
       /* save the sounding mode data */
-      write_snd_record(errlog.sock, progname, snd, ststr);
+      OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
       ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
 
