@@ -56,7 +56,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalsound 2023/03/03"};
+char progid[80]={"normalsound 2023/03/15"};
 char progname[256];
 
 int arg=0;
@@ -495,7 +495,7 @@ int main(int argc,char *argv[])
     scan = -2;
 
     /* set the xcf variable to do cross-correlations (AOA) */
-    xcf = 1;
+    if (xcnt > 1) xcf = 1;
 
     /* set the sounding mode integration time and number of ranges */
     intsc = snd_intt_sc;
