@@ -15,7 +15,19 @@
 #include "sequence.h"
 
 
-int OpsBuild7pulse(struct sequence *seq) {
+struct sequence *OpsSequenceMake() {
+
+  struct sequence *ptr=NULL;
+  ptr=malloc(sizeof(struct sequence));
+  if (ptr==NULL) return NULL;
+  memset(ptr,0,sizeof(struct sequence));
+  ptr->ptab=NULL;
+  ptr->lags=NULL;
+  return ptr;
+}
+
+
+int OpsBuild7pulse(struct sequence *ptr) {
 
   void *tmp=NULL;
 
@@ -43,26 +55,26 @@ int OpsBuild7pulse(struct sequence *seq) {
     { 9,27},    /* 18 */
     {27,27}};   /* alternate lag-0 */
 
-  seq->mppul = 7;
-  seq->mplgs = 18;
-  seq->mpinc = 2400;
-  seq->mplgexs = 0;
+  ptr->mppul = 7;
+  ptr->mplgs = 18;
+  ptr->mpinc = 2400;
+  ptr->mplgexs = 0;
 
-  tmp = malloc(sizeof(int)*seq->mppul);
+  tmp = malloc(sizeof(ptab));
   if (tmp==NULL) return -1;
-  memcpy(tmp,ptab,sizeof(int)*seq->mppul);
-  seq->ptab = tmp;
+  memcpy(tmp,ptab,sizeof(ptab));
+  ptr->ptab = tmp;
 
-  tmp = realloc(tmp,sizeof(lags));
+  tmp = malloc(sizeof(lags));
   if (tmp==NULL) return -1;
   memcpy(tmp,lags,sizeof(lags));
-  seq->lags = tmp;
+  ptr->lags = tmp;
 
   return 0;
 }
 
 
-int OpsBuild8pulse(struct sequence *seq) {
+int OpsBuild8pulse(struct sequence *ptr) {
 
   void *tmp=NULL;
 
@@ -97,26 +109,26 @@ int OpsBuild8pulse(struct sequence *seq) {
 
     {43,43}};   /* alternate lag-0  */
 
-  seq->mppul = 8;
-  seq->mplgs = 23;
-  seq->mpinc = 1500;
-  seq->mplgexs = 0;
+  ptr->mppul = 8;
+  ptr->mplgs = 23;
+  ptr->mpinc = 1500;
+  ptr->mplgexs = 0;
 
-  tmp = malloc(sizeof(int)*seq->mppul);
+  tmp = malloc(sizeof(ptab));
   if (tmp==NULL) return -1;
-  memcpy(tmp,ptab,sizeof(int)*seq->mppul);
-  seq->ptab = tmp;
+  memcpy(tmp,ptab,sizeof(ptab));
+  ptr->ptab = tmp;
 
-  tmp = realloc(tmp,sizeof(lags));
+  tmp = malloc(sizeof(lags));
   if (tmp==NULL) return -1;
   memcpy(tmp,lags,sizeof(lags));
-  seq->lags = tmp;
+  ptr->lags = tmp;
 
   return 0;
 }
 
 
-int OpsBuild16pulse(struct sequence *seq) {
+int OpsBuild16pulse(struct sequence *ptr) {
 
   void *tmp=NULL;
 
@@ -246,26 +258,26 @@ int OpsBuild16pulse(struct sequence *seq) {
     {0,1495},      /*  120 */
     {1495,1495}};  /*  121 */
 
-  seq->mppul = 16;
-  seq->mplgs = 121;
-  seq->mpinc = 100;
-  seq->mplgexs = 0;
+  ptr->mppul = 16;
+  ptr->mplgs = 121;
+  ptr->mpinc = 100;
+  ptr->mplgexs = 0;
 
-  tmp = malloc(sizeof(int)*seq->mppul);
+  tmp = malloc(sizeof(ptab));
   if (tmp==NULL) return -1;
-  memcpy(tmp,ptab,sizeof(int)*seq->mppul);
-  seq->ptab = tmp;
+  memcpy(tmp,ptab,sizeof(ptab));
+  ptr->ptab = tmp;
 
-  tmp = realloc(tmp,sizeof(lags));
+  tmp = malloc(sizeof(lags));
   if (tmp==NULL) return -1;
   memcpy(tmp,lags,sizeof(lags));
-  seq->lags = tmp;
+  ptr->lags = tmp;
 
   return 0;
 }
 
 
-int OpsBuildTauscan(struct sequence *seq) {
+int OpsBuildTauscan(struct sequence *ptr) {
 
   int i=0;
   void *tmp=NULL;
@@ -310,32 +322,32 @@ int OpsBuildTauscan(struct sequence *seq) {
     {64,64}     /* alternate lag zero */
   };
 
-  seq->mppul = 13;
-  seq->mplgs = 18;
-  seq->mpinc = 2400;
-  seq->mplgexs = 0;
+  ptr->mppul = 13;
+  ptr->mplgs = 18;
+  ptr->mpinc = 2400;
+  ptr->mplgexs = 0;
 
   for (i=1; i<LAG_SIZE; i++) {
     if ((lags[i][0]==64) && (lags[i][1]==64)) break;
-    seq->mplgexs++;
+    ptr->mplgexs++;
   }
-  seq->mplgexs++;
+  ptr->mplgexs++;
 
-  tmp = malloc(sizeof(int)*seq->mppul);
+  tmp = malloc(sizeof(ptab));
   if (tmp==NULL) return -1;
-  memcpy(tmp,ptab,sizeof(int)*seq->mppul);
-  seq->ptab = tmp;
+  memcpy(tmp,ptab,sizeof(ptab));
+  ptr->ptab = tmp;
 
-  tmp = realloc(tmp,sizeof(lags));
+  tmp = malloc(sizeof(lags));
   if (tmp==NULL) return -1;
   memcpy(tmp,lags,sizeof(lags));
-  seq->lags = tmp;
+  ptr->lags = tmp;
 
   return 0;
 }
 
 
-int OpsBuildTauscan11(struct sequence *seq) {
+int OpsBuildTauscan11(struct sequence *ptr) {
 
   int i=0;
   void *tmp=NULL;
@@ -369,26 +381,26 @@ int OpsBuildTauscan11(struct sequence *seq) {
     {42,42}     /* alternate lag zero */
   };
 
-  seq->mppul = 11;
-  seq->mplgs = 12;
-  seq->mpinc = 3000;
-  seq->mplgexs = 0;
+  ptr->mppul = 11;
+  ptr->mplgs = 12;
+  ptr->mpinc = 3000;
+  ptr->mplgexs = 0;
 
   for (i=1; i<LAG_SIZE; i++) {
     if ((lags[i][0]==42) && (lags[i][1]==42)) break;
-    seq->mplgexs++;
+    ptr->mplgexs++;
   }
-  seq->mplgexs++;
+  ptr->mplgexs++;
 
-  tmp = malloc(sizeof(int)*seq->mppul);
+  tmp = malloc(sizeof(ptab));
   if (tmp==NULL) return -1;
-  memcpy(tmp,ptab,sizeof(int)*seq->mppul);
-  seq->ptab = tmp;
+  memcpy(tmp,ptab,sizeof(ptab));
+  ptr->ptab = tmp;
 
-  tmp = realloc(tmp,sizeof(lags));
+  tmp = malloc(sizeof(lags));
   if (tmp==NULL) return -1;
   memcpy(tmp,lags,sizeof(lags));
-  seq->lags = tmp;
+  ptr->lags = tmp;
 
   return 0;
 }

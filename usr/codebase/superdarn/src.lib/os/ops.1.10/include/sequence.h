@@ -16,11 +16,13 @@ struct sequence {
   int (*lags)[2];
 };
 
-int OpsBuild7pulse(struct sequence *seq);
-int OpsBuild8pulse(struct sequence *seq);
-int OpsBuild16pulse(struct sequence *seq);
-int OpsBuildTauscan(struct sequence *seq);
-int OpsBuildTauscan11(struct sequence *seq);
+struct sequence *OpsSequenceMake();
+
+int OpsBuild7pulse(struct sequence *ptr);
+int OpsBuild8pulse(struct sequence *ptr);
+int OpsBuild16pulse(struct sequence *ptr);
+int OpsBuildTauscan(struct sequence *ptr);
+int OpsBuildTauscan11(struct sequence *ptr);
 
 #endif
 
