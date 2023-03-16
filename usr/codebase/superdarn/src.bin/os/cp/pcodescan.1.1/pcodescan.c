@@ -39,6 +39,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 
@@ -72,7 +73,6 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  int ptab[8] = {0,14,22,24,27,31,42,43};
   int *bcode;
   int bcode2[2]={1,-1};
   int bcode3[3]={1,1,-1};
@@ -81,35 +81,6 @@ int main(int argc,char *argv[]) {
   int bcode7[7]={1,1,1,-1,-1,1,-1};
   int bcode11[11]={1,1,1,-1,-1,-1,1,-1,-1,1,-1};
   int bcode13[13]={1,1,1,1,1,-1,-1,1,1,-1,1,-1,1};
-
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
 
   char logtxt[1024];
 
@@ -146,12 +117,17 @@ int main(int argc,char *argv[]) {
   int bmsc    = 6;
   int bmus    = 0;
 
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
   cp    = 998;
   intsc = 7;
   intus = 0;
-  mppul = 8;
-  mplgs = 23;
-  mpinc = 1500;
+  mppul = seq->mppul;
+  mplgs = seq->mplgs;
+  mpinc = seq->mpinc;
   nrang = 300;
   rsep  = 15;
   nbaud = 3;
@@ -342,7 +318,7 @@ int main(int argc,char *argv[]) {
   OpsFitACFStart();
 
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-  tsgid = SiteTimeSeq(ptab);
+  tsgid = SiteTimeSeq(seq->ptab);
 
   if (bm_sync) skip = OpsFindSkip(scnsc,scnus, bmsc,bmus, 0);
   else         skip = OpsFindSkip(scnsc,scnus, intsc,intus, 0);
@@ -427,7 +403,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
-      nave = SiteIntegrate(lags);
+      nave = SiteIntegrate(seq->lags);
       if (nave < 0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -436,7 +412,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 

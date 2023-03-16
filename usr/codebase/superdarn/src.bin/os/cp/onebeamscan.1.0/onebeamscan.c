@@ -48,6 +48,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 #include "site.h"
@@ -82,43 +83,6 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  /*
-   * commentary here: SGS
-   * It seems that the mode should be decoupled from the pulse sequence.
-   * The pulse table and lag table should be externally defined with some
-   * way of determining the time it takes for a given sequence.
-   */
-
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
-
   char logtxt[1024];
 
   int exitpoll=0;
@@ -147,6 +111,8 @@ int main(int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
+  struct sequence *seq;
+
   if (debug) {
     printf("Size of int %lu\n",sizeof(int));
     printf("Size of long %lu\n",sizeof(long));
@@ -163,15 +129,18 @@ int main(int argc,char *argv[]) {
     printf("Size of Struct SiteSettings  %lu\n",sizeof(struct SiteSettings));
   }
 
-  cp     = 1240;  /* CPID */
-  intsc  = 7;     /* integration period; recomputed below ... */
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
+  cp     = 1240;        /* CPID */
+  intsc  = 7;           /* integration period; recomputed below ... */
   intus  = 0;
-  mppul  = 8;     /* number of pulses; tied to array above ... */
-  mplgs  = 23;    /* same here for the number of lags */
-  mpinc  = 1500;  /* multi-pulse increment [us] */
-  nrang  = 100;   /* the number of ranges gets set in SiteXXXStart() */
-  rsep   = 45;    /* same for the range separation */
-  txpl   = 300;   /* pulse length [us]; gets redefined below... */
+  mppul  = seq->mppul;  /* number of pulses */
+  mplgs  = seq->mplgs;  /* number of lags */
+  mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
+  nrang  = 100;         /* the number of ranges gets set in SiteXXXStart() */
+  rsep   = 45;          /* same for the range separation */
+  txpl   = 300;         /* pulse length [us]; gets redefined below... */
 
   dmpinc = nmpinc = mpinc;  /* set day and night to the same,
                                 but could change */
@@ -314,7 +283,7 @@ int main(int argc,char *argv[]) {
   OpsFitACFStart();
   
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-  tsgid = SiteTimeSeq(ptab);
+  tsgid = SiteTimeSeq(seq->ptab);
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -377,7 +346,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
     
-      nave = SiteIntegrate(lags);   
+      nave = SiteIntegrate(seq->lags);   
       if (nave < 0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt); 
@@ -386,7 +355,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 

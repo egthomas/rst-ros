@@ -39,6 +39,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "snd.h"
 #include "sync.h"
@@ -80,36 +81,6 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[])
 {
-
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
 
   char logtxt[1024];
 
@@ -171,16 +142,20 @@ int main(int argc,char *argv[])
   snd_intt = snd_intt_sc + snd_intt_us*1e-6;
   /* ------------------------------------------------------- */
 
+  struct sequence *seq;
 
-  cp     = 1100;    /* CPID */
-  intsc  = 7;       /* integration period; recomputed below ... */
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
+  cp     = 1100;        /* CPID */
+  intsc  = 7;           /* integration period; recomputed below ... */
   intus  = 0;
-  mppul  = 8;       /* number of pulses; tied to array above ... */
-  mplgs  = 23;      /* same here for the number of lags */
-  mpinc  = 1500;    /* multi-pulse increment [us] */
-  nrang  = 100;     /* the number of ranges gets set in SiteXXXStart() */
-  rsep   = 45;      /* same for the range separation */
-  txpl   = 300;     /* pulse length [us]; gets redefined below... */
+  mppul  = seq->mppul;  /* number of pulses */
+  mplgs  = seq->mplgs;  /* number of lags */
+  mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
+  nrang  = 100;         /* the number of ranges gets set in SiteXXXStart() */
+  rsep   = 45;          /* same for the range separation */
+  txpl   = 300;         /* pulse length [us]; gets redefined below... */
 
   dmpinc = nmpinc = mpinc;  /* set day and night to the same,
                                but could change */
@@ -357,7 +332,7 @@ int main(int argc,char *argv[])
   do {
 
     printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-    tsgid=SiteTimeSeq(ptab);
+    tsgid=SiteTimeSeq(seq->ptab);
 
     printf("Entering Site Start Scan Station ID: %s  %d\n",ststr,stid);
     if (SiteStartScan() !=0) continue;
@@ -424,7 +399,7 @@ int main(int argc,char *argv[])
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
-      nave=SiteIntegrate(lags);
+      nave=SiteIntegrate(seq->lags);
       if (nave < 0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -433,7 +408,7 @@ int main(int argc,char *argv[])
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
@@ -497,7 +472,7 @@ int main(int argc,char *argv[])
     nrang = snd_nrang;
 
     /* make a new timing sequence for the sounding */
-    tsgid = SiteTimeSeq(ptab);
+    tsgid = SiteTimeSeq(seq->ptab);
 
     /* we have time until the end of the minute to do sounding */
     /* minus a safety factor given in time_needed */
@@ -526,7 +501,7 @@ int main(int argc,char *argv[])
       sprintf(logtxt,"Transmitting SND on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock, progname, logtxt);
 
-      nave = SiteIntegrate(lags);
+      nave = SiteIntegrate(seq->lags);
       if (nave < 0) {
         sprintf(logtxt, "SND integration error: %d", nave);
         ErrLog(errlog.sock,progname, logtxt);
@@ -535,7 +510,7 @@ int main(int argc,char *argv[])
       sprintf(logtxt,"Number of SND sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);

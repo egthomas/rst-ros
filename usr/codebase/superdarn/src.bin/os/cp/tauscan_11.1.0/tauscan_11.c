@@ -40,6 +40,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 
@@ -73,38 +74,6 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  int i=0;
-
-  /* special pulse and lag sequence for 11-pulse tauscan */
-  int ptab[11] = {0,10,13,14,19,21,31,33,38,39,42};
-
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},              /* 0 */
-    {13,14},    /* 1 */
-    {38,39},              /* 1 */
-    {19,21},    /* 2 */
-    {31,33},              /* 2 */
-    {10,13},    /* 3 */
-    {39,42},              /* 3 */
-    {10,14},    /* 4 */
-    {38,42},              /* 4 */
-    {14,19},    /* 5 */
-    {33,38},              /* 5 */
-    {13,19},    /* 6 */
-    {33,39},              /* 6 */
-    {16,23},    /* 7 */
-    {31,38},              /* 7 */
-    {15,23},    /* 8 */
-    {31,39},              /* 8 */
-    {10,19},    /* 9 */
-    {33,42},              /* 9 */
-    { 0,10},    /* 10 */
-    {21,31},              /* 10 */
-    {10,21},    /* 11 */
-    {31,42},              /* 11 */
-    {42,42}     /* alternate lag zero */
-  };
-
   char logtxt[1024];
 
   int exitpoll=0;
@@ -127,26 +96,24 @@ int main(int argc,char *argv[]) {
   int total_scan_usecs=0;
   int total_integration_usecs=0;
 
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuildTauscan11(seq);
+
   /* standard radar parameters */
   cp=502;
   intsc=5;
   intus=500000;
-  mppul=11;
-  mplgs=12;         /* There are 12 lags counting lag zero. No lags are missing */
-  mplgexs=0;
-  mpinc=3000;
-  nmpinc=3000;
-  dmpinc=3000;
+  mppul=seq->mppul;
+  mplgs=seq->mplgs;   /* There are 12 lags counting lag zero. No lags are missing */
+  mplgexs=seq->mplgexs;
+  mpinc=seq->mpinc;
+  nmpinc=seq->mpinc;
+  dmpinc=seq->mpinc;
   nrang=100;
   rsep=45;
   txpl=300;
-
-  /* counting lags in lagtable defined above... why? */
-  for (i=1;i<256;i++) {
-    if ((lags[i][0]==42) && (lags[i][1]==42)) break;
-    mplgexs++;
-  }
-  mplgexs++;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 
@@ -286,7 +253,7 @@ int main(int argc,char *argv[]) {
 
   printf("Preparing SiteTimeSeq Station ID: %s %d\n",ststr,stid);
   /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-  tsgid=SiteTimeSeq(ptab);
+  tsgid=SiteTimeSeq(seq->ptab);
 
   printf("entering Scan Loop Station ID: %s %d\n",ststr, stid);
   do {
@@ -364,7 +331,7 @@ int main(int argc,char *argv[]) {
 
       printf("Entering Site Integrate Station ID: %s %d \n", ststr, stid);
       /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-      nave=SiteIntegrate(lags);
+      nave=SiteIntegrate(seq->lags);
       if (nave<0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -374,7 +341,7 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
 
       /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/build.c */
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 

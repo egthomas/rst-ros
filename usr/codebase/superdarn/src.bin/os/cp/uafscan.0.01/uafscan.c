@@ -54,6 +54,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 #include "site.h"
@@ -138,38 +139,6 @@ int main(int argc,char *argv[]) {
   int time_now,  time_to_wait; /* times in ms for period synchronization */
   int *scan_times;  /* scan times in ms */
 
-/* Pulse sequence Table */
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-
-/* Lag sequence Table */
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},		/*  0 */
-    {42,43},		/*  1 */
-    {22,24},		/*  2 */
-    {24,27},		/*  3 */
-    {27,31},		/*  4 */
-    {22,27},		/*  5 */
-    /* Lag 6 gap */
-    {24,31},		/*  7 */
-    {14,22},		/*  8 */
-    {22,31},		/*  9 */
-    {14,24},		/* 10 */
-    {31,42},		/* 11 */
-    {31,43},		/* 12 */
-    {14,27},		/* 13 */
-    { 0,14},		/* 14 */
-    {27,42},		/* 15 */
-    {27,43},		/* 16 */
-    {14,31},		/* 17 */
-    {24,42},		/* 18 */
-    {24,43},		/* 19 */
-    {22,42},		/* 20 */
-    {22,43},		/* 21 */
-    { 0,22},		/* 22 */
-    /* Lag 23 gap */
-    { 0,24},		/* 24 */
-    {43,43}};		/* alternate lag-0  */
-
 /* Integration period variables */
   int scnsc=120;
   int scnus=0;
@@ -192,14 +161,19 @@ int main(int argc,char *argv[]) {
   /* XCF processing variables */
   int cnt=0;
 
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
 /* Set default values of globally defined variables here*/
   cp     = 9000;    /*unused Alaska cpid, will be reset below  */
   intsc  = 7;
   intus  = 0;
-  mppul  = 8;
-  mplgs  = 23;
-  mpinc  = 1500;
-  dmpinc = 1500;
+  mppul  = seq->mppul;
+  mplgs  = seq->mplgs;
+  mpinc  = seq->mpinc;
+  dmpinc = seq->mpinc;
   nrang  = 75;
   rsep   = 45;
   txpl   = 300;
@@ -477,10 +451,10 @@ int main(int argc,char *argv[]) {
      scnus = 0;
      intsc=3;
      intus=200000;
-     mppul=8;
-     mplgs=23;
-     mpinc=1500;
-     dmpinc=1500;
+     mppul=seq->mppul;
+     mplgs=seq->mplgs;
+     mpinc=seq->mpinc;
+     dmpinc=seq->mpinc;
      nrang=100;
 
      sync_scan = 0; 
@@ -741,10 +715,10 @@ int main(int argc,char *argv[]) {
         tsgprm.rtoxmin = 0;
 
         tsgprm.pat  = malloc(sizeof(int)*mppul);
-        tsgprm.code = ptab;
+        tsgprm.code = seq->ptab;
 
         for (i=0;i<tsgprm.mppul;i++) 
-           tsgprm.pat[i]=ptab[i];
+           tsgprm.pat[i]=seq->ptab[i];
 
         tsgbuf=TSGMake(&tsgprm,&flag);
         fprintf(stdout,"Sequence Parameters::\n");
@@ -781,7 +755,7 @@ int main(int argc,char *argv[]) {
 
 
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-  tsgid=SiteTimeSeq(ptab);
+  tsgid=SiteTimeSeq(seq->ptab);
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -888,7 +862,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
     
-      nave=SiteIntegrate(lags);   
+      nave=SiteIntegrate(seq->lags);   
       if (nave<0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt); 
@@ -898,7 +872,7 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
 
       /* Processing and sending data */ 
-      OpsBuildPrm(prm,ptab,lags);    
+      OpsBuildPrm(prm,seq->ptab,seq->lags);    
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);

@@ -37,6 +37,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 #include "site.h"
@@ -52,7 +53,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalscan_16pulse 2022/09/01"};
+char progid[80]={"normalscan_16pulse 2023/03/15"};
 char progname[256];
 
 int arg=0;
@@ -81,131 +82,6 @@ int main(int argc,char *argv[])
   int bcode7[7]={1,1,1,-1,-1,1,-1};
   int bcode11[11]={1,1,1,-1,-1,-1,1,-1,-1,1,-1};
   int bcode13[13]={1,1,1,1,1,-1,-1,1,1,-1,1,-1,1};
-
-  int ptab[16] = {0,4,19,42,78,127,191,270,364,474,600,745,905,1083,1280,1495};
-  int lags[LAG_SIZE][2] = {
-    {1495,1495},   /*  0 */
-    {0,4},         /*  1 */
-    {4,19},        /*  2 */
-    {0,19},        /*  3 */
-    {19,42},       /*  4 */
-    {42,78},       /*  5 */
-    {4,42},        /*  6 */
-    {0,42},        /*  7 */
-    {78,127},      /*  8 */
-    {19,78},       /*  9 */
-    {127,191},     /*  10 */
-    {4,78},        /*  11 */
-    {0,78},        /*  12 */
-    {191,270},     /*  13 */
-    {42,127},      /*  14 */
-    {270,364},     /*  15 */
-    {19,127},      /*  16 */
-    {364,474},     /*  17 */
-    {78,191},      /*  18 */
-    {4,127},       /*  19 */
-    {474,600},     /*  20 */
-    {0,127},       /*  21 */
-    {127,270},     /*  22 */
-    {600,745},     /*  23 */
-    {42,191},      /*  24 */
-    {745,905},     /*  25 */
-    {191,364},     /*  26 */
-    {19,191},      /*  27 */
-    {905,1083},    /*  28 */
-    {4,191},       /*  29 */
-    {0,191},       /*  30 */
-    {78,270},      /*  31 */
-    {1083,1280},   /*  32 */
-    {270,474},     /*  33 */
-    {1280,1495},   /*  34 */
-    {42,270},      /*  35 */
-    {127,364},     /*  36 */
-    {364,600},     /*  37 */
-    {19,270},      /*  38 */
-    {4,270},       /*  39 */
-    {0,270},       /*  40 */
-    {474,745},     /*  41 */
-    {191,474},     /*  42 */
-    {78,364},      /*  43 */
-    {600,905},     /*  44 */
-    {42,364},      /*  45 */
-    {270,600},     /*  46 */
-    {745,1083},    /*  47 */
-    {19,364},      /*  48 */
-    {127,474},     /*  49 */
-    {4,364},       /*  50 */
-    {0,364},       /*  51 */
-    {905,1280},    /*  52 */
-    {364,745},     /*  53 */
-    {78,474},      /*  54 */
-    {191,600},     /*  55 */
-    {1083,1495},   /*  56 */
-    {474,905},     /*  57 */
-    {42,474},      /*  58 */
-    {19,474},      /*  59 */
-    {4,474},       /*  60 */
-    {127,600},     /*  61 */
-    {0,474},       /*  62 */
-    {270,745},     /*  63 */
-    {600,1083},    /*  64 */
-    {78,600},      /*  65 */
-    {745,1280},    /*  66 */
-    {364,905},     /*  67 */
-    {191,745},     /*  68 */
-    {42,600},      /*  69 */
-    {19,600},      /*  70 */
-    {905,1495},    /*  71 */
-    {4,600},       /*  72 */
-    {0,600},       /*  73 */
-    {474,1083},    /*  74 */
-    {127,745},     /*  75 */
-    {270,905},     /*  76 */
-    {78,745},      /*  77 */
-    {600,1280},    /*  78 */
-    {42,745},      /*  79 */
-    {191,905},     /*  80 */
-    {364,1083},    /*  81 */
-    {19,745},      /*  82 */
-    {4,745},       /*  83 */
-    {0,745},       /*  84 */
-    {745,1495},    /*  85 */
-    {127,905},     /*  86 */
-    {474,1280},    /*  87 */
-    {270,1083},    /*  88 */
-    {78,905},      /*  89 */
-    {42,905},      /*  90 */
-    {19,905},      /*  91 */
-    {191,1083},    /*  92 */
-    {600,1495},    /*  93 */
-    {4,905},       /*  94 */
-    {0,905},       /*  95 */
-    {364,1280},    /*  96 */
-    {127,1083},    /*  97 */
-    {78,1083},     /*  98 */
-    {270,1280},    /*  99 */
-    {474,1495},    /*  100 */
-    {42,1083},     /*  101 */
-    {19,1083},     /*  102 */
-    {4,1083},      /*  103 */
-    {0,1083},      /*  104 */
-    {191,1280},    /*  105 */
-    {364,1495},    /*  106 */
-    {127,1280},    /*  107 */
-    {78,1280},     /*  108 */
-    {270,1495},    /*  109 */
-    {42,1280},     /*  110 */
-    {19,1280},     /*  111 */
-    {4,1280},      /*  112 */
-    {0,1280},      /*  113 */
-    {191,1495},    /*  114 */
-    {127,1495},    /*  115 */
-    {78,1495},     /*  116 */
-    {42,1495},     /*  117 */
-    {19,1495},     /*  118 */
-    {4,1495},      /*  119 */
-    {0,1495},      /*  120 */
-    {1495,1495}};  /*  121 */
 
   char logtxt[1024];
 
@@ -247,16 +123,20 @@ int main(int argc,char *argv[])
     printf("Size of Struct SiteSettings  %lu\n",sizeof(struct SiteSettings));
   }
 
+  struct sequence *seq;
 
-  cp     = 9100;    /* CPID */
-  intsc  = 6;       /* integration period; recomputed below ... */
+  seq=OpsSequenceMake();
+  OpsBuild16pulse(seq);
+
+  cp     = 9100;        /* CPID */
+  intsc  = 6;           /* integration period; recomputed below ... */
   intus  = 0;
-  mppul  = 16;      /* number of pulses; tied to array above ... */
-  mplgs  = 121;     /* same here for the number of lags */
-  mpinc  = 100;     /* multi-pulse increment [us] */
-  nrang  = 300;     /* the number of ranges gets set in SiteXXXStart() */
-  rsep   = 15;      /* same for the range separation */
-  txpl   = 100;     /* pulse length [us]; gets redefined below... */
+  mppul  = seq->mppul;  /* number of pulses */
+  mplgs  = seq->mplgs;  /* number of lags */
+  mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
+  nrang  = 300;         /* the number of ranges gets set in SiteXXXStart() */
+  rsep   = 15;          /* same for the range separation */
+  txpl   = 100;         /* pulse length [us]; gets redefined below... */
   nbaud  = 1;
 
   dmpinc = nmpinc = mpinc;  /* set day and night to the same,
@@ -424,7 +304,7 @@ int main(int argc,char *argv[])
   OpsFitACFStart();
 
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-  tsgid=SiteTimeSeq(ptab);
+  tsgid=SiteTimeSeq(seq->ptab);
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -494,7 +374,7 @@ int main(int argc,char *argv[])
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
-      nave=SiteIntegrate(lags);
+      nave=SiteIntegrate(seq->lags);
       if (nave < 0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -503,7 +383,7 @@ int main(int argc,char *argv[])
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
