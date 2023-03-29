@@ -495,6 +495,9 @@ int main(int argc,char *argv[]) {
           printw(" ");
           attroff(COLOR_PAIR(14));
           printw(" GS");
+        } else {
+          move(25, nrng+5);
+          clrtoeol();
         }
       }
 
