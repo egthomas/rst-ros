@@ -83,6 +83,7 @@ int main(int argc,char *argv[]) {
 
   unsigned char colorflg=0;
   unsigned char gflg=0;
+  unsigned char menu=1;
   double nlevels=5;
   double smin=0;
   double smax=0;
@@ -268,6 +269,8 @@ int main(int argc,char *argv[]) {
         smax=emax;
       } else if (c == 'g') {
         gflg = !gflg;
+      } else if (c == 'n') {
+        menu = !menu;
       } else if (c == KEY_UP) {
         if (pwrflg || elvflg ) smax += 5;
         else if (widflg) smax += 50;
@@ -343,6 +346,7 @@ int main(int argc,char *argv[]) {
 
     if (flag !=-1) {
 
+      /* Store data from most recent beam in buffer */
       buffer.beam[prm->bmnum]=1;
       for (i=0; i<nrng; i++) {
         if ((i >= prm->nrang) || (i >= MAX_RANGE)) break;
@@ -392,23 +396,58 @@ int main(int argc,char *argv[]) {
       /* Draw a menu explaining the keyboard controls */
       if (colorflg) {
         move(0, 50);
-        printw("+-Keyboard Controls:----------+");
-        move(1, 50);
-        printw("| p : power                   |");
-        move(2, 50);
-        printw("| v : velocity                |");
-        move(3, 50);
-        printw("| w : spectral width          |");
-        move(4, 50);
-        printw("| e : elevation angle         |");
-        move(5, 50);
-        printw("| g : GS flag (velocity only) |");
-        move(6, 50);
-        printw("|                             |");
-        move(7, 50);
-        printw("| Press any other key to quit |");
-        move(8, 50);
-        printw("+-----------------------------+");
+        addch(ACS_ULCORNER);
+        for (i=0;i<3;i++) addch(ACS_HLINE);
+        if (menu) {
+          printw("Keyboard Controls (1/2)");
+          for (i=0;i<3;i++) addch(ACS_HLINE);
+          addch(ACS_URCORNER);
+          move(1, 50); addch(ACS_VLINE);
+          printw(" p : power          n : next");
+          move(1, 80); addch(ACS_VLINE);
+          move(2, 50); addch(ACS_VLINE);
+          printw(" v : velocity           page");
+          move(2, 80); addch(ACS_VLINE);
+          move(3, 50); addch(ACS_VLINE);
+          printw(" w : spectral width");
+          move(3, 80); addch(ACS_VLINE);
+          move(4, 50); addch(ACS_VLINE);
+          printw(" e : elevation angle");
+          move(4, 80); addch(ACS_VLINE);
+          move(5, 50); addch(ACS_VLINE);
+          printw(" g : GS flag (velocity only)");
+        } else {
+          printw("Keyboard Controls (2/2)");
+          for (i=0;i<3;i++) addch(ACS_HLINE);
+          addch(ACS_URCORNER);
+          move(1, 50); addch(ACS_VLINE);
+          printw(" Arrow Keys:        n : prev");
+          move(1, 80); addch(ACS_VLINE);
+          move(2, 50); addch(ACS_VLINE);
+          move(2, 52); addch(ACS_RARROW);
+          printw(" : change param       page");
+          move(2, 80); addch(ACS_VLINE);
+          move(3, 50); addch(ACS_VLINE);
+          move(3, 52); addch(ACS_LARROW);
+          printw(" : change param");
+          move(3, 80); addch(ACS_VLINE);
+          move(4, 50); addch(ACS_VLINE);
+          move(4, 52); addch(ACS_UARROW);
+          printw(" : increase scale");
+          move(4, 80); addch(ACS_VLINE);
+          move(5, 50); addch(ACS_VLINE);
+          move(5, 52); addch(ACS_DARROW);
+          printw(" : decrease scale");
+        }
+        move(5, 80); addch(ACS_VLINE);
+        move(6, 50); addch(ACS_VLINE);
+        move(6, 80); addch(ACS_VLINE);
+        move(7, 50); addch(ACS_VLINE);
+        printw(" Press any other key to quit ");
+        addch(ACS_VLINE);
+        move(8, 50); addch(ACS_LLCORNER);
+        for (i=0;i<29;i++) addch(ACS_HLINE);
+        addch(ACS_LRCORNER);
       } else {
         move(0, 53);
         printw("* Press any key to quit *");
