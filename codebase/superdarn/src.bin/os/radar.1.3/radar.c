@@ -115,6 +115,13 @@ int operate(pid_t parent,int sock) {
         dfreq=fprm.end-fprm.start;
         if (dfreq > 0) {
           tfreq=fprm.start + (rand() % dfreq);
+          if (ftable[rnum-1] !=NULL) {
+            s=0;
+            while ((FreqTest(ftable[rnum-1],tfreq) == 1) && (s < 10)) {
+              tfreq=fprm.start + (rand() % dfreq);
+              s++;
+            }
+          }
         } else {
           tfreq=fprm.start;
         }
