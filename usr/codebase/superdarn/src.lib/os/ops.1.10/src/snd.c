@@ -12,12 +12,14 @@
 #include <zlib.h>
 #include "rtypes.h"
 #include "limit.h"
+#include "rtime.h"
 #include "dmap.h"
 #include "rprm.h"
 #include "fitdata.h"
 #include "snddata.h"
 #include "fitsnd.h"
 #include "sndwrite.h"
+#include "sndread.h"
 #include "errlog.h"
 #include "global.h"
 #include "snd.h"
@@ -64,6 +66,71 @@ int OpsSndStart() {
   fprintf(stderr,"Leaving OpsSndStart\n");
   fflush(stderr);
   return 0;
+}
+
+
+void OpsFindSndSkip(char *ststr,int *snd_bms,int snd_bms_tot,int *snd_bm_cnt,int *odd_beams) {
+
+  char data_path[60], data_filename[40], filename[105];
+
+  char *snd_dir;
+  FILE *fp=NULL;
+
+  struct SndData *tmp;
+  int sbc = 0;
+  int odd = 0;
+
+  /* get the snd data dir */
+  snd_dir = getenv("SD_SND_PATH");
+  if (snd_dir == NULL) {
+    return;
+  } else {
+    memcpy(data_path,snd_dir,strlen(snd_dir));
+    data_path[strlen(snd_dir)] = '/';
+    data_path[strlen(snd_dir)+1] = 0;
+  }
+
+  TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
+
+  /* make up the filename */
+  /* YYYYMMDD.HH.rad.snd */
+  sprintf(data_filename, "%04d%02d%02d.%02d.%s", yr, mo, dy, (hr/2)*2, ststr);
+
+  /* finally make the filename */
+  sprintf(filename, "%s%s.snd", data_path, data_filename);
+
+  /* open the output file */
+  fp = fopen(filename,"r");
+  if (fp == NULL) {
+    return;
+  }
+
+  tmp=SndMake();
+
+  /* read the snd records */
+  while (SndFread(fp,tmp) !=-1);
+
+  /* find the most recently used snd beam
+   * and skip to the next */
+  for (sbc=0; sbc<snd_bms_tot; sbc++) {
+    if      (tmp->bmnum == snd_bms[sbc]) break;
+    else if (tmp->bmnum == snd_bms[sbc]+1) {
+      odd = 1;
+      break;
+    }
+  }
+  sbc++;
+
+  /* check for the end of a beam loop */
+  if (sbc >= snd_bms_tot) {
+    sbc = 0;
+    odd = !odd;
+  }
+
+  *snd_bm_cnt = sbc;
+  *odd_beams = odd;
+
+  return;
 }
 
 
