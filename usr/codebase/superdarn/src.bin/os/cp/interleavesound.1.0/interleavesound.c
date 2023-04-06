@@ -54,7 +54,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2023/03/15"};
+char progid[80]={"interleavesound 2023/04/05"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -287,6 +287,8 @@ int main(int argc,char *argv[]) {
 
   OpsFitACFStart();
   OpsSndStart();
+
+  OpsFindSndSkip(ststr,snd_bms,snd_bms_tot,&snd_bm_cnt,&odd_beams);
 
   do {
 

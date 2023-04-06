@@ -62,7 +62,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2023/03/15"};
+char progid[80]={"testsound 2023/04/05"};
 char progname[256];
 
 int arg=0;
@@ -327,6 +327,8 @@ int main(int argc,char *argv[])
 
   printf("Preparing OpsSndStart Station ID: %s  %d\n",ststr,stid);
   OpsSndStart();
+
+  OpsFindSndSkip(ststr,snd_bms,snd_bms_tot,&snd_bm_cnt,&odd_beams);
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
