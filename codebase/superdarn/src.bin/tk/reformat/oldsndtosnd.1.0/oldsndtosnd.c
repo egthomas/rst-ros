@@ -147,7 +147,6 @@ int main (int argc,char *argv[]) {
   }
 
   while(fread(&header,sizeof(header),1,fp) == 1) {
-    TimeEpochToYMDHMS(header.stime,&yr,&mo,&dy,&hr,&mt,&sc);
 
     snd->origin.code=1;
     ctime = time((time_t) 0);
@@ -155,6 +154,8 @@ int main (int argc,char *argv[]) {
     strcpy(tmstr,asctime(gmtime(&ctime)));
     tmstr[24]=0;
     SndSetOriginTime(snd,tmstr);
+
+    TimeEpochToYMDHMS(header.stime,&yr,&mo,&dy,&hr,&mt,&sc);
 
     snd->stid = header.site_id;
     snd->time.yr = yr;
