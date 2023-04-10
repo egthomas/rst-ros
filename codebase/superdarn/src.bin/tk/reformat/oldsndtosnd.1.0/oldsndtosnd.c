@@ -290,9 +290,6 @@ int main (int argc,char *argv[]) {
           }
           snd->rng[i].p_l = max_power*data_old.pwr/255.;
           snd->rng[i].w_l = max_width*data_old.width/65535.;
-          fprintf(stderr,"%d:  byte: %d, qflg: %d, gsct: %d, v: %f, p: %f, w: %f\n",
-                  i,byte,snd->rng[i].qflg,snd->rng[i].gsct,
-                  snd->rng[i].v,snd->rng[i].p_l,snd->rng[i].w_l);
         }
       }
 
