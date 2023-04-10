@@ -274,15 +274,6 @@ int main (int argc,char *argv[]) {
 
       SndSetRng(snd,SND_NRANG);
 
-      fprintf(stderr,"%4d-%02d-%02d %02d:%02d:%02d\n",yr,mo,dy,hr,mt,(int)sc);
-      fprintf(stderr,"site_id: %d\n",header_old.site_id);
-      fprintf(stderr,"beam_no: %d\n",header_old.beam_no);
-      fprintf(stderr,"freq: %d\n",header_old.freq);
-      fprintf(stderr,"noise: %d\n",header_old.noise);
-      fprintf(stderr,"frange: %d\n",header_old.frange);
-      fprintf(stderr,"rsep: %d\n",header_old.rsep);
-      fprintf(stderr,"program_name: %s\n",header_old.program_name);
-
       for (i=0;i<SND_NRANG;i++) {
         byte=i/8;
         if ( (header_old.qflg[byte]>>(i%8)) & 0x01 ) {
