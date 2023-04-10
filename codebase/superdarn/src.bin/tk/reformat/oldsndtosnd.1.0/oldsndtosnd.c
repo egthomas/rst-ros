@@ -39,8 +39,9 @@ Modifications:
 #include "rtime.h"
 #include "option.h"
 #include "dmap.h"
-#include "snddata.h"
+#include "radar.h"
 
+#include "snddata.h"
 #include "sndread.h"
 #include "sndwrite.h"
 #include "sndseek.h"
@@ -50,9 +51,13 @@ Modifications:
 
 
 #define SND_NRANG 75
+#define MAX_RANGE 300
 
 struct SndData *snd;
 struct OptionData opt;
+struct RadarNetwork *network;
+struct Radar *radar;
+struct RadarSite *site;
 
 struct header_struct {
   int stime;
@@ -74,6 +79,46 @@ struct data_struct {
   short AOA;
 } data;
 
+struct header_struct_new {
+  int stime;
+  short site_id;
+  short beam_no;
+  short freq;
+  short noise;
+  short frange;
+  short rsep;
+  short nrang;
+  short gsct[MAX_RANGE];
+  short qflg[MAX_RANGE];
+  char program_name[40];
+} header_new;
+
+struct header_struct_old {
+  double stime;
+  char site_id;
+  char beam_no;
+  short freq;
+  short noise;
+  short frange;
+  short rsep;
+  char gsct[10];
+  char qflg[10];
+  char program_name[40];
+  short unused1;
+  short unused2;
+  short unused3;
+} header_old;
+
+struct data_struct_old {
+  short vel;
+  unsigned short width;
+  unsigned short AOA;
+  short unused1;
+  short unused2;
+  char unused3;
+  unsigned char pwr;
+} data_old;
+
 int rst_opterr (char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
   fprintf(stderr,"Please try: oldsndtosnd --help\n");
@@ -87,6 +132,8 @@ int main (int argc,char *argv[]) {
   int i,status=0;
   FILE *fp=NULL;
 
+  char *envstr=NULL;
+
   int yr,mo,dy,hr,mt;
   double sc;
  
@@ -95,15 +142,28 @@ int main (int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
+  int old=0;
+  int new=0;
+
   time_t ctime;
   int c,n;
   char command[128];
   char tmstr[40];
 
+  float offset;
+
+  int byte=0;
+  double min_vel=-3000;
+  double max_vel=3000;
+  double max_power=50;
+  double max_width=1000;
+
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
 
+  OptionAdd(&opt,"old",'x',&old);
+  OptionAdd(&opt,"new",'x',&new);
   OptionAdd(&opt,"vb",'x',&vb);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
@@ -126,6 +186,33 @@ int main (int argc,char *argv[]) {
     exit(0);
   }
 
+  envstr=getenv("SD_RADAR");
+  if (envstr==NULL) {
+    fprintf(stderr,"Environment variable 'SD_RADAR' must be defined.\n");
+    exit(-1);
+  }
+
+  fp=fopen(envstr,"r");
+  if (fp==NULL) {
+    fprintf(stderr,"Could not locate radar information file.\n");
+    exit(-1);
+  }
+
+  network=RadarLoad(fp);
+  fclose(fp);
+  if (network==NULL) {
+    fprintf(stderr,"Failed to load radar information.\n");
+    exit(-1);
+  }
+
+  envstr=getenv("SD_HDWPATH");
+  if (envstr==NULL) {
+    fprintf(stderr,"Environment variable 'SD_HDWPATH' must be defined.\n");
+    exit(-1);
+  }
+
+  RadarLoadHardware(envstr,network);
+
 
   command[0]=0;
   n=0;
@@ -146,61 +233,214 @@ int main (int argc,char *argv[]) {
     exit(-1);
   }
 
-  while(fread(&header,sizeof(header),1,fp) == 1) {
+  if (old) {
+    /* Read the sounding data files that used internal compression */
+    while(fread(&header_old,sizeof(header_old),1,fp) == 1) {
 
-    snd->origin.code=1;
-    ctime = time((time_t) 0);
-    SndSetOriginCommand(snd,command);
-    strcpy(tmstr,asctime(gmtime(&ctime)));
-    tmstr[24]=0;
-    SndSetOriginTime(snd,tmstr);
+      snd->origin.code=1;
+      ctime = time((time_t) 0);
+      SndSetOriginCommand(snd,command);
+      strcpy(tmstr,asctime(gmtime(&ctime)));
+      tmstr[24]=0;
+      SndSetOriginTime(snd,tmstr);
 
-    TimeEpochToYMDHMS(header.stime,&yr,&mo,&dy,&hr,&mt,&sc);
+      TimeEpochToYMDHMS(header_old.stime,&yr,&mo,&dy,&hr,&mt,&sc);
 
-    snd->stid = header.site_id;
-    snd->time.yr = yr;
-    snd->time.mo = mo;
-    snd->time.dy = dy;
-    snd->time.hr = hr;
-    snd->time.mt = mt;
-    snd->time.sc = (int) sc;
-    snd->noise.mean = header.noise;
-    snd->bmnum = header.beam_no;
-    snd->nrang = SND_NRANG;
-    snd->frang = header.frange;
-    snd->rsep = header.rsep;
-    snd->tfreq = header.freq;
-    snd->combf = header.program_name;
-    snd->snd_revision.major = SND_MAJOR_REVISION;
-    snd->snd_revision.minor = SND_MINOR_REVISION;
+      radar = RadarGetRadar(network,header_old.site_id);
+      site = RadarYMDHMSGetSite(radar,yr,mo,dy,hr,mt,sc);
+      offset = site->maxbeam/2.0-0.5;
 
-    SndSetRng(snd,SND_NRANG);
+      snd->stid = header_old.site_id;
+      snd->time.yr = yr;
+      snd->time.mo = mo;
+      snd->time.dy = dy;
+      snd->time.hr = hr;
+      snd->time.mt = mt;
+      snd->time.sc = (int) sc;
+      snd->lagfr = header_old.frange*20/3;
+      snd->smsep = header_old.rsep*20/3;
+      snd->noise.mean = header_old.noise;
+      snd->bmnum = header_old.beam_no;
+      snd->bmazm = site->boresite + site->bmsep*(header_old.beam_no-offset) + site->bmoff;
+      snd->intt.sc = 2;
+      snd->intt.us = 0;
+      snd->nrang = SND_NRANG;
+      snd->frang = header_old.frange;
+      snd->rsep = header_old.rsep;
+      snd->tfreq = header_old.freq;
+      snd->combf = header_old.program_name;
+      snd->snd_revision.major = SND_MAJOR_REVISION;
+      snd->snd_revision.minor = SND_MINOR_REVISION;
 
-    for (i=0;i<SND_NRANG;i++) {
-      snd->rng[i].qflg = header.qflg[i];
-      snd->rng[i].gsct = header.gsct[i];
-      if (header.qflg[i] == 1) {
-        status=fread(&data,sizeof(data),1,fp);
-        if (status != 1) break;
-        snd->rng[i].v = data.vel;
-        snd->rng[i].p_l = data.pwr;
-        snd->rng[i].w_l = data.width;
-      } else {
-        snd->rng[i].v = 0;
-        snd->rng[i].p_l = 0;
-        snd->rng[i].w_l = 0;
+      SndSetRng(snd,SND_NRANG);
+
+      fprintf(stderr,"%4d-%02d-%02d %02d:%02d:%02d\n",yr,mo,dy,hr,mt,(int)sc);
+      fprintf(stderr,"site_id: %d\n",header_old.site_id);
+      fprintf(stderr,"beam_no: %d\n",header_old.beam_no);
+      fprintf(stderr,"freq: %d\n",header_old.freq);
+      fprintf(stderr,"noise: %d\n",header_old.noise);
+      fprintf(stderr,"frange: %d\n",header_old.frange);
+      fprintf(stderr,"rsep: %d\n",header_old.rsep);
+      fprintf(stderr,"program_name: %s\n",header_old.program_name);
+
+      for (i=0;i<SND_NRANG;i++) {
+        byte=i/8;
+        if ( (header_old.qflg[byte]>>(i%8)) & 0x01 ) {
+          snd->rng[i].qflg = 1;
+          if ( (header_old.gsct[byte]>>(i%8)) & 0x01 ) {
+            snd->rng[i].gsct=1;
+          }
+          status=fread(&data_old,sizeof(data_old),1,fp);
+          if (status != 1) break;
+          if (data_old.vel < 0) {
+            snd->rng[i].v = -(data_old.vel+1)*min_vel/32767;
+          } else {
+            snd->rng[i].v = data_old.vel*max_vel/326767;
+          }
+          snd->rng[i].p_l = max_power*data_old.pwr/255.;
+          snd->rng[i].w_l = max_width*data_old.width/65535.;
+          fprintf(stderr,"%d:  byte: %d, qflg: %d, gsct: %d, v: %f, p: %f, w: %f\n",
+                  i,byte,snd->rng[i].qflg,snd->rng[i].gsct,
+                  snd->rng[i].v,snd->rng[i].p_l,snd->rng[i].w_l);
+        }
       }
+
+      status=SndFwrite(stdout,snd);
+
+      if (status==-1) break;
+
+      if (vb) fprintf(stderr,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d\n",snd->time.yr,
+                      snd->time.mo,snd->time.dy,snd->time.hr,snd->time.mt,
+                      snd->time.sc);
     }
 
-    status=SndFwrite(stdout,snd);
+  } else if (new) {
+    /* Read the sounding data files that do not use internal compression
+     * and have a variable number of range gates */
+    while(fread(&header_new,sizeof(header_new),1,fp) == 1) {
 
-    if (status==-1) break;
+      snd->origin.code=1;
+      ctime = time((time_t) 0);
+      SndSetOriginCommand(snd,command);
+      strcpy(tmstr,asctime(gmtime(&ctime)));
+      tmstr[24]=0;
+      SndSetOriginTime(snd,tmstr);
 
-    if (vb) fprintf(stderr,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d\n",snd->time.yr,
-                    snd->time.mo,snd->time.dy,snd->time.hr,snd->time.mt,
-                    snd->time.sc);
+      TimeEpochToYMDHMS(header_new.stime,&yr,&mo,&dy,&hr,&mt,&sc);
+
+      radar = RadarGetRadar(network,header_new.site_id);
+      site = RadarYMDHMSGetSite(radar,yr,mo,dy,hr,mt,sc);
+      offset = site->maxbeam/2.0-0.5;
+
+      snd->stid = header_new.site_id;
+      snd->time.yr = yr;
+      snd->time.mo = mo;
+      snd->time.dy = dy;
+      snd->time.hr = hr;
+      snd->time.mt = mt;
+      snd->time.sc = (int) sc;
+      snd->lagfr = header_new.frange*20/3;
+      snd->smsep = header_new.rsep*20/3;
+      snd->noise.mean = header_new.noise;
+      snd->bmnum = header_new.beam_no;
+      snd->bmazm = site->boresite + site->bmsep*(header_new.beam_no-offset) + site->bmoff;
+      snd->intt.sc = 2;
+      snd->intt.us = 0;
+      snd->nrang = header_new.nrang;
+      snd->frang = header_new.frange;
+      snd->rsep = header_new.rsep;
+      snd->tfreq = header_new.freq;
+      snd->combf = header_new.program_name;
+      snd->snd_revision.major = SND_MAJOR_REVISION;
+      snd->snd_revision.minor = SND_MINOR_REVISION;
+
+      SndSetRng(snd,header_new.nrang);
+
+      for (i=0;i<header_new.nrang;i++) {
+        snd->rng[i].qflg = header_new.qflg[i];
+        snd->rng[i].gsct = header_new.gsct[i];
+        if (header_new.qflg[i] == 1) {
+          status=fread(&data,sizeof(data),1,fp);
+          if (status != 1) break;
+          snd->rng[i].v = data.vel;
+          snd->rng[i].p_l = data.pwr;
+          snd->rng[i].w_l = data.width;
+        }
+      }
+
+      status=SndFwrite(stdout,snd);
+
+      if (status==-1) break;
+
+      if (vb) fprintf(stderr,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d\n",snd->time.yr,
+                      snd->time.mo,snd->time.dy,snd->time.hr,snd->time.mt,
+                      snd->time.sc);
+    }
+
+  } else {
+    /* Read the sounding data files that do not use internal compression */
+    while(fread(&header,sizeof(header),1,fp) == 1) {
+
+      snd->origin.code=1;
+      ctime = time((time_t) 0);
+      SndSetOriginCommand(snd,command);
+      strcpy(tmstr,asctime(gmtime(&ctime)));
+      tmstr[24]=0;
+      SndSetOriginTime(snd,tmstr);
+
+      TimeEpochToYMDHMS(header.stime,&yr,&mo,&dy,&hr,&mt,&sc);
+
+      radar = RadarGetRadar(network,header.site_id);
+      site = RadarYMDHMSGetSite(radar,yr,mo,dy,hr,mt,sc);
+      offset = site->maxbeam/2.0-0.5;
+
+      snd->stid = header.site_id;
+      snd->time.yr = yr;
+      snd->time.mo = mo;
+      snd->time.dy = dy;
+      snd->time.hr = hr;
+      snd->time.mt = mt;
+      snd->time.sc = (int) sc;
+      snd->lagfr = header.frange*20/3;
+      snd->smsep = header.rsep*20/3;
+      snd->noise.mean = header.noise;
+      snd->bmnum = header.beam_no;
+      snd->bmazm = site->boresite + site->bmsep*(header.beam_no-offset) + site->bmoff;
+      snd->intt.sc = 2;
+      snd->intt.us = 0;
+      snd->nrang = SND_NRANG;
+      snd->frang = header.frange;
+      snd->rsep = header.rsep;
+      snd->tfreq = header.freq;
+      snd->combf = header.program_name;
+      snd->snd_revision.major = SND_MAJOR_REVISION;
+      snd->snd_revision.minor = SND_MINOR_REVISION;
+
+      SndSetRng(snd,SND_NRANG);
+
+      for (i=0;i<SND_NRANG;i++) {
+        snd->rng[i].qflg = header.qflg[i];
+        snd->rng[i].gsct = header.gsct[i];
+        if (header.qflg[i] == 1) {
+          status=fread(&data,sizeof(data),1,fp);
+          if (status != 1) break;
+          snd->rng[i].v = data.vel;
+          snd->rng[i].p_l = data.pwr;
+          snd->rng[i].w_l = data.width;
+        }
+      }
+
+      status=SndFwrite(stdout,snd);
+
+      if (status==-1) break;
+
+      if (vb) fprintf(stderr,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d\n",snd->time.yr,
+                      snd->time.mo,snd->time.dy,snd->time.hr,snd->time.mt,
+                      snd->time.sc);
+    }
   }
 
+  /* Close the sounding data file */
   if (fp !=stdin) fclose(fp);
 
   return 0;
