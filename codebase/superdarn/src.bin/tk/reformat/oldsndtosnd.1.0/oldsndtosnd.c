@@ -79,6 +79,7 @@ struct data_struct {
   short AOA;
 } data;
 
+#pragma pack(1)
 struct header_struct_new {
   int stime;
   short site_id;
@@ -108,6 +109,7 @@ struct header_struct_old {
   short unused2;
   short unused3;
 } header_old;
+#pragma pack()
 
 struct data_struct_old {
   short vel;
@@ -281,7 +283,8 @@ int main (int argc,char *argv[]) {
           if ( (header_old.gsct[byte]>>(i%8)) & 0x01 ) {
             snd->rng[i].gsct=1;
           }
-          status=fread(&data_old,sizeof(data_old),1,fp);
+          //status=fread(&data_old,sizeof(data_old),1,fp);
+          status=fread(&data_old,sizeof(unsigned char)*8,1,fp);
           if (status != 1) break;
           if (data_old.vel < 0) {
             snd->rng[i].v = -(data_old.vel+1)*min_vel/32767;
