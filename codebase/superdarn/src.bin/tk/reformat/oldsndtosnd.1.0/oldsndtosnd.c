@@ -239,6 +239,12 @@ int main (int argc,char *argv[]) {
     /* Read the sounding data files that used internal compression */
     while(fread(&header_old,sizeof(header_old),1,fp) == 1) {
 
+      if ((header_old.site_id <= 0) || (header_old.site_id > network->rnum)) {
+        fprintf(stderr,"Invalid site_id (%d): ",header_old.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
+
       snd->origin.code=1;
       ctime = time((time_t) 0);
       SndSetOriginCommand(snd,command);
@@ -310,6 +316,12 @@ int main (int argc,char *argv[]) {
      * and have a variable number of range gates */
     while(fread(&header_new,sizeof(header_new),1,fp) == 1) {
 
+      if ((header_new.site_id <= 0) || (header_new.site_id > network->rnum)) {
+        fprintf(stderr,"Invalid site_id (%d): ",header_new.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
+
       snd->origin.code=1;
       ctime = time((time_t) 0);
       SndSetOriginCommand(snd,command);
@@ -371,6 +383,12 @@ int main (int argc,char *argv[]) {
   } else {
     /* Read the sounding data files that do not use internal compression */
     while(fread(&header,sizeof(header),1,fp) == 1) {
+
+      if ((header.site_id <= 0) || (header.site_id > network->rnum)) {
+        fprintf(stderr,"Invalid site_id (%d): ",header.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
 
       snd->origin.code=1;
       ctime = time((time_t) 0);
