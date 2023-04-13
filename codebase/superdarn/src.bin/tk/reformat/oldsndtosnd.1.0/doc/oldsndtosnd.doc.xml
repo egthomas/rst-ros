@@ -4,12 +4,16 @@
 <name>oldsndtosnd</name>
 <location>src.bin/tk/reformat/oldsndtosnd</location>
 
-<syntax>trim_snd --help</syntax>
-<syntax>trim_snd [-vb] [<ar>oldsndname</ar>]</syntax>
+<syntax>oldsndtosnd --help</syntax>
+<syntax>oldsndtosnd [-vb] [<ar>oldsndname</ar>]</syntax>
 
 <option><on>--help</on><od>print the help message and exit.</od>
 </option>
 <option><on>--version</on><od>print the RST version number and exit.</od>
+</option>
+<option><on>-old</on><od>files are in the original binary format with internal compression.</od>
+</option>
+<option><on>-new</on><od>files are in the revised binary format with a variable number of ranges.</od>
 </option>
 <option><on>-vb</on><od>verbose. Log information to the console.</od>
 </option>
