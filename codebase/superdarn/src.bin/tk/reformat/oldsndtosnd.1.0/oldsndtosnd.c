@@ -260,7 +260,13 @@ int main (int argc,char *argv[]) {
         fprintf(stderr,"file likely in different snd format\n");
         break;
       }
+
       site = RadarYMDHMSGetSite(radar,yr,mo,dy,hr,mt,sc);
+      if (site == NULL) {
+        fprintf(stderr,"Invalid site_id (%d): ",header_old.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
       offset = site->maxbeam/2.0-0.5;
 
       snd->stid = header_old.site_id;
@@ -338,6 +344,12 @@ int main (int argc,char *argv[]) {
       TimeEpochToYMDHMS(header_new.stime,&yr,&mo,&dy,&hr,&mt,&sc);
 
       radar = RadarGetRadar(network,header_new.site_id);
+      if (radar == NULL) {
+        fprintf(stderr,"Invalid site_id (%d): ",header_new.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
+
       site = RadarYMDHMSGetSite(radar,yr,mo,dy,hr,mt,sc);
       if (site == NULL) {
         fprintf(stderr,"Invalid site_id (%d): ",header_new.site_id);
@@ -412,7 +424,18 @@ int main (int argc,char *argv[]) {
       TimeEpochToYMDHMS(header.stime,&yr,&mo,&dy,&hr,&mt,&sc);
 
       radar = RadarGetRadar(network,header.site_id);
+      if (radar == NULL) {
+        fprintf(stderr,"Invalid site_id (%d): ",header.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
+
       site = RadarYMDHMSGetSite(radar,yr,mo,dy,hr,mt,sc);
+      if (site == NULL) {
+        fprintf(stderr,"Invalid site_id (%d): ",header.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
       offset = site->maxbeam/2.0-0.5;
 
       snd->stid = header.site_id;
