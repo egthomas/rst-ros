@@ -60,7 +60,7 @@ struct Radar *radar;
 struct RadarSite *site;
 
 struct header_struct {
-  int stime;
+  int   stime;
   short site_id;
   short beam_no;
   short freq;
@@ -69,7 +69,7 @@ struct header_struct {
   short rsep;
   short gsct[SND_NRANG];
   short qflg[SND_NRANG];
-  char program_name[40];
+  char  program_name[40];
 } header;
 
 struct data_struct {
@@ -81,7 +81,7 @@ struct data_struct {
 
 #pragma pack(1)
 struct header_struct_new {
-  int stime;
+  int   stime;
   short site_id;
   short beam_no;
   short freq;
@@ -91,23 +91,23 @@ struct header_struct_new {
   short nrang;
   short gsct[MAX_RANGE];
   short qflg[MAX_RANGE];
-  char program_name[40];
+  char  program_name[40];
 } header_new;
 
 struct header_struct_old {
   double stime;
-  char site_id;
-  char beam_no;
-  short freq;
-  short noise;
-  short frange;
-  short rsep;
-  char gsct[10];
-  char qflg[10];
-  char program_name[40];
-  short unused1;
-  short unused2;
-  short unused3;
+  char   site_id;
+  char   beam_no;
+  short  freq;
+  short  noise;
+  short  frange;
+  short  rsep;
+  char   gsct[10];
+  char   qflg[10];
+  char   program_name[40];
+  short  unused1;
+  short  unused2;
+  short  unused3;
 } header_old;
 #pragma pack()
 
@@ -117,7 +117,7 @@ struct data_struct_old {
   unsigned short AOA;
   short unused1;
   short unused2;
-  char unused3;
+  char  unused3;
   unsigned char pwr;
 } data_old;
 
