@@ -128,7 +128,7 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
   iq->revision.minor = 0;
 
   iq->seqnum=nave;
-  iq->chnnum=rxchn;
+  iq->chnnum=rxchn*2;
   iq->smpnum=smpnum;
   iq->skpnum=skpnum;
 
