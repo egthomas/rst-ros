@@ -27,16 +27,6 @@ struct sequence *OpsSequenceMake() {
 }
 
 
-void OpsSequenceFree(struct sequence *ptr) {
-
-  if (ptr==NULL) return;
-  if (ptr->ptab !=NULL) free(ptr->ptab);
-  if (ptr->lags !=NULL) free(ptr->lags);
-  free(ptr);
-  return;
-}
-
-
 int OpsBuild7pulse(struct sequence *ptr) {
 
   void *tmp=NULL;
