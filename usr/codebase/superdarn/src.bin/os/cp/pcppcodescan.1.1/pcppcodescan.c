@@ -91,15 +91,6 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  int *bcode;
-  int bcode2[2]={1,-1};
-  int bcode3[3]={1,1,-1};
-  int bcode4[4]={1,1,-1,1};
-  int bcode5[5]={1,1,1,-1,1};
-  int bcode7[7]={1,1,1,-1,-1,1,-1};
-  int bcode11[11]={1,1,1,-1,-1,-1,1,-1,-1,1,-1};
-  int bcode13[13]={1,1,1,1,1,-1,-1,1,1,-1,1,-1,1};
-
   char logtxt[1024];
 
   int exitpoll=0;
@@ -115,7 +106,7 @@ int main(int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
-  int status=0,n,i;
+  int status=0,n;
 
   int PCPBEAM=9;    /* Set PCPBEAM to default to beam 9 -KTS */
 
@@ -187,20 +178,9 @@ int main(int argc,char *argv[]) {
  
   if (ststr==NULL) ststr=dfststr;
 
-  if(nbaud==2) bcode=bcode2;
-  if(nbaud==3) bcode=bcode3;
-  if(nbaud==4) bcode=bcode4;
-  if(nbaud==5) bcode=bcode5;
-  if(nbaud==7) bcode=bcode7;
-  if(nbaud==11) bcode=bcode11;
-  if(nbaud==13) bcode=bcode13;
-  pcode=(int *)malloc((size_t)sizeof(int)*mppul*nbaud);
-  for(i=0;i<mppul;i++){
-    for(n=0;n<nbaud;n++){
-      pcode[i*nbaud+n]=bcode[n];
-    }
-  }
-  
+  pcode=(int *)malloc((size_t)sizeof(int)*seq->mppul*nbaud);
+  OpsBuildPcode(nbaud,seq->mppul,pcode);
+
   printf("Station String: %s\n",ststr);
   OpsStart(ststr);
 
