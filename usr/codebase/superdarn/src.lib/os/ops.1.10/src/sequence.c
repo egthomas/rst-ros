@@ -27,6 +27,16 @@ struct sequence *OpsSequenceMake() {
 }
 
 
+void OpsSequenceFree(struct sequence *ptr) {
+
+  if (ptr==NULL) return;
+  if (ptr->ptab !=NULL) free(ptr->ptab);
+  if (ptr->lags !=NULL) free(ptr->lags);
+  free(ptr);
+  return;
+}
+
+
 int OpsBuild7pulse(struct sequence *ptr) {
 
   void *tmp=NULL;
@@ -403,5 +413,40 @@ int OpsBuildTauscan11(struct sequence *ptr) {
   ptr->lags = tmp;
 
   return 0;
+}
+
+
+void OpsBuildPcode(int nbaud, int mppul, int *pcode) {
+
+  int i,n;
+
+  int *bcode=NULL;
+  int bcode1[1]={1};
+  int bcode2[2]={1,-1};
+  int bcode3[3]={1,1,-1};
+  int bcode4[4]={1,1,-1,1};
+  int bcode5[5]={1,1,1,-1,1};
+  int bcode7[7]={1,1,1,-1,-1,1,-1};
+  int bcode11[11]={1,1,1,-1,-1,-1,1,-1,-1,1,-1};
+  int bcode13[13]={1,1,1,1,1,-1,-1,1,1,-1,1,-1,1};
+
+  switch (nbaud) {
+    case  1: bcode = bcode1;  break;
+    case  2: bcode = bcode2;  break;
+    case  3: bcode = bcode3;  break;
+    case  4: bcode = bcode4;  break;
+    case  5: bcode = bcode5;  break;
+    case  7: bcode = bcode7;  break;
+    case 11: bcode = bcode11; break;
+    case 13: bcode = bcode13; break;
+    default: bcode = bcode1;
+  }
+
+  for (i=0; i<mppul; i++) {
+    for (n=0; n<nbaud; n++) {
+      pcode[i*nbaud+n] = bcode[n];
+    }
+  }
+
 }
 

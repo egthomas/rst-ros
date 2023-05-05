@@ -17,12 +17,15 @@ struct sequence {
 };
 
 struct sequence *OpsSequenceMake();
+void OpsSequenceFree(struct sequence *ptr);
 
 int OpsBuild7pulse(struct sequence *ptr);
 int OpsBuild8pulse(struct sequence *ptr);
 int OpsBuild16pulse(struct sequence *ptr);
 int OpsBuildTauscan(struct sequence *ptr);
 int OpsBuildTauscan11(struct sequence *ptr);
+
+void OpsBuildPcode(int nbaud, int mppul, int *pcode);
 
 #endif
 
