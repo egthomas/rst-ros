@@ -103,22 +103,6 @@ int main(int argc,char *argv[])
   unsigned char option=0;
   unsigned char version=0;
 
-  if (debug) {
-    printf("Size of int %lu\n",sizeof(int));
-    printf("Size of long %lu\n",sizeof(long));
-    printf("Size of long long %lu\n",sizeof(long long));
-    printf("Size of struct TRTimes %lu\n",sizeof(struct TRTimes));
-    printf("Size of struct SeqPRM %lu\n",sizeof(struct SeqPRM));
-    printf("Size of struct RosData %lu\n",sizeof(struct RosData));
-    printf("Size of struct DataPRM %lu\n",sizeof(struct DataPRM));
-    printf("Size of Struct ControlPRM  %lu\n",sizeof(struct ControlPRM));
-    printf("Size of Struct RadarPRM  %lu\n",sizeof(struct RadarPRM));
-    printf("Size of Struct ROSMsg  %lu\n",sizeof(struct ROSMsg));
-    printf("Size of Struct CLRFreq  %lu\n",sizeof(struct CLRFreqPRM));
-    printf("Size of Struct TSGprm  %lu\n",sizeof(struct TSGprm));
-    printf("Size of Struct SiteSettings  %lu\n",sizeof(struct SiteSettings));
-  }
-
 
   /* ---------------- Variables for sounding --------------- */
   int *snd_bms;
