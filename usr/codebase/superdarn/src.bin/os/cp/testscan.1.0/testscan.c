@@ -99,8 +99,6 @@ int main(int argc,char *argv[]) {
   int *bms;           /* scanning beams                                     */
   int intgt[20];      /* start times of each integration period             */
   int nintgs=20;      /* number of integration periods per scan; SGS 1-min  */
-  int bufsc=0;        /* a buffer at the end of scan; historically this has */
-  int bufus=0;        /*  been set to 3.0s to account for what???           */
   unsigned char hlp=0;
   unsigned char option=0;
   unsigned char version=0;
@@ -171,11 +169,6 @@ int main(int argc,char *argv[]) {
     OptionVersion(stdout);
     exit(0);
   }
-
-  /* specify beams right here assuming the following: */
-  /* scnsc=120; scnus=0;    */
-  /* bufsc=0;   bufus=0;    */
-  /* intsc=3;;  intuc=0;;   */
 
   /* start time of each integration period */
   for (i=0; i<nintgs; i++)
