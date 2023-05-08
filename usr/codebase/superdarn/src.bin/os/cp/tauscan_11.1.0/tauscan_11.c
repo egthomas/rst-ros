@@ -76,7 +76,6 @@ int main(int argc,char *argv[]) {
 
   char logtxt[1024];
 
-  int exitpoll=0;
   int scannowait=0;
 
   int scnsc=120;
@@ -386,7 +385,6 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      if (exitpoll !=0) break;
       scan=0;
       if (bmnum==ebm) break;
       if (backward) bmnum--;
@@ -396,8 +394,8 @@ int main(int argc,char *argv[]) {
 
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-    if ((exitpoll==0) && (scannowait==0)) SiteEndScan(scnsc,scnus,5000);
-  } while (exitpoll==0);
+    if (scannowait==0) SiteEndScan(scnsc,scnus,5000);
+  } while (1);
 
   for (n=0;n<tnum;n++) RMsgSndClose(task[n].sock);
 

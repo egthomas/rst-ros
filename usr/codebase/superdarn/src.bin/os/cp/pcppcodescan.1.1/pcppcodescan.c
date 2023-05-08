@@ -93,8 +93,6 @@ int main(int argc,char *argv[]) {
 
   char logtxt[1024];
 
-  int exitpoll=0;
-
   int scnsc=60;
   int scnus=0;
   int skip;
@@ -363,7 +361,6 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      if (exitpoll !=0) break;      /* where does exitpoll ever get set? SGS */
       scan=0;
       if (bmnum==ebm) break;        /* it seems that it is critical that the
                                        number of beams must fit within the
@@ -373,82 +370,80 @@ int main(int argc,char *argv[]) {
 
     } while (1);
     /* ** Single beam sounding to fill remaining time ******************* */
-    if (exitpoll==0){
-      scan=-2;
-      bmnum=PCPBEAM;
-      intsc=1;
-      intus=0;
-      for (pcpcnt=0;pcpcnt<PCPFNUM;pcpcnt++) {
-        stfrq=pcpfreqs[pcpcnt];
-        TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
+    scan=-2;
+    bmnum=PCPBEAM;
+    intsc=1;
+    intus=0;
+    for (pcpcnt=0;pcpcnt<PCPFNUM;pcpcnt++) {
+      stfrq=pcpfreqs[pcpcnt];
+      TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
-        sprintf(logtxt,"Sounding beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
-                       intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Sounding beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
+                     intsc,intus,hr,mt,sc,us);
+      ErrLog(errlog.sock,progname,logtxt);
+      ErrLog(errlog.sock,progname,"Starting Integration.");
+
+      SiteStartIntt(intsc,intus);
+
+      ErrLog(errlog.sock,progname,"Doing clear frequency search.");
+      sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
+      ErrLog(errlog.sock,progname, logtxt);
+
+      printf("FRQ: %d %d", stfrq, frqrng);
+      tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);
+
+      sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
+      ErrLog(errlog.sock,progname,logtxt);
+
+      nave=SiteIntegrate(seq->lags);
+      if (nave<0) {
+        sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
-        ErrLog(errlog.sock,progname,"Starting Integration.");
+        continue;
+      }
+      sprintf(logtxt,"Number of sequences: %d",nave);
+      ErrLog(errlog.sock,progname,logtxt);
 
-        SiteStartIntt(intsc,intus);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
+      OpsBuildIQ(iq,&badtr);
+      OpsBuildRaw(raw);
+      FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
-        ErrLog(errlog.sock,progname,"Doing clear frequency search.");
-        sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
-        ErrLog(errlog.sock,progname, logtxt);
+      /* write out data here */
+      msg.num=0;
+      msg.tsize=0;
+      tmpbuf=RadarParmFlatten(prm,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf, PRM_TYPE,0);
 
-        printf("FRQ: %d %d", stfrq, frqrng);
-        tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);
+      tmpbuf=IQFlatten(iq,prm->nave,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,IQ_TYPE,0);
 
-        sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
-        ErrLog(errlog.sock,progname,logtxt);
+      RMsgSndAdd(&msg,sizeof(unsigned int)*2*iq->tbadtr,
+                 (unsigned char *) badtr,BADTR_TYPE,0);
 
-        nave=SiteIntegrate(seq->lags);
-        if (nave<0) {
-          sprintf(logtxt,"Integration error:%d",nave);
-          ErrLog(errlog.sock,progname,logtxt);
-          continue;
-        }
-        sprintf(logtxt,"Number of sequences: %d",nave);
-        ErrLog(errlog.sock,progname,logtxt);
+      RMsgSndAdd(&msg,strlen(sharedmemory)+1,(unsigned char *) sharedmemory,
+                 IQS_TYPE,0);
 
-        OpsBuildPrm(prm,seq->ptab,seq->lags);
-        OpsBuildIQ(iq,&badtr);
-        OpsBuildRaw(raw);
-        FitACF(prm,raw,fblk,fit,site,tdiff,-999);
+      tmpbuf=RawFlatten(raw,prm->nrang,prm->mplgs,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0);
 
-        /* write out data here */
-        msg.num=0;
-        msg.tsize=0;
-        tmpbuf=RadarParmFlatten(prm,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf, PRM_TYPE,0);
-
-        tmpbuf=IQFlatten(iq,prm->nave,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf,IQ_TYPE,0);
-
-        RMsgSndAdd(&msg,sizeof(unsigned int)*2*iq->tbadtr,
-                   (unsigned char *) badtr,BADTR_TYPE,0);
-
-        RMsgSndAdd(&msg,strlen(sharedmemory)+1,(unsigned char *) sharedmemory,
-                   IQS_TYPE,0);
-
-        tmpbuf=RawFlatten(raw,prm->nrang,prm->mplgs,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0);
-
-        tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-        RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *) progname,
-                   NME_TYPE,0);
-        for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
-        for (n=0;n<msg.num;n++) {
-          if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
-          if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
-          if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
-          if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
-        }
+      tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
+      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *) progname,
+                 NME_TYPE,0);
+      for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
+      for (n=0;n<msg.num;n++) {
+        if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
+        if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
+        if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
+        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
       }
     }
     /* ************************** END Single beam sounding to fill remaining time ******************* */
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     SiteEndScan(scnsc,scnus,5000);
 
-  } while (exitpoll==0);
+  } while (1);
 
   for (n=0;n<tnum;n++) RMsgSndClose(task[n].sock);
 
