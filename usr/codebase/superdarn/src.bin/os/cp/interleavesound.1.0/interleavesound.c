@@ -89,7 +89,6 @@ int main(int argc,char *argv[]) {
 
   /* new variables for dynamically creating beam sequences */
   int *bms;           /* scanning beams                                     */
-  int intgt[20];      /* start times of each integration period             */
   int nintgs=20;      /* number of integration periods per scan; SGS 1-min  */
   unsigned char hlp=0;
   unsigned char option=0;
@@ -188,10 +187,6 @@ int main(int argc,char *argv[]) {
     usage();
     return (-1);
   }
-
-  /* start time of each integration period */
-  for (i=0; i<nintgs; i++)
-    intgt[i] = i*(intsc + intus*1e-6);
 
   if (ststr==NULL) ststr=dfststr;
 
