@@ -197,6 +197,8 @@ int main(int argc,char *argv[]) {
 
   if (ststr==NULL) ststr=dfststr;
 
+  channel = cnum;
+
   pcode=(int *)malloc((size_t)sizeof(int)*seq->mppul*nbaud);
   OpsBuildPcode(nbaud,seq->mppul,pcode);
 

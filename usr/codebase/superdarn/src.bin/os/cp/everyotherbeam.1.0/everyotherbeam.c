@@ -226,6 +226,8 @@ int main(int argc,char *argv[]) {
 
   if (ststr == NULL) ststr = dfststr;
 
+  channel = cnum;
+
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
 

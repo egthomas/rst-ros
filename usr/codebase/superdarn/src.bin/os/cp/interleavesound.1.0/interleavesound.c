@@ -195,6 +195,8 @@ int main(int argc,char *argv[]) {
 
   if (ststr==NULL) ststr=dfststr;
 
+  channel = cnum;
+
   /* Point to the beams here */
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     bms = bmse;

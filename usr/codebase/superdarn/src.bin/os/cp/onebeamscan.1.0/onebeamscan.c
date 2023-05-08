@@ -184,6 +184,8 @@ int main(int argc,char *argv[]) {
 
   if (ststr==NULL) ststr=dfststr;
 
+  channel = cnum;
+
   OpsStart(ststr);
 
   status = SiteBuild(libstr);

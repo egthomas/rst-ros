@@ -239,6 +239,7 @@ int main(int argc,char *argv[]) {
   /* Load site library argument here */
   if (ststr==NULL) ststr=dfststr;
 
+  channel = cnum;
 
   printf("Requested :: ststr: %s libstr: %s\n",ststr,libstr);
 /* This loads Radar Site information from hdw.dat files */
