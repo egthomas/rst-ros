@@ -52,7 +52,7 @@ void OpsBuildPrm(struct RadarParm *prm,int *ptab,int (*lags)[2]) {
   RadarParmSetOriginTime(prm,tmstr);
 
   prm->stid = stid;
-  prm->channel=0;
+  prm->channel=channel;
   prm->time.yr=yr;
   prm->time.mo=mo;
   prm->time.dy=dy;

@@ -98,6 +98,7 @@ int scan=DEFAULT_SCAN;
 int mxpwr=DEFAULT_MXPWR;
 int lvmax=DEFAULT_LVMAX;
 int cp=50;
+int channel=0;
 
 int *pcode=NULL;
 

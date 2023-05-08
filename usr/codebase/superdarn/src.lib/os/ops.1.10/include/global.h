@@ -81,6 +81,7 @@ extern int scan;
 extern int mxpwr;
 extern int lvmax;
 extern int cp;
+extern int channel;
 
 extern int *pcode;
 
