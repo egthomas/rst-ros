@@ -196,7 +196,7 @@ int operate(pid_t parent,int sock) {
           fp=fopen(filename,"a");
           if (fp==NULL) ErrLog(errsock,taskname,"Error opening file.");
           else {
-            int fd,st;
+            int fd;
             unsigned char *p;
             int offset=0;
             if (dmsg[dptr].iqoff !=NULL) offset=*dmsg[dptr].iqoff;
@@ -205,7 +205,7 @@ int operate(pid_t parent,int sock) {
             s=IQFwrite(fp,prm,
                        iq,dmsg[dptr].badtr,
                        (int16 *) (p+offset));
-            st=ShMemFree(p,dmsg[dptr].iqs,IQBUFSIZE,0,fd);
+            ShMemFree(p,dmsg[dptr].iqs,IQBUFSIZE,0,fd);
 
             if (s==-1) break;
           }
@@ -330,6 +330,11 @@ int main(int argc,char *argv[]) {
   /* set socket options */
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
                   sizeof(sc_reuseaddr));
+
+  if (temp != 0) {
+      perror("error setting socket options");
+      exit(-1);
+  }
 
   /* name and bind socket to an address and port number */
 

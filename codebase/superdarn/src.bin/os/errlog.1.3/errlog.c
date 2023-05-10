@@ -54,7 +54,7 @@ char *get_time() {
 FILE *open_file() {
 
   FILE *fp=NULL;
-  char  daynum[16];
+  char daynum[28];
   char mode[10];
   time_t tclock;
   struct tm *gmt;
@@ -211,6 +211,11 @@ int main(int argc,char *argv[]) {
   /* set socket options */
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
                   sizeof(sc_reuseaddr));
+
+  if (temp != 0) {
+      perror("error setting socket options");
+      exit(-1);
+  }
 
   /* name and bind socket to an address and port number */
 

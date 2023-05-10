@@ -21,7 +21,7 @@
 
 void print_schedule(struct scd_blk *ptr) {/* prints out the schedule */
   int c;
-  char txt[256];
+  char txt[1050];
   if (ptr->num==0) {
     log_info(1,"No schedule file loaded");
     return;
