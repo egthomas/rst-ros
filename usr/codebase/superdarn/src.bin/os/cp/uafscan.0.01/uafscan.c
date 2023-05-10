@@ -295,7 +295,7 @@ int main(int argc,char *argv[]) {
         scnsc = 60;
         scnus = 0;
         sprintf(modestr," (fast)");
-        strncat(progname,modestr,strlen(modestr)+1);
+        strncat(progname,modestr,sizeof(progname)-strlen(progname)-1);
       } 
 
       if (onesec) {    /* If onesec option selected , no longer wait for scan boundaries, activate clear frequency skip option*/
@@ -305,7 +305,7 @@ int main(int argc,char *argv[]) {
         scnsc = nBeams_per_scan+4;
         scnus = 0;
         sprintf(modestr," (onesec)");
-        strncat(progname,modestr,strlen(modestr)+1);
+        strncat(progname,modestr,sizeof(progname)-strlen(progname)-1);
         nowait = 1;
         if(clrskip < 0)
             clrskip = default_clrskip_secs;
@@ -315,7 +315,7 @@ int main(int argc,char *argv[]) {
       if (camp >= 0 || nBeams_per_scan == 1) {   /* Camping Beam, no longer wait for scan boundaries, activate clear frequency skip option */
          fprintf(stderr, "Initializing one camping beam...\n");
          sprintf(modestr," (camp)");
-         strncat(progname,modestr,strlen(modestr)+1);
+         strncat(progname,modestr,sizeof(progname)-strlen(progname)-1);
 
          cp = 153;
          nowait = 1;
