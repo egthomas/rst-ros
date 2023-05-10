@@ -30,10 +30,6 @@ This package does not include the hardware interface software, instead
 it contains a "dummy" radar task that simulates the responses of the
 radar hardware.
 
-Note the ROS code in this package is based on the RST 3.1 software used
-at the Christmas Valley radars, and may not include all of the ROS 3.6+
-updates in use at the Fort Hays or other MSI-style radars.
-
 
 Features
 --------
