@@ -35,6 +35,7 @@ void OpsLoadSndFreqs(char *ststr) {
   char snd_filename[100];
   FILE *snd_dat;
   char *path;
+  int stat;
 
   int snd_freq_cnt=0;
 
@@ -48,10 +49,15 @@ void OpsLoadSndFreqs(char *ststr) {
   fprintf(stderr,"Checking Sounder File: %s\n",snd_filename);
   snd_dat = fopen(snd_filename, "r");
   if (snd_dat != NULL) {
-    fscanf(snd_dat, "%d", &snd_freqs_tot);
+    stat = fscanf(snd_dat, "%d", &snd_freqs_tot);
+    if (stat != 1) {
+      fprintf(stderr,"Error reading number of sounder frequencies\n");
+      fclose(snd_dat);
+      return;
+    }
     if (snd_freqs_tot > MAX_SND_FREQS) snd_freqs_tot = MAX_SND_FREQS;
     for (snd_freq_cnt=0; snd_freq_cnt < snd_freqs_tot; snd_freq_cnt++)
-      fscanf(snd_dat, "%d", &snd_freqs[snd_freq_cnt]);
+      stat = fscanf(snd_dat, "%d", &snd_freqs[snd_freq_cnt]);
     fclose(snd_dat);
     fprintf(stderr,"Sounder File: %s read\n",snd_filename);
   } else {
