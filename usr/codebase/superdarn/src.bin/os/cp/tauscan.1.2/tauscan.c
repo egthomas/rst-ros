@@ -307,12 +307,11 @@ int main(int argc,char *argv[]) {
         frang=nfrang;
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus time:%d:%d:%d "
-              "mpinc:%d\n", bmnum,intsc,intus,hr,mt,sc,mplgexs);
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)"
+              " mpinc:%d", bmnum,intsc,intus,hr,mt,sc,us,mplgexs);
       ErrLog(errlog.sock,progname,logtxt);
 
       ErrLog(errlog.sock,progname,"Starting Integration.");
-
       printf("Entering Site Start Intt Station ID: %s %d\n",ststr,stid);
       /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
       SiteStartIntt(intsc,intus);
