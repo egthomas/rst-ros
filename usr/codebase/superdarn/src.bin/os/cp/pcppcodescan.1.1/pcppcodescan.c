@@ -120,8 +120,8 @@ int main(int argc,char *argv[]) {
   mplgs=seq->mplgs;
   mpinc=1560;
   nrang=565;        /* 3390 km range at 6 km range separation */
-  nrang=750;        /* 4500 km range at 6 km range separation */
-  rsep=6;
+  /*nrang=750;*/    /* 4500 km range at 6 km range separation */
+  rsep=6;           /* [this exceeds MAX_RANGE (700) in limit.h] */
   nbaud=13;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
