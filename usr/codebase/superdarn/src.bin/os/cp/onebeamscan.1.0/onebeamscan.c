@@ -99,7 +99,7 @@ int main(int argc,char *argv[]) {
   int n;
   int status=0;
 
-  int ibm,obm;
+  int ibm,obm=10;
   int nbm = 20;    /* default number of "beams" */
   int total_scan_usecs = 0;
   int total_integration_usecs = 0;
@@ -297,6 +297,8 @@ int main(int argc,char *argv[]) {
     } else xcf=0;
 
     ibm = skip = OpsFindSkip(scnsc,scnus,intsc,intus,0);
+
+    bmnum = obm;
 
     do {
 
