@@ -145,8 +145,8 @@ int main(int argc,char *argv[]) {
 
 /* Added by KTS to enable changing of beams used for FoV scan  21Dec2011 */
 
-  OptionAdd(&opt, "sbm", 'i', &sbm);
-  OptionAdd(&opt, "ebm", 'i', &ebm);
+  OptionAdd(&opt, "sb",  'i', &sbm);
+  OptionAdd(&opt, "eb",  'i', &ebm);
   OptionAdd(&opt, "ep",  'i', &errlog.port);
   OptionAdd(&opt, "sp",  'i', &shell.port);
   OptionAdd(&opt, "bp",  'i', &baseport);
