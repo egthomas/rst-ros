@@ -267,8 +267,8 @@ int main(int argc,char *argv[]) {
      cp=PCPCPID;    /* does the cp ever change? SGS */
      scnsc=60;      /* this never changes and is defined 3 times... SGS */
      scnus=0;       /* this one too... SGS */
-     intsc=3;
-     intus=0;
+     intsc=2;
+     intus=500000;
 
     if (SiteStartScan() !=0) continue;
 
@@ -320,7 +320,6 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
       ErrLog(errlog.sock,progname, logtxt);
 
-      printf("FRQ: %d %d", stfrq, frqrng);
       tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
@@ -400,7 +399,6 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
       ErrLog(errlog.sock,progname, logtxt);
 
-      printf("FRQ: %d %d", stfrq, frqrng);
       tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
