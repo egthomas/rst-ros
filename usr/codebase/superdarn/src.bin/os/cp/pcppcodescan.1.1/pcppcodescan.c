@@ -118,7 +118,7 @@ int main(int argc,char *argv[]) {
   intus=0;
   mppul=seq->mppul;
   mplgs=seq->mplgs;
-  mpinc=seq->mpinc;
+  mpinc=1560;
   nrang=565;        /* 3390 km range at 6 km range separation */
   nrang=750;        /* 4500 km range at 6 km range separation */
   rsep=6;
@@ -250,6 +250,17 @@ int main(int argc,char *argv[]) {
   OpsFitACFStart();
 
   tsgid=SiteTimeSeq(seq->ptab);
+  if (tsgid !=0) {
+    if (tsgid==-2) {
+      ErrLog(errlog.sock,progname,"Error registering timing sequence.");
+    } else if (tsgid==-1) {
+      ErrLog(errlog.sock,progname,"TSGMake error code: 0 (tsgbuff==NULL)");
+    } else {
+      sprintf(logtxt,"TSGMake error code: %d",tsgid);
+      ErrLog(errlog.sock,progname,logtxt);
+    }
+    exit(-1);
+  }
 
   do {
 
