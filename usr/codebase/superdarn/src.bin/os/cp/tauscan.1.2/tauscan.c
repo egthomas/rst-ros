@@ -346,7 +346,7 @@ int main(int argc,char *argv[]) {
 
       /* rst/codebase/superdarn/src.lib/tk/fitacf.2.5/src/fitacf.c */
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
-             FitSetAlgorithm(fit,"fitacf2");
+      FitSetAlgorithm(fit,"fitacf2");
 
       msg.num=0;
       msg.tsize=0;
