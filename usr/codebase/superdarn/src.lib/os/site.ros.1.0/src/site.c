@@ -182,7 +182,7 @@ int SiteRosStart(char *host,char *ststr)
   if (config_lookup_int(&cfg, "cnum", &ltemp)) {
     cnum = ltemp;
   } else {
-    cnum = 1;
+    if (cnum == 0) cnum = 1;
     fprintf(stderr,"Site Cfg Warning:: 'cnum' setting undefined in site cfg file, using: %d\n",cnum);
   }
 
