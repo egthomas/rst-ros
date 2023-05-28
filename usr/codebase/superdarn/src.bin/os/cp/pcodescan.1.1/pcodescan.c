@@ -118,8 +118,6 @@ int main(int argc,char *argv[]) {
   mppul = seq->mppul;
   mplgs = seq->mplgs;
   mpinc = seq->mpinc;
-  nrang = 300;
-  rsep  = 15;
   nbaud = 3;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
@@ -162,8 +160,6 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "baud",   'i', &nbaud);
   OptionAdd(&opt, "sf",     'i', &stfrq);
   OptionAdd(&opt, "tau",    'i', &mpinc);
-/*  OptionAdd(&opt, "rangeres", 'i', &rsep);
-  OptionAdd(&opt, "ranges",   'i', &nrang);*/
 
   arg = OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -215,6 +211,10 @@ int main(int argc,char *argv[]) {
     fprintf(stderr,"Error reading site configuration file.\n");
     exit(1);
   }
+
+  /* non-standard nrang and rsep for this mode */
+  nrang = 300;
+  rsep  = 15;
 
   /* reprocess the commandline since some things are reset by SiteStart */
   arg = OptionProcess(1,argc,argv,&opt,NULL);
@@ -277,11 +277,6 @@ int main(int argc,char *argv[]) {
   if (discretion) cp= -cp;
 
   txpl = (nbaud*rsep*20)/3;
-
-/*
-  if (fast) sprintf(progname,"pcodescan (fast)");
-  else sprintf(progname,"pcodescan");
-*/
 
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);

@@ -137,7 +137,6 @@ int main(int argc,char *argv[]) {
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
   dmpinc = seq->mpinc;
-  nrang  = 100;
   rsep   = 45;
   txpl   = 300;     /* note: recomputed below */
 
@@ -289,7 +288,9 @@ int main(int argc,char *argv[]) {
 
   do {
 
-    tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+    if (def_nrang != snd_nrang) {
+      tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+    }
 
     if (SiteStartScan() !=0) continue;
 
@@ -419,7 +420,9 @@ int main(int argc,char *argv[]) {
     nrang = snd_nrang;
 
     /* make a new timing sequence for the sounding */
-    tsgid = SiteTimeSeq(seq->ptab);
+    if (def_nrang != snd_nrang) {
+      tsgid = SiteTimeSeq(seq->ptab);
+    }
 
     /* we have time until the end of the minute to do sounding */
     /* minus a safety factor given in time_needed */

@@ -163,7 +163,6 @@ int main(int argc,char *argv[]) {
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
   dmpinc = seq->mpinc;
-  nrang  = 75;
   rsep   = 45;
   txpl   = 300;
   nbaud  = 1;

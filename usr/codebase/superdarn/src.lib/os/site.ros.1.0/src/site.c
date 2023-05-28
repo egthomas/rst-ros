@@ -218,6 +218,14 @@ int SiteRosStart(char *host,char *ststr)
     fprintf(stderr,"Site Cfg Warning:: 'nfrq' setting undefined in site cfg file, using: %d\n",nfrq);
   }
 
+  /* Get the number of range gates */
+  if (config_lookup_int(&cfg, "nrang", &ltemp)) {
+    nrang = ltemp;
+  } else {
+    nrang = 75;
+    fprintf(stderr,"Site Cfg Warning:: 'nrang' setting undefined in site cfg file, using: %d\n",nrang);
+  }
+
   /* Get whether you need to correct for inverted phase between main and interf rf signal
    *   invert=0         No inversion necessary
    *   invert=non-zero  Inversion necessary */

@@ -137,7 +137,6 @@ int main(int argc,char *argv[])
   mppul  = seq->mppul;  /* number of pulses */
   mplgs  = seq->mplgs;  /* number of lags */
   mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
-  nrang  = 100;         /* the number of ranges gets set in SiteXXXStart() */
   rsep   = 45;          /* same for the range separation */
   txpl   = 300;         /* pulse length [us]; gets redefined below... */
 
@@ -319,8 +318,10 @@ int main(int argc,char *argv[])
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
-    printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-    tsgid=SiteTimeSeq(seq->ptab);
+    if (def_nrang != snd_nrang) {
+      printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
+      tsgid=SiteTimeSeq(seq->ptab);
+    }
 
     printf("Entering Site Start Scan Station ID: %s  %d\n",ststr,stid);
     if (SiteStartScan() !=0) continue;
@@ -460,7 +461,9 @@ int main(int argc,char *argv[])
     nrang = snd_nrang;
 
     /* make a new timing sequence for the sounding */
-    tsgid = SiteTimeSeq(seq->ptab);
+    if (def_nrang != snd_nrang) {
+      tsgid = SiteTimeSeq(seq->ptab);
+    }
 
     /* we have time until the end of the minute to do sounding */
     /* minus a safety factor given in time_needed */

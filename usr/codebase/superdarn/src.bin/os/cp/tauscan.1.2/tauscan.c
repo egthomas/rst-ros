@@ -109,7 +109,6 @@ int main(int argc,char *argv[]) {
   mplgexs=seq->mplgexs;
   mpinc=seq->mpinc;
   dmpinc=seq->mpinc;
-  nrang=100;
   rsep=45;
   txpl=300;
 

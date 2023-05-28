@@ -108,8 +108,6 @@ int main(int argc,char *argv[])
   mppul  = seq->mppul;  /* number of pulses */
   mplgs  = seq->mplgs;  /* number of lags */
   mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
-  nrang  = 300;         /* the number of ranges gets set in SiteXXXStart() */
-  rsep   = 15;          /* same for the range separation */
   txpl   = 100;         /* pulse length [us]; gets redefined below... */
   nbaud  = 1;
 
@@ -194,6 +192,10 @@ int main(int argc,char *argv[])
     fprintf(stderr,"Error reading site configuration file.\n");
     exit(1);
   }
+
+  /* non-standard nrang and rsep for this mode */
+  nrang  = 300;         /* the number of ranges gets set in SiteXXXStart() */
+  rsep   = 15;          /* same for the range separation */
 
   /* reprocess the commandline since some things are reset by SiteStart */
   arg=OptionProcess(1,argc,argv,&opt,NULL);

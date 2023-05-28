@@ -137,7 +137,6 @@ int main(int argc,char *argv[]) {
   mppul  = seq->mppul;  /* number of pulses */
   mplgs  = seq->mplgs;  /* number of lags */
   mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
-  nrang  = 100;         /* the number of ranges gets set in SiteXXXStart() */
   rsep   = 45;          /* same for the range separation */
   txpl   = 300;         /* pulse length [us]; gets redefined below... */
 

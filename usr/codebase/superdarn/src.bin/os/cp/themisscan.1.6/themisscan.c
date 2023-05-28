@@ -134,7 +134,6 @@ int main(int argc,char *argv[]) {
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
   dmpinc = seq->mpinc;
-  nrang  = 100;
   rsep   = 45;
   txpl   = 300;         /* note: recomputed below */
 

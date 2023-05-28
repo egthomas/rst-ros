@@ -110,7 +110,6 @@ int main(int argc,char *argv[]) {
   mpinc=seq->mpinc;
   nmpinc=seq->mpinc;
   dmpinc=seq->mpinc;
-  nrang=100;
   rsep=45;
   txpl=300;
 

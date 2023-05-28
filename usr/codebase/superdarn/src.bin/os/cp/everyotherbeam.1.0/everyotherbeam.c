@@ -133,7 +133,6 @@ int main(int argc,char *argv[]) {
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
   dmpinc = 1500;
-  nrang  = 100;         /* can this be set in the site library? */
   rsep   = 45;
   txpl   = 300;         /* note: recomputed below */
 
