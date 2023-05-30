@@ -49,9 +49,6 @@ struct RMsgBlock msg;
 
 struct RShellTable rstable;
 
-int maxatten=DEFAULT_MAX_ATTEN;
-int protatten=DEFAULT_PROT_ATTEN;
-
 unsigned char command[128];
 
 int debug=0;

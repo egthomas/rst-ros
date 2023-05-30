@@ -39,9 +39,6 @@ extern int debug;
 extern int rnum;
 extern int cnum;
 
-extern int maxatten;
-extern int protatten;
-
 extern int tsgid;
 extern int stid;
 extern int yr;
