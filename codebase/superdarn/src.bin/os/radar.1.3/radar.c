@@ -168,8 +168,8 @@ int operate(pid_t parent,int sock) {
         if (rdata.main !=NULL) free(rdata.main);
         if (rdata.back !=NULL) free(rdata.back);
 
+        dprm.samples=rprm.number_of_samples;
         if (vb) fprintf(stderr,"Number of samples %d\n",dprm.samples);
-        dprm.samples=tprm.samples+tprm.smdelay+30;
         dprm.status=0;
 
         rdata.main=malloc(4*dprm.samples);
