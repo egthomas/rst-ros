@@ -126,7 +126,7 @@ int main(int argc,char *argv[]) {
     case 11: bcode = bcode11; break;
     case 13: bcode = bcode13; break;
     default:
-      fprintf(stderr,"Invalid nbaud: %d\n",nbaud);
+      fprintf(stderr,"Invalid nbaud: %d  (1,2,3,4,5,7,11,13)\n",nbaud);
       exit(-1);
   }
 
@@ -166,8 +166,23 @@ int main(int argc,char *argv[]) {
   }
 
   buf=TSGMake(&prm,&flag);
+
   if (buf==NULL) {
-    fprintf(stderr,"TSGMake Error: %d\n",flag);
+    fprintf(stderr,"TSGMake Error: %d",flag);
+    switch (flag) {
+      case  1: fprintf(stderr," (TSG_INV_RSEP)\n"); break;
+      case  2: fprintf(stderr," (TSG_NO_SMSEP)\n"); break;
+      case  3: fprintf(stderr," (TSG_INV_MPPUL_SMSEP)\n"); break;
+      case  4: fprintf(stderr," (TSG_INV_PAT)\n"); break;
+      case  5: fprintf(stderr," (TSG_INV_MPINC_SMSEP)\n"); break;
+      case  6: fprintf(stderr," (TSG_INV_LAGFR_SMSEP)\n"); break;
+      case  7: fprintf(stderr," (TSG_INV_DUTY_CYCLE)\n"); break;
+      case  8: fprintf(stderr," (TSG_INV_ODD_SMSEP)\n"); break;
+      case  9: fprintf(stderr," (TSG_INV_TXPL_BAUD)\n"); break;
+      case 10: fprintf(stderr," (TSG_INV_MEMORY)\n"); break;
+      case 11: fprintf(stderr," (TSG_INV_PHASE_DELAY)\n"); break;
+      default: fprintf(stderr,"\n"); break;
+    }
     exit(-1);
   }
 
