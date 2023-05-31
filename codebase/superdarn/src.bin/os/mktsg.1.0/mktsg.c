@@ -44,7 +44,8 @@ int main(int argc,char *argv[]) {
   int txpl;
   int old=0;
   int longpulse=0;
-  int tauscan=0;
+  int tauscan11=0;
+  int tauscan13=0;
 
   int *bcode;
   int bcode1[1]={1};
@@ -59,7 +60,8 @@ int main(int argc,char *argv[]) {
   int patn_old[7]   = {0,9,12,20,22,26,27};
   int patn_short[8] = {0,14,22,24,27,31,42,43};
   int patn_long[16] = {0,4,19,42,78,127,191,270,364,474,600,745,905,1083,1280,1495};
-  int patn_tau[11]  = {0,10,13,14,19,21,31,33,38,39,42};
+  int patn_tau11[11]  = {0,10,13,14,19,21,31,33,38,39,42};
+  int patn_tau13[13]  = {0,15,16,23,27,29,32,47,50,52,56,63,64};
 
   struct TSGprm prm;
   struct TSGbuf *buf=NULL;
@@ -68,7 +70,8 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "-option",   'x',&option);
   OptionAdd(&opt, "-version",  'x',&version);
 
-  OptionAdd(&opt, "tauscan",   'x', &tauscan);
+  OptionAdd(&opt, "tauscan11",   'x', &tauscan11);
+  OptionAdd(&opt, "tauscan13",   'x', &tauscan13);
   OptionAdd(&opt, "longpulse", 'x', &longpulse);
   OptionAdd(&opt, "old",       'x', &old);
 
@@ -99,9 +102,12 @@ int main(int argc,char *argv[]) {
     exit(0);
   }
 
-  if (tauscan) {
+  if (tauscan11) {
     mpinc = 3000;
     mppul = 11;
+  } else if (tauscan13) {
+    mpinc = 2400;
+    mppul = 13;
   } else if (longpulse) {
     nrang = 300;
     rsep  = 15;
@@ -155,8 +161,10 @@ int main(int argc,char *argv[]) {
   prm.code    = pcode;
   prm.pat     = malloc(sizeof(int)*prm.mppul);
 
-  if (tauscan) {
-    for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_tau[i];
+  if (tauscan11) {
+    for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_tau11[i];
+  } else if (tauscan13) {
+    for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_tau13[i];
   } else if (longpulse) {
     for (i=0;i<prm.mppul;i++) prm.pat[i] = patn_long[i];
   } else if (old) {
