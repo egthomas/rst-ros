@@ -302,6 +302,8 @@ int main(int argc,char *argv[]) {
     if (bmnum > ebm) bmnum = sbm;
   }
 
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
+
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
@@ -370,7 +372,7 @@ int main(int argc,char *argv[]) {
       /*printf("FRQ: %d %d", stfrq, frqrng);*/
       /*tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);*/
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);

@@ -282,6 +282,8 @@ int main(int argc,char *argv[]) {
 
   tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
 
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
+
   do {
 
     if (SiteStartScan() !=0) continue;
@@ -370,7 +372,7 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname, logtxt);
       tfreq=SiteFCLR(stfrq,stfrq+frqrng);
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);

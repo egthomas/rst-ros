@@ -255,6 +255,8 @@ int main(int argc,char *argv[])
   printf("Preparing OpsFitACFStart Station ID: %s  %d\n",ststr,stid);
   OpsFitACFStart();
 
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
+
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
@@ -326,7 +328,7 @@ int main(int argc,char *argv[])
       ErrLog(errlog.sock,progname, logtxt);
       tfreq=SiteFCLR(stfrq,stfrq+frqrng);
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
