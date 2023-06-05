@@ -19,5 +19,4 @@ void OpsBuildPrm(struct RadarParm *prm,
 void OpsBuildIQ(struct IQ *iq,unsigned int **badtr);
 void OpsBuildRaw(struct RawData *raw);
 
-
 #endif

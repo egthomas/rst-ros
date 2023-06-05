@@ -27,4 +27,3 @@ int OpsBuildTauscan11(struct sequence *ptr);
 void OpsBuildPcode(int nbaud, int mppul, int *pcode);
 
 #endif
-

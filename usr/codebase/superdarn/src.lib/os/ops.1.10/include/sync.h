@@ -10,9 +10,7 @@
 #ifndef _SYNC_H
 #define _SYNC_H
 
-/*int OpsFindSkip(int bsc,int bus);*/
 int OpsFindSkip(int scnsc, int scnus, int synsc, int synus, int nbm);
 int OpsDayNight();
 
 #endif
-
