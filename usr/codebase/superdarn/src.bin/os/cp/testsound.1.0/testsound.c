@@ -62,7 +62,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2023/04/05"};
+char progid[80]={"testsound 2023/06/05"};
 char progname[256];
 
 int arg=0;
@@ -221,10 +221,10 @@ int main(int argc,char *argv[])
     return (-1);
   }
 
+  OpsStart(ststr);
+
   /* Load the sounding frequencies */
   OpsLoadSndFreqs(ststr);
-
-  OpsStart(ststr);
 
   status=SiteBuild(libstr);
   if (status==-1) {

@@ -15,6 +15,7 @@
 #include "rtime.h"
 #include "dmap.h"
 #include "rprm.h"
+#include "freq.h"
 #include "fitdata.h"
 #include "snddata.h"
 #include "fitsnd.h"
@@ -25,8 +26,8 @@
 #include "snd.h"
 
 
-int snd_freqs_tot=8;
-int snd_freqs[MAX_SND_FREQS]= {11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 0, 0, 0, 0 };
+int snd_freqs_tot;
+int snd_freqs[MAX_SND_FREQS];
 
 struct SndData *snd;
 
@@ -37,7 +38,10 @@ void OpsLoadSndFreqs(char *ststr) {
   char *path;
   int stat;
 
+  int tmp_freqs[MAX_SND_FREQS]={9500, 10500, 11500, 12500, 13500, 14500, 15500, 16500, 0, 0, 0, 0 };
+
   int snd_freq_cnt=0;
+  int cnt=0;
 
   /* load the sounder frequencies from file in site directory if present */
   path = getenv("SD_SITE_PATH");
@@ -52,18 +56,30 @@ void OpsLoadSndFreqs(char *ststr) {
     stat = fscanf(snd_dat, "%d", &snd_freqs_tot);
     if (stat != 1) {
       fprintf(stderr,"Error reading number of sounder frequencies\n");
+      snd_freqs_tot = 8;
       fclose(snd_dat);
-      return;
+    } else {
+      if (snd_freqs_tot > MAX_SND_FREQS) snd_freqs_tot = MAX_SND_FREQS;
+      for (snd_freq_cnt=0; snd_freq_cnt < snd_freqs_tot; snd_freq_cnt++)
+        stat = fscanf(snd_dat, "%d", &tmp_freqs[snd_freq_cnt]);
+      fclose(snd_dat);
+      fprintf(stderr,"Sounder File: %s read\n",snd_filename);
     }
-    if (snd_freqs_tot > MAX_SND_FREQS) snd_freqs_tot = MAX_SND_FREQS;
-    for (snd_freq_cnt=0; snd_freq_cnt < snd_freqs_tot; snd_freq_cnt++)
-      stat = fscanf(snd_dat, "%d", &snd_freqs[snd_freq_cnt]);
-    fclose(snd_dat);
-    fprintf(stderr,"Sounder File: %s read\n",snd_filename);
   } else {
     fprintf(stderr,"Sounder File: %s not found\n",snd_filename);
+    snd_freqs_tot = 8;
   }
 
+  /* Check whether sounder frequencies are valid */
+  for (snd_freq_cnt=0; snd_freq_cnt < snd_freqs_tot; snd_freq_cnt++) {
+    if (FreqTest(ftable,tmp_freqs[snd_freq_cnt]) == 0) {
+      snd_freqs[cnt] = tmp_freqs[snd_freq_cnt];
+      cnt++;
+    } else {
+      fprintf(stderr,"Bad sounder frequency: %d\n",tmp_freqs[snd_freq_cnt]);
+    }
+  }
+  snd_freqs_tot = cnt;
 }
 
 
@@ -135,8 +151,6 @@ void OpsFindSndSkip(char *ststr,int *snd_bms,int snd_bms_tot,int *snd_bm_cnt,int
 
   *snd_bm_cnt = sbc;
   *odd_beams = odd;
-
-  return;
 }
 
 
