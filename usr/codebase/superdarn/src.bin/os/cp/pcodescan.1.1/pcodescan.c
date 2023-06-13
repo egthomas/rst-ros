@@ -223,6 +223,7 @@ int main(int argc,char *argv[]) {
   if (rxonly) {
     strcpy(progid, "rxonlybistaticpcodescan");
     strcpy(progname, "rxonlybistaticpcodescan");
+    txpow = 1;
   } else {
     if (fast) sprintf(progname,"pcodescan (fast)");
     else sprintf(progname,"pcodescan");

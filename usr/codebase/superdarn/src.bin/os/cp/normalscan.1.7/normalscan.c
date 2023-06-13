@@ -238,6 +238,7 @@ int main(int argc,char *argv[]) {
   if (rxonly) {
     strcpy(progid, "rxonlybistaticscan");
     strcpy(progname, "rxonlybistaticscan");
+    txpow = 1;
   } else {
     if (fast) sprintf(progname,"normalscan (fast)");
     else sprintf(progname,"normalscan");

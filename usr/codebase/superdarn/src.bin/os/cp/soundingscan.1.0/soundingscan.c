@@ -232,6 +232,7 @@ int main(int argc,char *argv[]) {
   if (rxonly) {
     strcpy(progid, "rxonlybistaticsound");
     strcpy(progname, "rxonlybistaticsound");
+    txpow = 1;
   } else {
     if (fast) sprintf(progname,"soundingscan (fast)");
     else sprintf(progname,"soundingscan");
