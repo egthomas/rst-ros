@@ -151,6 +151,8 @@ void OpsFindSndSkip(char *ststr,int *snd_bms,int snd_bms_tot,int *snd_bm_cnt,int
 
   *snd_bm_cnt = sbc;
   *odd_beams = odd;
+
+  SndFree(tmp);
 }
 
 
