@@ -548,5 +548,8 @@ int main(int argc,char *argv[]) {
 
   endwin();
 
+  RadarParmFree(prm);
+  FitFree(fit);
+
   return 0;
 }
