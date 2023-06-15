@@ -203,5 +203,6 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
+  fprintf(stderr,"Parameters succesfully uploaded.\n");
   return 0;
 }
