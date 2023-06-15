@@ -135,8 +135,8 @@ int SiteRosStart(char *host,char *ststr)
   if (config_lookup_string(&cfg, "station", &str)) {
     strcpy(station,str);
   } else {
-    fprintf(stderr,"Site Cfg Error:: No station setting in configuration file\n");
-    return -1;
+    strcpy(station,ststr);
+    fprintf(stderr,"Site Cfg Warning:: 'station' setting undefined in site cfg file, using: %s\n",station);
   }
 
   /* Get the radar beam scan direction */
