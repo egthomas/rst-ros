@@ -221,8 +221,8 @@ int main(int argc,char *argv[]) {
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
   if (rxonly) {
-    strcpy(progid, "rxonlybistaticpcodescan");
-    strcpy(progname, "rxonlybistaticpcodescan");
+    strcpy(progid, "rxonlybistaticpcodescan; BISTATIC");
+    strcpy(progname, "rxonlybistaticpcodescan; BISTATIC");
     txpow = 1;
   } else {
     if (fast) sprintf(progname,"pcodescan (fast)");

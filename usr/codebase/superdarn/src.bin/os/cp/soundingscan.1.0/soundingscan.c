@@ -230,8 +230,8 @@ int main(int argc,char *argv[]) {
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
   if (rxonly) {
-    strcpy(progid, "rxonlybistaticsound");
-    strcpy(progname, "rxonlybistaticsound");
+    strcpy(progid, "rxonlybistaticsound; BISTATIC");
+    strcpy(progname, "rxonlybistaticsound; BISTATIC");
     txpow = 1;
   } else {
     if (fast) sprintf(progname,"soundingscan (fast)");
