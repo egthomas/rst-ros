@@ -34,7 +34,7 @@
 #include "version.h"
 
 #define DEF_CPPORT 44001
-#define DEF_RSPORT 44002
+#define DEF_RSPORT 45001
 
 #define MAX_NUM  256
 #define BUF_SIZE (32*1024)
