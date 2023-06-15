@@ -143,7 +143,7 @@ int main(int argc,char *argv[]) {
     strcpy(name,radar);
     strcat(name,".scdlog");
   } else {
-    strcpy(name,".scdlog");
+    strcpy(name,"scdlog");
   }
   logname=name;
 
