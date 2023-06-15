@@ -287,9 +287,10 @@ int main (int argc,char *argv[]) {
       snd->frang = header_old.frange;
       snd->rsep = header_old.rsep;
       snd->tfreq = header_old.freq;
-      snd->combf = header_old.program_name;
       snd->snd_revision.major = SND_MAJOR_REVISION;
       snd->snd_revision.minor = SND_MINOR_REVISION;
+
+      SndSetCombf(snd,header_old.program_name);
 
       SndSetRng(snd,SND_NRANG);
 
@@ -376,9 +377,10 @@ int main (int argc,char *argv[]) {
       snd->frang = header_new.frange;
       snd->rsep = header_new.rsep;
       snd->tfreq = header_new.freq;
-      snd->combf = header_new.program_name;
       snd->snd_revision.major = SND_MAJOR_REVISION;
       snd->snd_revision.minor = SND_MINOR_REVISION;
+
+      SndSetCombf(snd,header_new.program_name);
 
       SndSetRng(snd,header_new.nrang);
 
@@ -456,9 +458,10 @@ int main (int argc,char *argv[]) {
       snd->frang = header.frange;
       snd->rsep = header.rsep;
       snd->tfreq = header.freq;
-      snd->combf = header.program_name;
       snd->snd_revision.major = SND_MAJOR_REVISION;
       snd->snd_revision.minor = SND_MINOR_REVISION;
+
+      SndSetCombf(snd,header.program_name);
 
       SndSetRng(snd,SND_NRANG);
 
