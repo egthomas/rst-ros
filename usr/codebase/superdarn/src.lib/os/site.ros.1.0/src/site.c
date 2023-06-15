@@ -126,8 +126,9 @@ int SiteRosStart(char *host,char *ststr)
   config_init(&cfg);
   retval = config_read_file(&cfg,config_filepath);
   if (retval == CONFIG_FALSE) {
-    fprintf(stderr,"Site Cfg Read Error:: %d - %s\n",
+    fprintf(stderr,"Site Cfg Read Error:: %d - %s\nSiteRosStart aborting\n",
             config_error_line(&cfg), config_error_text(&cfg));
+    return -1;
   }
 
   /* Get the station name */
