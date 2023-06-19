@@ -272,19 +272,12 @@ int main(int argc,char *argv[]) {
           exit(-1);
         }
 
-        indices[0]=0;
-        intervals[0]=1;
-        counts[0]=1;
-
         switch (sx->type) {
         case DATACHAR:
           status=CDFlib(SELECT_,
                         zVAR_,varid,zVAR_RECNUMBER_,block,
                         zVAR_RECCOUNT_,1,
                         zVAR_RECINTERVAL_,1,
-                        zVAR_DIMINDICES_,indices,
-                        zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATASHORT:
@@ -292,9 +285,6 @@ int main(int argc,char *argv[]) {
                         zVAR_,varid,zVAR_RECNUMBER_,block,
                         zVAR_RECCOUNT_,1,
                         zVAR_RECINTERVAL_,1,
-                        zVAR_DIMINDICES_,indices,
-                        zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATAINT:
@@ -302,9 +292,6 @@ int main(int argc,char *argv[]) {
                         zVAR_,varid,zVAR_RECNUMBER_,block,
                         zVAR_RECCOUNT_,1,
                         zVAR_RECINTERVAL_,1,
-                        zVAR_DIMINDICES_,indices,
-                        zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATAFLOAT:
@@ -312,9 +299,6 @@ int main(int argc,char *argv[]) {
                         zVAR_,varid,zVAR_RECNUMBER_,block,
                         zVAR_RECCOUNT_,1,
                         zVAR_RECINTERVAL_,1,
-                        zVAR_DIMINDICES_,indices,
-                        zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATADOUBLE:
@@ -322,9 +306,6 @@ int main(int argc,char *argv[]) {
                         zVAR_,varid,zVAR_RECNUMBER_,block,
                         zVAR_RECCOUNT_,1,
                         zVAR_RECINTERVAL_,1,
-                        zVAR_DIMINDICES_,indices,
-                        zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATASTRING:
@@ -341,9 +322,6 @@ int main(int argc,char *argv[]) {
                         zVAR_,varid,zVAR_RECNUMBER_,block,
                         zVAR_RECCOUNT_,1,
                         zVAR_RECINTERVAL_,1,
-                        zVAR_DIMINDICES_,indices,
-                        zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,buf,NULL_);
 
           free(buf);
