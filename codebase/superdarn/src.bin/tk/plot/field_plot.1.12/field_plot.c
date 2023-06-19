@@ -510,8 +510,8 @@ int main(int argc,char *argv[]) {
   float lat=1e10,lon=0;
   float latmin=50.0;
   float sf=1.0;
-  float xshift=1e10;
-  float yshift=1e10;
+  float xshift=0.0;
+  float yshift=0.0;
 
   unsigned char magflg=0;
   unsigned char rotflg=0;
