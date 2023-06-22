@@ -54,7 +54,7 @@ int operate(pid_t parent,int sock) {
   struct DataPRM dprm;
   struct TRTimes badtrdat;
 
-  int tfreq,dfreq,rnum,cnum,s;
+  int tfreq,dfreq,rnum,cnum,s,i;
   float noise=0.5;
 
   int32 temp_int32,data_length;
@@ -64,6 +64,16 @@ int operate(pid_t parent,int sock) {
   int num_transmitters=16;
 
   int AGC[16],LOPWR[16];
+
+  int intsc,intus,nrang,mpinc,smsep,lagfr,mppul,nbaud;
+  int *pcode=NULL;
+
+  int32_t periods_per_scan,fixFreq,sync_scan;
+  int32_t scn_sc,scn_us,int_sc,int_us,start_period;
+  int32_t sbeam_list[100];
+  int32_t clrfrq_fstart[100];
+  int32_t clrfrq_bw[100];
+  int32_t *beam_times;
 
   memset(&rprm,0,sizeof(struct ControlPRM));
   memset(&fprm,0,sizeof(struct CLRFreqPRM));
@@ -78,6 +88,7 @@ int operate(pid_t parent,int sock) {
     if (s !=sizeof(struct ROSMsg)) break;
 
     rmsg.type=smsg.type;
+    rmsg.status=1;
 
     switch (smsg.type) {
       case SET_RADAR_CHAN:
@@ -102,6 +113,30 @@ int operate(pid_t parent,int sock) {
       case GET_PARAMETERS:
         if (vb) fprintf(stderr,"GET_PARAMETERS\n");
         TCPIPMsgSend(sock, &rprm, sizeof(struct ControlPRM));
+        break;
+
+      case SET_ACTIVE:
+        if (vb) fprintf(stderr,"SET_ACTIVE\n");
+        TCPIPMsgRecv(sock, &periods_per_scan, sizeof(int32_t)); /* number of periods */
+
+        TCPIPMsgRecv(sock, &fixFreq, sizeof(int32_t)); /* fixed frequency or -1 for clear frequency search */
+        TCPIPMsgRecv(sock, &clrfrq_fstart, periods_per_scan*sizeof(int32_t)); /* start frequency of clrfreq */
+        TCPIPMsgRecv(sock, &clrfrq_bw, periods_per_scan*sizeof(int32_t)); /* bandwidth of clrfreq in Hz */
+        TCPIPMsgRecv(sock, &sbeam_list, periods_per_scan*sizeof(int32_t)); /* scan beam list */
+
+        TCPIPMsgRecv(sock, &sync_scan, sizeof(int32_t)); /* if the periods/beams should start at fixed times */
+        TCPIPMsgRecv(sock, &scn_sc, sizeof(int32_t)); /* scan and integration times */
+        TCPIPMsgRecv(sock, &scn_us, sizeof(int32_t));
+        TCPIPMsgRecv(sock, &int_sc, sizeof(int32_t));
+        TCPIPMsgRecv(sock, &int_us, sizeof(int32_t));
+
+        TCPIPMsgRecv(sock, &start_period, sizeof(int32_t));
+        if (sync_scan == 1) {
+          beam_times = malloc(periods_per_scan*sizeof(int));
+          TCPIPMsgRecv(sock, &beam_times, periods_per_scan*sizeof(int32_t));
+        }
+
+        rmsg.status=0;
         break;
 
       case SET_PARAMETERS:
@@ -152,6 +187,23 @@ int operate(pid_t parent,int sock) {
         if (vb) fprintf(stderr,"%d\n",tprm.len);
         TCPIPMsgRecv(sock, tsgbuf->rep, sizeof(unsigned char)*tsgbuf->len);
         TCPIPMsgRecv(sock, tsgbuf->code, sizeof(unsigned char)*tsgbuf->len);
+
+        TCPIPMsgRecv(sock, &intsc, sizeof(int));
+        TCPIPMsgRecv(sock, &intus, sizeof(int));
+        TCPIPMsgRecv(sock, &nrang, sizeof(int));
+        TCPIPMsgRecv(sock, &mpinc, sizeof(int));
+        TCPIPMsgRecv(sock, &smsep, sizeof(int));
+        TCPIPMsgRecv(sock, &lagfr, sizeof(int));
+        TCPIPMsgRecv(sock, &mppul, sizeof(int));
+
+        tsgprm.pat = malloc(sizeof(int)*mppul);
+        for (i=0; i<mppul; i++)
+          TCPIPMsgRecv(sock, &tsgprm.pat[i], sizeof(int));
+
+        TCPIPMsgRecv(sock, &nbaud, sizeof(int));
+        pcode = (int *)malloc((size_t)sizeof(int)*mppul*nbaud);
+        for (i=0; i<nbaud; i++)
+          TCPIPMsgRecv(sock, &pcode[i], sizeof(int));
         break;
 
       case PING:
@@ -210,7 +262,6 @@ int operate(pid_t parent,int sock) {
 
     if (vb) fprintf(stderr,"-return-\n");
 
-    rmsg.status=1;
     s=TCPIPMsgSend(sock,&rmsg,sizeof(struct ROSMsg));
 
     if (s !=sizeof(struct ROSMsg)) break;
