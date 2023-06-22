@@ -34,7 +34,7 @@
 #include "version.h"
 
 #define DEF_CPPORT 44001
-#define DEF_RSPORT 44002
+#define DEF_RSPORT 45001
 
 #define MAX_NUM  256
 #define BUF_SIZE (32*1024)
@@ -323,6 +323,11 @@ int main(int argc,char *argv[]) {
     /* set socket options */
     temp=setsockopt(sock[n],SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
                     sizeof(sc_reuseaddr));
+
+    if (temp != 0) {
+      perror("error setting socket options");
+      exit(-1);
+    }
 
     /* name and bind socket to an address and port number */
 

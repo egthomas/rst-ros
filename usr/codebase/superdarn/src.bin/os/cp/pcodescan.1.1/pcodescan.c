@@ -39,6 +39,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 
@@ -72,48 +73,8 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-  int *bcode;
-  int bcode2[2]={1,-1};
-  int bcode3[3]={1,1,-1};
-  int bcode4[4]={1,1,-1,1};
-  int bcode5[5]={1,1,1,-1,1};
-  int bcode7[7]={1,1,1,-1,-1,1,-1};
-  int bcode11[11]={1,1,1,-1,-1,-1,1,-1,-1,1,-1};
-  int bcode13[13]={1,1,1,1,1,-1,-1,1,1,-1,1,-1,1};
-
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
-
   char logtxt[1024];
 
-  int exitpoll=0;
   int scannowait=0;
 
   int scnsc=120;
@@ -128,7 +89,7 @@ int main(int argc,char *argv[]) {
   int rxonly=0;
   int setintt=0;  /* flag to override auto-calc of integration time */
 
-  int n,i;
+  int n;
   int status=0;
 
   int beams=0;
@@ -146,14 +107,17 @@ int main(int argc,char *argv[]) {
   int bmsc    = 6;
   int bmus    = 0;
 
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
   cp    = 998;
   intsc = 7;
   intus = 0;
-  mppul = 8;
-  mplgs = 23;
-  mpinc = 1500;
-  nrang = 300;
-  rsep  = 15;
+  mppul = seq->mppul;
+  mplgs = seq->mplgs;
+  mpinc = seq->mpinc;
   nbaud = 3;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
@@ -196,8 +160,6 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "baud",   'i', &nbaud);
   OptionAdd(&opt, "sf",     'i', &stfrq);
   OptionAdd(&opt, "tau",    'i', &mpinc);
-/*  OptionAdd(&opt, "rangeres", 'i', &rsep);
-  OptionAdd(&opt, "ranges",   'i', &nrang);*/
 
   arg = OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -230,23 +192,10 @@ int main(int argc,char *argv[]) {
 
   if (ststr==NULL) ststr=dfststr;
 
-  switch (nbaud) {
-    case  2: bcode = bcode2;  break;
-    case  3: bcode = bcode3;  break;
-    case  4: bcode = bcode4;  break;
-    case  5: bcode = bcode5;  break;
-    case  7: bcode = bcode7;  break;
-    case 11: bcode = bcode11; break;
-    case 13: bcode = bcode13; break;
-    default: bcode = bcode3;
-  }
+  channel = cnum;
 
-  pcode = (int *)malloc((size_t)sizeof(int)*mppul*nbaud);
-  for (i=0; i<mppul; i++) {
-    for (n=0; n<nbaud; n++) {
-      pcode[i*nbaud+n] = bcode[n];
-    }
-  }
+  pcode=(int *)malloc((size_t)sizeof(int)*seq->mppul*nbaud);
+  OpsBuildPcode(nbaud,seq->mppul,pcode);
 
   printf("Station String: %s\n",ststr);
   OpsStart(ststr);
@@ -263,13 +212,18 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
+  /* non-standard nrang and rsep for this mode */
+  nrang = 300;
+  rsep  = 15;
+
   /* reprocess the commandline since some things are reset by SiteStart */
   arg = OptionProcess(1,argc,argv,&opt,NULL);
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
   if (rxonly) {
-    strcpy(progid, "rxonlybistaticpcodescan");
-    strcpy(progname, "rxonlybistaticpcodescan");
+    strcpy(progid, "rxonlybistaticpcodescan; BISTATIC");
+    strcpy(progname, "rxonlybistaticpcodescan; BISTATIC");
+    txpow = 1;
   } else {
     if (fast) sprintf(progname,"pcodescan (fast)");
     else sprintf(progname,"pcodescan");
@@ -325,11 +279,6 @@ int main(int argc,char *argv[]) {
 
   txpl = (nbaud*rsep*20)/3;
 
-/*
-  if (fast) sprintf(progname,"pcodescan (fast)");
-  else sprintf(progname,"pcodescan");
-*/
-
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
 
@@ -342,7 +291,7 @@ int main(int argc,char *argv[]) {
   OpsFitACFStart();
 
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-  tsgid = SiteTimeSeq(ptab);
+  tsgid = SiteTimeSeq(seq->ptab);
 
   if (bm_sync) skip = OpsFindSkip(scnsc,scnus, bmsc,bmus, 0);
   else         skip = OpsFindSkip(scnsc,scnus, intsc,intus, 0);
@@ -353,6 +302,8 @@ int main(int argc,char *argv[]) {
     bmnum = sbm+skip;
     if (bmnum > ebm) bmnum = sbm;
   }
+
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -422,12 +373,12 @@ int main(int argc,char *argv[]) {
       /*printf("FRQ: %d %d", stfrq, frqrng);*/
       /*tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);*/
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
-      nave = SiteIntegrate(lags);
+      nave = SiteIntegrate(seq->lags);
       if (nave < 0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -436,7 +387,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
@@ -480,7 +431,6 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      if (exitpoll !=0) break;
       scan = 0;
       if (bmnum == ebm) break;
       if (backward) bmnum--;
@@ -495,8 +445,8 @@ int main(int argc,char *argv[]) {
 
     bmnum = sbm;
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-    if ((exitpoll==0)  && (scannowait==0)) SiteEndScan(scnsc,scnus,5000);
-  } while (exitpoll==0);
+    if (scannowait==0) SiteEndScan(scnsc,scnus,5000);
+  } while (1);
 
   for (n=0; n<tnum; n++) RMsgSndClose(task[n].sock);
 

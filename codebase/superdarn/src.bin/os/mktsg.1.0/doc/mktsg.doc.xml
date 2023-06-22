@@ -11,7 +11,9 @@
 </option>
 <option><on>--version</on><od>print the RST version number and exit.</od>
 </option>
-<option><on>-tauscan</on><od>use the 11-pulse tauscan sequence.</od>
+<option><on>-tauscan11</on><od>use the 11-pulse tauscan sequence.</od>
+</option>
+<option><on>-tauscan13</on><od>use the 13-pulse tauscan sequence.</od>
 </option>
 <option><on>-longpulse</on><od>use the extended 16-pulse sequence.</od>
 </option>

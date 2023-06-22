@@ -1,4 +1,4 @@
-# SuperDARN RST
+# SuperDARN RST-ROS
 
 base codebase/base/src.lib lib
 base codebase/base/src.bin bin 

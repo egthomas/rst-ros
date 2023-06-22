@@ -27,7 +27,7 @@
 
 
 char *dhost="127.0.0.1";
-int dport=44002;
+int dport=45001;
 
 struct TCPIPMsgHost server;
 
@@ -203,5 +203,6 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
+  fprintf(stderr,"Parameters succesfully uploaded.\n");
   return 0;
 }

@@ -101,6 +101,8 @@ int operate(pid_t parent,int sock) {
         ErrLog(errsock,taskname,"Opening file.");
         rmsg=RMsgRcvDecodeOpen(sock,&cbuflen,&cbufadr);
         if (rmsg==TASK_OK) flg=1;
+        if (cbufadr !=NULL) free(cbufadr);
+        cbufadr=NULL;
         break;
       case TASK_CLOSE:
         ErrLog(errsock,taskname,"Closing file.");
@@ -299,6 +301,11 @@ int main(int argc,char *argv[]) {
   /* set socket options */
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
                   sizeof(sc_reuseaddr));
+
+  if (temp != 0) {
+      perror("error setting socket options");
+      exit(-1);
+  }
 
   /* name and bind socket to an address and port number */
 

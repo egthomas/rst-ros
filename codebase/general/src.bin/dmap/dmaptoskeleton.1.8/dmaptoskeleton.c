@@ -322,17 +322,21 @@ int main(int argc,char *argv[]) {
      "! ---------  ------------  ------------  -------  ----  -----\n");
   fprintf(fp,
      "  %d/%d           0             0         %d/z    0\n",
-     rnum,znum,block);
+     0,rnum+znum,block);
 
   fprintf(fp,"\n#GLOBALattributes\n");
   fprintf(fp,"\n#VARIABLEattributes\n");
+  fprintf(fp,"\n#variables\n");
 
-  fprintf(fp,"\n#variables\n\n");
+  fprintf(fp,"\n#zVariables\n\n");
   for (n=0;n<snum;n++) {
     sx=sptr[n];
-    fprintf(fp,"! Variable          Data      Number    Record   Dimension\n");
-    fprintf(fp,"! Name              Type     Elements  Variance  Variances\n");
-    fprintf(fp,"! --------          ----     --------  --------  ---------\n");
+    fprintf(fp,"! Variable          Data      Number");
+    fprintf(fp,"                 Record   Dimension\n");
+    fprintf(fp,"! Name              Type     Elements  Dims");
+    fprintf(fp,"  Sizes  Variance  Variances\n");
+    fprintf(fp, "! --------          ----     --------  ----");
+    fprintf(fp,"  -----  --------  ---------\n");
     fprintf(fp,"\n");
     sprintf(buf,"  %c%s%c",'"',cdfsname[n],'"');
     fprintf(fp,"%s",buf);
@@ -362,15 +366,17 @@ int main(int argc,char *argv[]) {
     }
     nelm=1;
     if (sx->type==DATASTRING) nelm=STRINGSIZE;
-    fprintf(fp,"    %d         T          ",nelm);
+    fprintf(fp,"    %d         %d     ",nelm,0);
+    fprintf(fp,"  ");
+    fprintf(fp,"    T     ");
     fprintf(fp,"\n\n");
     fprintf(fp,"! Attribute         Data     Value\n");
     fprintf(fp,"! Name              Type\n");
-    fprintf(fp,"! --------          ----     --------\n");
+    fprintf(fp,"! ---------         ----     -----\n");
     fprintf(fp,"\n.\n\n");
 
   }
-  fprintf(fp,"\n#zVariables\n\n");
+//  fprintf(fp,"\n#zVariables\n\n");
 
   for (n=0;n<anum;n++) {
     ax=aptr[n];
@@ -418,7 +424,7 @@ int main(int argc,char *argv[]) {
     fprintf(fp,"\n\n");
     fprintf(fp,"! Attribute         Data     Value\n");
     fprintf(fp,"! Name              Type\n");
-    fprintf(fp,"! --------          ----     --------\n");
+    fprintf(fp,"! ---------         ----     -----\n");
     fprintf(fp,"\n.\n\n");
 
   }

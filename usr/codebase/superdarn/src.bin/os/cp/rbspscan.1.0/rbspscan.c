@@ -60,6 +60,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 #include "site.h"
@@ -89,47 +90,9 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  /*
-   * STANDARD commentary here: SGS
-   * It seems that the mode should be decoupled from the pulse sequence.
-   * The pulse table and lag table should be externally defined with some
-   * way of determining the time it takes for a given sequence.
-   */
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
-
   char logtxt[1024]="";
   char tempLog[40];
 
-  int exitpoll=0;
   int scannowait=0;
   /* these are set for a standard 2-min scan, any changes here will affect
      the number of beams sampled, etc.
@@ -144,6 +107,9 @@ int main(int argc,char *argv[]) {
   int i,n;
   unsigned char fast=0;
   unsigned char pfisr=0;
+  unsigned char tromso=0;               /* ICE beams over Tromso heater */
+  unsigned char risr=0;                 /* ICW beams over RISR-N & -C   */
+  unsigned char lyr=0;                  /* ICE beams over Longyearbyen  */
   unsigned char discretion=0;
   int status=0;
   int fixfrq=0;
@@ -152,8 +118,6 @@ int main(int argc,char *argv[]) {
   int *bms;           /* scanning beams                                     */
   int intgt[40];      /* start times of each integration period             */
   int nintgs=40;      /* number of integration periods per scan; SGS 2-min  */
-  int bufsc=0;        /* a buffer at the end of scan; historically this has */
-  int bufus=0;        /*  been set to 3.0s to account for what???           */
   unsigned char hlp=0;
   unsigned char option=0;
   unsigned char version=0;
@@ -173,9 +137,27 @@ int main(int argc,char *argv[]) {
   int bmsw[40] =
              {22,23,21,20,18,19,22,17,21,16,18,15,22,14,21,13,18,12,22,11,
               21,10,18, 9,22, 8,21, 7,18, 6,22, 5,21, 4,18, 3,22, 2,21,18};
+  /* ICE camping beams over Tromso and Skiboten: 20, 21, 22 */
+  int eiscatbms[40] =
+             {20, 0,21, 1,22, 2,20, 3,21, 4,22, 5,20, 6,21, 7,22, 8,20, 9,
+              21,10,22,11,20,12,21,13,22,14,20,15,21,16,22,17,20,18,21,19};
+  /*
+   * alt that 'camps' on 19,20,21
+  int eiscatbms[40] =
+             {19, 0,20, 1,21, 2,19, 3,20, 4,21, 5,19, 6,20, 7,21, 8,19, 9,
+              20,10,21,11,19,12,20,13,21,14,19,15,20,16,21,17,19,18,20,21};
+   */
+  /* ICE camping beams over Longyearbyen: 11, 12, 13 */
+  int lyrbms[40] =
+             {11, 0,12, 1,13, 2,11, 3,12, 4,13, 5,11, 6,12, 7,13, 8,11, 9,
+              12,10,13,14,11,15,12,16,13,17,11,18,12,19,13,20,11,21,12,13};
+  /* ICW camping beams over RISR: 17, 16, 15 */
+  int rbisr[40] =
+             {17,23,16,22,15,21,17,20,16,19,15,18,17,14,16,13,15,12,17,11,
+              16,10,15, 9,17, 8,16, 7,15, 6,17, 5,16, 4,15, 3,17, 2,16,15};
   /* cvw camping beams over PFISR: 12, 10, 8 */
   int pbisr[40] =
-             {12,23,10,22, 8,22,12,20,10,19, 8,18,12,17,10,16, 8,15,12,14,
+             {12,23,10,22, 8,21,12,20,10,19, 8,18,12,17,10,16, 8,15,12,14,
               10,13, 8,11,12, 9,10, 7, 8, 6,12, 5,10, 4, 8, 3,12, 2,10, 8};
 
   /* use odd/even beams to generate a 1-min scan at lower spatial resolution */
@@ -186,22 +168,29 @@ int main(int argc,char *argv[]) {
   int altw[40] = {22,16,21,14,18,12,22,10,21, 8,18, 6,22, 4,21, 2,18,23,22,19,
               21,17,18,15,22,13,21,11,18, 9,22, 7,21, 5,18, 3,22,20,21,18};
 
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
   /* standard radar defaults */
-  cp     = 200;     /* rbsbscan cpid SGS need to pick something */
-  intsc  = 3;       /* integration period; not sure how critical this is */
-  intus  = 0;       /*  but can be changed here */
-  mppul  = 8;
-  mplgs  = 23;      /* this depends on the pulse sequence.... SGS */
-  mpinc  = 1500;
-  dmpinc = 1500;
-  nrang  = 100;     /* can this be set in the site library? */
+  cp     = 200;         /* rbsbscan cpid SGS need to pick something */
+  intsc  = 3;           /* integration period; not sure how critical this is */
+  intus  = 0;           /*  but can be changed here */
+  mppul  = seq->mppul;
+  mplgs  = seq->mplgs;
+  mpinc  = seq->mpinc;
+  dmpinc = seq->mpinc;
   rsep   = 45;
-  txpl   = 300;     /* note: recomputed below */
+  txpl   = 300;         /* note: recomputed below */
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
   OptionAdd(&opt,"di",    'x',&discretion);
   OptionAdd(&opt,"fast",  'x',&fast);
   OptionAdd(&opt,"pfisr", 'x',&pfisr);
+  OptionAdd(&opt,"tromso",'x',&tromso);
+  OptionAdd(&opt,"risr",  'x',&risr);
+  OptionAdd(&opt,"lyr",   'x',&lyr);
   OptionAdd(&opt,"frang", 'i',&frang);
   OptionAdd(&opt,"rsep",  'i',&rsep);
   OptionAdd(&opt,"dt",    'i',&day);
@@ -240,11 +229,6 @@ int main(int argc,char *argv[]) {
     exit(0);
   }
 
-  /* specify beams right here assuming the following: */
-  /* scnsc=120; scnus=0;    */
-  /* bufsc=0;   bufus=0;    */
-  /* intsc=3;;  intuc=0;;   */
-
   /* start time of each integration period */
   for (i=0; i<nintgs; i++)
     intgt[i] = i*(intsc + intus*1e-6);
@@ -260,6 +244,17 @@ int main(int argc,char *argv[]) {
       bms = alte;       /* odd/even beam sequence */
     else
       bms = bmse;       /* standard 2-min sequence */
+    if (tromso) {	/* ICE camp over Tromso and Skiboten */
+      bms = eiscatbms;
+      cbm[0] = 20;
+      cbm[1] = 21;
+      cbm[2] = 22;
+    } else if (lyr) {	/* ICE camping beams over Longyearbyen */
+      bms = lyrbms;
+      cbm[0] = 11;
+      cbm[1] = 12;
+      cbm[2] = 13;
+    }
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
     cbm[0] = 22;
     cbm[1] = 21;
@@ -273,6 +268,11 @@ int main(int argc,char *argv[]) {
       cbm[0] = 12;
       cbm[1] = 10;
       cbm[2] =  8;
+    } else if (risr) {	/* ICW camping beams over RISR */
+      bms = rbisr;
+      cbm[0] = 17;
+      cbm[1] = 16;
+      cbm[2] = 15;
     }
   } else {
     if (hlp) usage();
@@ -280,6 +280,7 @@ int main(int argc,char *argv[]) {
     return (-1);
   }
 
+  /* SGS: this will likely break... */
   if (strcmp(ststr,"fhw") == 0) {
     for (i=0; i<nintgs; i++)
       bms[i] -= 2; /* decrement beams by 2 for 22 beam radar */
@@ -307,6 +308,8 @@ int main(int argc,char *argv[]) {
   /* not sure if -nrang commandline option works */
 
   if (ststr==NULL) ststr=dfststr;
+
+  channel = cnum;
 
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
@@ -381,7 +384,9 @@ int main(int argc,char *argv[]) {
 
   OpsFitACFStart();
 
-  tsgid=SiteTimeSeq(ptab);    /* get the timing sequence */
+  tsgid=SiteTimeSeq(seq->ptab);    /* get the timing sequence */
+
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
   do {
 
@@ -471,11 +476,11 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname, logtxt);
       tfreq=SiteFCLR(stfrq,stfrq+frqrng);
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
-      nave=SiteIntegrate(lags);
+      nave=SiteIntegrate(seq->lags);
       if (nave<0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -484,7 +489,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
@@ -526,7 +531,6 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      if (exitpoll !=0) break;
       scan=0;
       if (skip == (nintgs-1)) break;
       skip++;
@@ -535,8 +539,8 @@ int main(int argc,char *argv[]) {
     } while (1);
 
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-    if ((exitpoll==0) && (scannowait==0)) SiteEndScan(scnsc,scnus,5000);
-  } while (exitpoll==0);
+    if (scannowait==0) SiteEndScan(scnsc,scnus,5000);
+  } while (1);
 
   for (n=0;n<tnum;n++) RMsgSndClose(task[n].sock);
 

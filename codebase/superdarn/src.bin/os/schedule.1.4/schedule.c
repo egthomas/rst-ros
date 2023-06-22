@@ -70,7 +70,7 @@ int main(int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
-  char logtxt[256];
+  char logtxt[512];
   char name[256];
   char tmp[256];
   char *radar=NULL;
@@ -143,7 +143,7 @@ int main(int argc,char *argv[]) {
     strcpy(name,radar);
     strcat(name,".scdlog");
   } else {
-    strcpy(name,".scdlog");
+    strcpy(name,"scdlog");
   }
   logname=name;
 

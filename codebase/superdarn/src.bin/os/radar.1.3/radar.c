@@ -28,6 +28,7 @@
 
 #include "tcpipmsg.h"
 #include "rosmsg.h"
+#include "freq.h"
 
 #include "errstr.h"
 #include "hlpstr.h"
@@ -36,8 +37,9 @@
 
 struct OptionData opt;
 unsigned char vb;
-int tfreq=11800;
 time_t t;
+
+struct FreqTable *ftable[2];
 
 
 int operate(pid_t parent,int sock) {
@@ -52,7 +54,7 @@ int operate(pid_t parent,int sock) {
   struct DataPRM dprm;
   struct TRTimes badtrdat;
 
-  int dfreq,rnum,cnum,s;
+  int tfreq,dfreq,rnum,cnum,s;
   float noise=0.5;
 
   int32 temp_int32,data_length;
@@ -113,8 +115,23 @@ int operate(pid_t parent,int sock) {
         dfreq=fprm.end-fprm.start;
         if (dfreq > 0) {
           tfreq=fprm.start + (rand() % dfreq);
+          if (ftable[rnum-1] !=NULL) {
+            s=0;
+            while ((FreqTest(ftable[rnum-1],tfreq) == 1) && (s < 10)) {
+              tfreq=fprm.start + (rand() % dfreq);
+              s++;
+            }
+          }
         } else {
           tfreq=fprm.start;
+        }
+        if (ftable[rnum-1] !=NULL) {
+          if (FreqTest(ftable[rnum-1],tfreq) == 1) {
+            tfreq=0;
+            noise=1e10;
+          } else {
+            noise=0.5;
+          }
         }
         break;
 
@@ -151,8 +168,8 @@ int operate(pid_t parent,int sock) {
         if (rdata.main !=NULL) free(rdata.main);
         if (rdata.back !=NULL) free(rdata.back);
 
+        dprm.samples=rprm.number_of_samples;
         if (vb) fprintf(stderr,"Number of samples %d\n",dprm.samples);
-        dprm.samples=tprm.samples+tprm.smdelay+30;
         dprm.status=0;
 
         rdata.main=malloc(4*dprm.samples);
@@ -221,6 +238,13 @@ int main(int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
+  FILE *fp;
+  char *ststr=NULL;
+  char *envstr=NULL;;
+  char freq_filepath[100];
+  struct FreqTable *table;
+  int st_cnt=0;
+
   socklen_t length;
   socklen_t clength;
 
@@ -239,6 +263,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-version",'x',&version);
   OptionAdd(&opt,"vb",'x',&vb);
   OptionAdd(&opt,"lp",'i',&port);
+  OptionAdd(&opt,"name",'t',&ststr);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -261,6 +286,22 @@ int main(int argc,char *argv[]) {
     exit(0);
   }
 
+  envstr=getenv("SD_SITE_PATH");
+  if ((ststr !=NULL) && (envstr !=NULL)) {
+    char *tmp;
+    tmp=strtok(ststr,",");
+    do {
+      sprintf(freq_filepath,"%s/site.%s/restrict.dat",envstr,tmp);
+      fp=fopen(freq_filepath,"r");
+      if (fp !=NULL) {
+        table=FreqLoadTable(fp);
+        fclose(fp);
+        ftable[st_cnt]=table;
+      }
+      st_cnt++;
+    } while ((tmp=strtok(NULL,",")) !=NULL);
+  }
+
   signal(SIGCHLD,SIG_IGN);
   signal(SIGPIPE,SIG_IGN);
 
@@ -275,6 +316,11 @@ int main(int argc,char *argv[]) {
   /* set socket options */
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
                   sizeof(sc_reuseaddr));
+
+  if (temp != 0) {
+      perror("error setting socket options");
+      exit(-1);
+  }
 
   /* name and bind socket to an address and port number */
 

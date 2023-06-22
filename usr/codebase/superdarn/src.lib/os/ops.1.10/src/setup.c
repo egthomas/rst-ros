@@ -54,6 +54,7 @@ int OpsSetupCommand(int argc,char *argv[]) {
 int OpsStart(char *ststr) {
   FILE *fp;
   char *envstr;
+  char freq_filepath[250];
 
   TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
@@ -108,12 +109,15 @@ int OpsStart(char *ststr) {
     exit(-1);
   }
 
-  envstr=getenv("SD_FREQ_TABLE");
-  if (envstr !=NULL) fp=fopen(envstr,"r");
-  else fp=NULL;
+  envstr=getenv("SD_SITE_PATH");
+  if (envstr !=NULL) {
+    sprintf(freq_filepath,"%s/site.%s/restrict.dat",envstr,ststr);
+    fp=fopen(freq_filepath,"r");
+  } else fp=NULL;
   if (fp !=NULL) {
     ftable=FreqLoadTable(fp);
     fclose(fp);
+    fprintf(stderr,"Frequency table %s loaded\n",freq_filepath);
   }
 
   prm=RadarParmMake();

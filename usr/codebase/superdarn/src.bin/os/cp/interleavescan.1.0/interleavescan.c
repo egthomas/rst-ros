@@ -49,6 +49,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 #include "site.h"
@@ -78,47 +79,9 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  /*
-   * STANDARD commentary here: SGS
-   * It seems that the mode should be decoupled from the pulse sequence.
-   * The pulse table and lag table should be externally defined with some
-   * way of determining the time it takes for a given sequence.
-   */
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
-
   char logtxt[1024]="";
   char tempLog[40];
 
-  int exitpoll=0;
   int scannowait=0;
   /* these are set for a standard 1-min scan, any changes here will affect
      the number of beams sampled, etc.
@@ -139,8 +102,6 @@ int main(int argc,char *argv[]) {
   int *bms;           /* scanning beams                                     */
   int intgt[20];      /* start times of each integration period             */
   int nintgs=20;      /* number of integration periods per scan; SGS 1-min  */
-  int bufsc=0;        /* a buffer at the end of scan; historically this has */
-  int bufus=0;        /*  been set to 3.0s to account for what???           */
   unsigned char hlp=0;
   unsigned char option=0;
   unsigned char version=0;
@@ -156,17 +117,21 @@ int main(int argc,char *argv[]) {
   int bmsw[20] =
              {23,19,15,11, 7,21,17,13, 9, 5,22,18,14,10, 6,20,16,12, 8, 4};
 
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
   /* standard radar defaults */
-  cp     = 191;     /* using 191 per memorandum */
-  intsc  = 3;       /* integration period; not sure how critical this is */
-  intus  = 0;       /*  but can be changed here */
-  mppul  = 8;
-  mplgs  = 23;      /* this depends on the pulse sequence.... SGS */
-  mpinc  = 1500;
-  dmpinc = 1500;
-  nrang  = 100;     /* can this be set in the site library? */
+  cp     = 191;         /* using 191 per memorandum */
+  intsc  = 3;           /* integration period; not sure how critical this is */
+  intus  = 0;           /*  but can be changed here */
+  mppul  = seq->mppul;
+  mplgs  = seq->mplgs;
+  mpinc  = seq->mpinc;
+  dmpinc = seq->mpinc;
   rsep   = 45;
-  txpl   = 300;     /* note: recomputed below */
+  txpl   = 300;         /* note: recomputed below */
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
   OptionAdd(&opt,"di",    'x',&discretion);
@@ -208,11 +173,6 @@ int main(int argc,char *argv[]) {
     exit(0);
   }
 
-  /* specify beams right here assuming the following: */
-  /* scnsc=120; scnus=0;    */
-  /* bufsc=0;   bufus=0;    */
-  /* intsc=3;;  intuc=0;;   */
-
   /* start time of each integration period */
   for (i=0; i<nintgs; i++)
     intgt[i] = i*(intsc + intus*1e-6);
@@ -253,6 +213,8 @@ int main(int argc,char *argv[]) {
   /* not sure if -nrang commandline option works */
 
   if (ststr==NULL) ststr=dfststr;
+
+  channel = cnum;
 
   /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
@@ -326,7 +288,9 @@ int main(int argc,char *argv[]) {
 
   OpsFitACFStart();
 
-  tsgid=SiteTimeSeq(ptab);  /* get the timing sequence */
+  tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
   do {
 
@@ -416,11 +380,11 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname, logtxt);
       tfreq=SiteFCLR(stfrq,stfrq+frqrng);
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
-      nave=SiteIntegrate(lags);
+      nave=SiteIntegrate(seq->lags);
       if (nave<0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -429,7 +393,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
@@ -471,7 +435,6 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      if (exitpoll !=0) break;
       scan=0;
       if (skip == (nintgs-1)) break;
       skip++;
@@ -480,8 +443,8 @@ int main(int argc,char *argv[]) {
     } while (1);
 
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-    if ((exitpoll==0) && (scannowait==0)) SiteEndScan(scnsc,scnus,5000);
-  } while (exitpoll==0);
+    if (scannowait==0) SiteEndScan(scnsc,scnus,5000);
+  } while (1);
 
   for (n=0;n<tnum;n++) RMsgSndClose(task[n].sock);
 

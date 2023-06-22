@@ -39,9 +39,6 @@ extern int debug;
 extern int rnum;
 extern int cnum;
 
-extern int maxatten;
-extern int protatten;
-
 extern int tsgid;
 extern int stid;
 extern int yr;
@@ -81,6 +78,7 @@ extern int scan;
 extern int mxpwr;
 extern int lvmax;
 extern int cp;
+extern int channel;
 
 extern int *pcode;
 
@@ -138,4 +136,3 @@ extern int stfrq;
 extern int frqrng;
 
 #endif
-

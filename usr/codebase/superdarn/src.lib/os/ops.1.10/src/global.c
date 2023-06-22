@@ -49,9 +49,6 @@ struct RMsgBlock msg;
 
 struct RShellTable rstable;
 
-int maxatten=DEFAULT_MAX_ATTEN;
-int protatten=DEFAULT_PROT_ATTEN;
-
 unsigned char command[128];
 
 int debug=0;
@@ -98,6 +95,7 @@ int scan=DEFAULT_SCAN;
 int mxpwr=DEFAULT_MXPWR;
 int lvmax=DEFAULT_LVMAX;
 int cp=50;
+int channel=0;
 
 int *pcode=NULL;
 
@@ -116,8 +114,7 @@ int backward=0;
 int sbm=0;
 int ebm=15;
 
-int xcnt=1;     /* set to 0 for no xcf calculations;   */
-                /*       >0 to do xcf every xcnt scans */
+int xcnt=0;
 
 int day=10;
 int night=20;

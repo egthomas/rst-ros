@@ -28,6 +28,8 @@
 #include "fitblk.h"
 #include "fitdata.h"
 #include "fitacf.h"
+#include "snddata.h"
+#include "sndwrite.h"
 #include "errlog.h"
 #include "freq.h"
 #include "tcpipmsg.h"
@@ -37,18 +39,13 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
+#include "snd.h"
 #include "sync.h"
 #include "site.h"
 #include "sitebuild.h"
 #include "siteglobal.h"
-
-#include "sndwrite.h"
-
-#define MAX_SND_FREQS 12
-
-void write_snd_record(char *progname, struct RadarParm *prm,
-                      struct FitData *fit);
 
 #define RT_TASK 3
 
@@ -57,7 +54,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2023/02/18"};
+char progid[80]={"interleavesound 2023/06/05"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -74,37 +71,6 @@ int rst_opterr(char *txt) {
 }
 
 int main(int argc,char *argv[]) {
-
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
 
   char logtxt[1024]="";
   char tempLog[40];
@@ -123,7 +89,6 @@ int main(int argc,char *argv[]) {
 
   /* new variables for dynamically creating beam sequences */
   int *bms;           /* scanning beams                                     */
-  int intgt[20];      /* start times of each integration period             */
   int nintgs=20;      /* number of integration periods per scan; SGS 1-min  */
   unsigned char hlp=0;
   unsigned char option=0;
@@ -142,12 +107,6 @@ int main(int argc,char *argv[]) {
 
 
   /* ---------------- Variables for sounding --------------- */
-  char snd_filename[100];
-  FILE *snd_dat;
-  /* If the file $SD_SND_PATH/sounder_[rad].dat exists, the next two parameters are read from it */
-  /* the file contains one integer value per line */
-  int snd_freqs_tot=8;
-  int snd_freqs[MAX_SND_FREQS]= {11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 0, 0, 0, 0 };
   int *snd_bms;
   int snd_bmse[]={0,2,4,6,8,10,12,14,16,18};   /* beam sequences for 24-beam MSI radars using only */
   int snd_bmsw[]={22,20,18,16,14,12,10,8,6,4}; /*  the 20 most meridional beams */
@@ -162,21 +121,22 @@ int main(int argc,char *argv[]) {
   int snd_intt_us=500000;
   float snd_time, snd_intt, time_needed=1.25;
 
-  char *path;
-
   snd_intt = snd_intt_sc + snd_intt_us*1e-6;
   /* ------------------------------------------------------- */
 
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
 
   /* standard radar defaults */
   cp     = 197;
   intsc  = fast_intt_sc;
   intus  = fast_intt_us;
-  mppul  = 8;
-  mplgs  = 23;
-  mpinc  = 1500;
-  dmpinc = 1500;
-  nrang  = 100;
+  mppul  = seq->mppul;
+  mplgs  = seq->mplgs;
+  mpinc  = seq->mpinc;
+  dmpinc = seq->mpinc;
   rsep   = 45;
   txpl   = 300;     /* note: recomputed below */
 
@@ -227,11 +187,9 @@ int main(int argc,char *argv[]) {
     return (-1);
   }
 
-  /* start time of each integration period */
-  for (i=0; i<nintgs; i++)
-    intgt[i] = i*(intsc + intus*1e-6);
-
   if (ststr==NULL) ststr=dfststr;
+
+  channel = cnum;
 
   /* Point to the beams here */
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
@@ -252,28 +210,10 @@ int main(int argc,char *argv[]) {
     return (-1);
   }
 
-  /* load the sounder frequencies from file in site directory if present */
-  path = getenv("SD_SITE_PATH");
-  if (path == NULL) {
-    fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined.\n");
-  }
-
-  sprintf(snd_filename,"%s/site.%s/sounder_%s.dat", path, ststr, ststr);
-  fprintf(stderr,"Checking Sounder File: %s\n",snd_filename);
-  snd_dat = fopen(snd_filename, "r");
-  if (snd_dat != NULL) {
-    fscanf(snd_dat, "%d", &snd_freqs_tot);
-    if (snd_freqs_tot > 12) snd_freqs_tot = 12;
-    for (snd_freq_cnt=0; snd_freq_cnt < snd_freqs_tot; snd_freq_cnt++)
-      fscanf(snd_dat, "%d", &snd_freqs[snd_freq_cnt]);
-    snd_freq_cnt = 0;
-    fclose(snd_dat);
-    fprintf(stderr,"Sounder File: %s read\n",snd_filename);
-  } else {
-    fprintf(stderr,"Sounder File: %s not found\n",snd_filename);
-  }
-
   OpsStart(ststr);
+
+  /* Load the sounding frequencies */
+  OpsLoadSndFreqs(ststr);
 
   status=SiteBuild(libstr);
   if (status==-1) {
@@ -342,10 +282,17 @@ int main(int argc,char *argv[]) {
   }
 
   OpsFitACFStart();
+  OpsSndStart();
+
+  OpsFindSndSkip(ststr,snd_bms,snd_bms_tot,&snd_bm_cnt,&odd_beams);
+
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
   do {
 
-    tsgid=SiteTimeSeq(ptab);  /* get the timing sequence */
+    if (def_nrang != snd_nrang) {
+      tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+    }
 
     if (SiteStartScan() !=0) continue;
 
@@ -399,11 +346,11 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname, logtxt);
       tfreq=SiteFCLR(stfrq,stfrq+frqrng);
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
-      nave=SiteIntegrate(lags);
+      nave=SiteIntegrate(seq->lags);
       if (nave<0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -412,7 +359,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
@@ -467,7 +414,7 @@ int main(int argc,char *argv[]) {
     scan = -2;
 
     /* set the xcf variable to do cross-correlations (AOA) */
-    xcf = 1;
+    if (xcnt > 1) xcf = 1;
 
     /* set the sounding mode integration time and number of ranges */
     intsc = snd_intt_sc;
@@ -475,7 +422,9 @@ int main(int argc,char *argv[]) {
     nrang = snd_nrang;
 
     /* make a new timing sequence for the sounding */
-    tsgid = SiteTimeSeq(ptab);
+    if (def_nrang != snd_nrang) {
+      tsgid = SiteTimeSeq(seq->ptab);
+    }
 
     /* we have time until the end of the minute to do sounding */
     /* minus a safety factor given in time_needed */
@@ -504,7 +453,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Transmitting SND on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock, progname, logtxt);
 
-      nave = SiteIntegrate(lags);
+      nave = SiteIntegrate(seq->lags);
       if (nave < 0) {
         sprintf(logtxt, "SND integration error: %d", nave);
         ErrLog(errlog.sock,progname, logtxt);
@@ -513,7 +462,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of SND sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
@@ -546,8 +495,10 @@ int main(int argc,char *argv[]) {
         prm->scan = 0;
       }
 
+      OpsBuildSnd(prm,fit);
+
       /* save the sounding mode data */
-      write_snd_record(progname, prm, fit);
+      OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
       ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
 
@@ -615,55 +566,3 @@ void usage(void)
     printf("\n");
 }
 
-
-/********************** function write_snd_record() ************************/
-/* changed the output to dmap format */
-
-void write_snd_record(char *progname, struct RadarParm *prm, struct FitData *fit) {
-
-  char data_path[100], data_filename[50], filename[80];
-
-  char *snd_dir;
-  FILE *out;
-
-  char logtxt[1024]="";
-  int status;
-
-  /* set up the data directory */
-  /* get the snd data dir */
-  snd_dir = getenv("SD_SND_PATH");
-  if (snd_dir == NULL)
-    sprintf(data_path,"/data/ros/snd/");
-  else {
-    memcpy(data_path,snd_dir,strlen(snd_dir));
-    data_path[strlen(snd_dir)] = '/';
-    data_path[strlen(snd_dir)+1] = 0;
-  }
-
-  /* make up the filename */
-  /* YYYYMMDD.HH.rad.snd */
-  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/ 2)* 2, ststr);
-
-  /* finally make the filename */
-  sprintf(filename, "%s%s.snd", data_path, data_filename);
-
-  /* open the output file */
-  fprintf(stderr,"Sounding Data File: %s\n",filename);
-  out = fopen(filename,"a");
-  if (out == NULL) {
-    /* crap. might as well go home */
-    sprintf(logtxt,"Unable to open sounding file:%s",filename);
-    ErrLog(errlog.sock,progname,logtxt);
-    return;
-  }
-
-  /* write the sounding record */
-  status = SndFwrite(out, prm, fit);
-  if (status == -1) {
-    ErrLog(errlog.sock,progname,"Error writing sounding record.");
-  } else {
-    ErrLog(errlog.sock,progname,"Sounding record successfully written.");
-  }
-
-  fclose(out);
-}

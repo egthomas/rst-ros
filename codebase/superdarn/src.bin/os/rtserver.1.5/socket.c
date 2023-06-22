@@ -98,6 +98,8 @@ int createsocket(int *port) {
   temp=setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&sc_reuseaddr,
                   sizeof(sc_reuseaddr));
 
+  if (temp != 0) return -1;
+
   if (bind(sock,(struct sockaddr *) &server,sizeof(server))) return -1;
 
   /* Find out assigned port number and print it out */

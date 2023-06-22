@@ -52,7 +52,7 @@ void OpsBuildPrm(struct RadarParm *prm,int *ptab,int (*lags)[2]) {
   RadarParmSetOriginTime(prm,tmstr);
 
   prm->stid = stid;
-  prm->channel=0;
+  prm->channel=channel;
   prm->time.yr=yr;
   prm->time.mo=mo;
   prm->time.dy=dy;
@@ -128,7 +128,7 @@ void OpsBuildIQ(struct IQ *iq,unsigned int **badtr) {
   iq->revision.minor = 0;
 
   iq->seqnum=nave;
-  iq->chnnum=rxchn;
+  iq->chnnum=rxchn*2;
   iq->smpnum=smpnum;
   iq->skpnum=skpnum;
 

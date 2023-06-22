@@ -128,16 +128,17 @@ int SiteRosStart(char *host,char *ststr)
   config_init(&cfg);
   retval = config_read_file(&cfg,config_filepath);
   if (retval == CONFIG_FALSE) {
-    fprintf(stderr,"Site Cfg Read Error:: %d - %s\n",
+    fprintf(stderr,"Site Cfg Read Error:: %d - %s\nSiteRosStart aborting\n",
             config_error_line(&cfg), config_error_text(&cfg));
+    return -1;
   }
 
   /* Get the station name */
   if (config_lookup_string(&cfg, "station", &str)) {
     strcpy(station,str);
   } else {
-    fprintf(stderr,"Site Cfg Error:: No station setting in configuration file\n");
-    return -1;
+    strcpy(station,ststr);
+    fprintf(stderr,"Site Cfg Warning:: 'station' setting undefined in site cfg file, using: %s\n",station);
   }
 
   /* Get the radar beam scan direction */
@@ -150,10 +151,10 @@ int SiteRosStart(char *host,char *ststr)
 
   /* Get the XCF (ie elevation angle) collection option */
   if (config_lookup_int(&cfg, "xcf", &ltemp)) {
-    xcf = ltemp;
+    xcnt = ltemp;
   } else {
-    xcf = 1;
-    fprintf(stderr,"Site Cfg Warning:: 'xcf' setting undefined in site cfg file, using: %d\n",xcf);
+    xcnt = 1;
+    fprintf(stderr,"Site Cfg Warning:: 'xcf' setting undefined in site cfg file, using: %d\n",xcnt);
   }
 
   /* Get the starting beam number */
@@ -168,7 +169,7 @@ int SiteRosStart(char *host,char *ststr)
   if (config_lookup_int(&cfg, "ebm", &ltemp)) {
     ebm = ltemp;
   } else {
-    ebm = 23;
+    ebm = 15;
     fprintf(stderr,"Site Cfg Warning:: 'ebm' setting undefined in site cfg file, using: %d\n",ebm);
   }
 
@@ -184,7 +185,7 @@ int SiteRosStart(char *host,char *ststr)
   if (config_lookup_int(&cfg, "cnum", &ltemp)) {
     cnum = ltemp;
   } else {
-    cnum = 1;
+    if (cnum == 0) cnum = 1;
     fprintf(stderr,"Site Cfg Warning:: 'cnum' setting undefined in site cfg file, using: %d\n",cnum);
   }
 
@@ -218,6 +219,14 @@ int SiteRosStart(char *host,char *ststr)
   } else {
     nfrq = 10400;
     fprintf(stderr,"Site Cfg Warning:: 'nfrq' setting undefined in site cfg file, using: %d\n",nfrq);
+  }
+
+  /* Get the number of range gates */
+  if (config_lookup_int(&cfg, "nrang", &ltemp)) {
+    nrang = ltemp;
+  } else {
+    nrang = 75;
+    fprintf(stderr,"Site Cfg Warning:: 'nrang' setting undefined in site cfg file, using: %d\n",nrang);
   }
 
   /* Get whether you need to correct for inverted phase between main and interf rf signal

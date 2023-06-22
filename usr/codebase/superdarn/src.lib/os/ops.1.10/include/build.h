@@ -1,5 +1,5 @@
-/* build..h
-   ========
+/* build.h
+   =======
    Author: R.J.Barnes
 */
 
@@ -18,6 +18,5 @@ void OpsBuildPrm(struct RadarParm *prm,
                  int *ptab,int (*lags)[2]);
 void OpsBuildIQ(struct IQ *iq,unsigned int **badtr);
 void OpsBuildRaw(struct RawData *raw);
-
 
 #endif

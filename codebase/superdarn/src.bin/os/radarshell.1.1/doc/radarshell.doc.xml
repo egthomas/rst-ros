@@ -13,7 +13,7 @@
 </option>
 <option><on><ar>host</ar></on><od>hostname or IP address of the shellserver to connect to (default is localhost).</od>
 </option>
-<option><on><ar>port</ar></on><od>port number of the shellserver to connect to on the system (default is 44002).</od>
+<option><on><ar>port</ar></on><od>port number of the shellserver to connect to on the system (default is 45001).</od>
 </option>
 <synopsis><p>An interactive shell for manipulating radar operating parameters. The four available commands are 1: 'show' (list all parameters and their values), 2: '[variable]=[value]' (change parameter), 3: 'go' (upload parameters to control program), and 4: 'exit' (close shell without modifying parameters).</p></synopsis>
 
@@ -30,15 +30,15 @@ exit</quote>
 <p>A new value is assigned to a variable by using the "<code>=</code>" sign:</p>
 
 <quote>bmnum=12
-combf=Hello word</quote>
+combf=Hello world</quote>
 
 <p>There should be no spaces between the value, the "<code>=</code>" sign, or the variable name.</p>
 <p>Typing "<code>exit</code>" will close the shell without uploading any parameters to the control program.</p>
 </description>
 
 <example>
-<command>radarshell localhost 44002</command>
-<description>Connect to the shellserver on <code>localhost</code> at port <code>44002</code> and start a new interactive shell session.</description>
+<command>radarshell localhost 45001</command>
+<description>Connect to the shellserver on <code>localhost</code> at port <code>45001</code> and start a new interactive shell session.</description>
 </example>
 
 </binary>

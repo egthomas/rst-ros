@@ -50,6 +50,7 @@ declaration.
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 
@@ -90,48 +91,7 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-  int *bcode;
-  int bcode2[2]={1,-1};
-  int bcode3[3]={1,1,-1};
-  int bcode4[4]={1,1,-1,1};
-  int bcode5[5]={1,1,1,-1,1};
-  int bcode7[7]={1,1,1,-1,-1,1,-1};
-  int bcode11[11]={1,1,1,-1,-1,-1,1,-1,-1,1,-1};
-  int bcode13[13]={1,1,1,1,1,-1,-1,1,1,-1,1,-1,1};
-
-  int lags[LAG_SIZE][2] = {  /* we really should decouple this from CPs. SGS */
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
-
   char logtxt[1024];
-
-  int exitpoll=0;
 
   int scnsc=60;
   int scnus=0;
@@ -144,19 +104,21 @@ int main(int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
-  int status=0,n,i;
+  int status=0,n;
 
   int PCPBEAM=9;    /* Set PCPBEAM to default to beam 9 -KTS */
+
+  struct sequence *seq;
+
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
 
   cp=PCPCPID;
   intsc=2;          /* Why is this set to 2 seconds and changed later? SGS */
   intus=0;
-  mppul=8;
-  mplgs=23;
-  mpinc=1500;
-  nrang=565;        /* 3390 km range at 6 km range separation */
-  nrang=750;        /* 4500 km range at 6 km range separation */
-  rsep=6;
+  mppul=seq->mppul;
+  mplgs=seq->mplgs;
+  mpinc=1560;
   nbaud=13;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
@@ -180,8 +142,8 @@ int main(int argc,char *argv[]) {
 
 /* Added by KTS to enable changing of beams used for FoV scan  21Dec2011 */
 
-  OptionAdd(&opt, "sbm", 'i', &sbm);
-  OptionAdd(&opt, "ebm", 'i', &ebm);
+  OptionAdd(&opt, "sb",  'i', &sbm);
+  OptionAdd(&opt, "eb",  'i', &ebm);
   OptionAdd(&opt, "ep",  'i', &errlog.port);
   OptionAdd(&opt, "sp",  'i', &shell.port);
   OptionAdd(&opt, "bp",  'i', &baseport);
@@ -211,20 +173,11 @@ int main(int argc,char *argv[]) {
  
   if (ststr==NULL) ststr=dfststr;
 
-  if(nbaud==2) bcode=bcode2;
-  if(nbaud==3) bcode=bcode3;
-  if(nbaud==4) bcode=bcode4;
-  if(nbaud==5) bcode=bcode5;
-  if(nbaud==7) bcode=bcode7;
-  if(nbaud==11) bcode=bcode11;
-  if(nbaud==13) bcode=bcode13;
-  pcode=(int *)malloc((size_t)sizeof(int)*mppul*nbaud);
-  for(i=0;i<mppul;i++){
-    for(n=0;n<nbaud;n++){
-      pcode[i*nbaud+n]=bcode[n];
-    }
-  }
-  
+  channel = cnum;
+
+  pcode=(int *)malloc((size_t)sizeof(int)*seq->mppul*nbaud);
+  OpsBuildPcode(nbaud,seq->mppul,pcode);
+
   printf("Station String: %s\n",ststr);
   OpsStart(ststr);
 
@@ -241,7 +194,14 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
+  /* non-standard nrang and rsep for this mode */
+  nrang=565;        /* 3390 km range at 6 km range separation */
+  /*nrang=750;*/    /* 4500 km range at 6 km range separation */
+  rsep=6;           /* [this exceeds MAX_RANGE (700) in limit.h] */
+
   arg=OptionProcess(1,argc,argv,&opt,NULL);  /* this fixes it... SGS */
+
+  sprintf(progname,"pcppcodescan");
 
   strncpy(combf,progid,80);
 
@@ -281,8 +241,6 @@ int main(int argc,char *argv[]) {
 
   txpl=(nbaud*rsep*20)/3;
 
-  sprintf(progname,"pcppcodescan");
-
   OpsLogStart(errlog.sock,progname,argc,argv);
 
   OpsSetupTask(tnum,task,errlog.sock,progname);
@@ -293,15 +251,26 @@ int main(int argc,char *argv[]) {
 
   OpsFitACFStart();
 
-  tsgid=SiteTimeSeq(ptab);
+  tsgid=SiteTimeSeq(seq->ptab);
+  if (tsgid !=0) {
+    if (tsgid==-2) {
+      ErrLog(errlog.sock,progname,"Error registering timing sequence.");
+    } else if (tsgid==-1) {
+      ErrLog(errlog.sock,progname,"TSGMake error code: 0 (tsgbuff==NULL)");
+    } else {
+      sprintf(logtxt,"TSGMake error code: %d",tsgid);
+      ErrLog(errlog.sock,progname,logtxt);
+    }
+    exit(-1);
+  }
 
   do {
 
      cp=PCPCPID;    /* does the cp ever change? SGS */
      scnsc=60;      /* this never changes and is defined 3 times... SGS */
      scnus=0;       /* this one too... SGS */
-     intsc=3;
-     intus=0;
+     intsc=2;
+     intus=500000;
 
     if (SiteStartScan() !=0) continue;
 
@@ -353,13 +322,12 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
       ErrLog(errlog.sock,progname, logtxt);
 
-      printf("FRQ: %d %d", stfrq, frqrng);
-      tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);
+      tfreq=SiteFCLR(stfrq,stfrq+frqrng);
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
-      nave=SiteIntegrate(lags);
+      nave=SiteIntegrate(seq->lags);
       if (nave<0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -368,7 +336,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
@@ -405,7 +373,6 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      if (exitpoll !=0) break;      /* where does exitpoll ever get set? SGS */
       scan=0;
       if (bmnum==ebm) break;        /* it seems that it is critical that the
                                        number of beams must fit within the
@@ -415,82 +382,79 @@ int main(int argc,char *argv[]) {
 
     } while (1);
     /* ** Single beam sounding to fill remaining time ******************* */
-    if (exitpoll==0){
-      scan=-2;
-      bmnum=PCPBEAM;
-      intsc=1;
-      intus=0;
-      for (pcpcnt=0;pcpcnt<PCPFNUM;pcpcnt++) {
-        stfrq=pcpfreqs[pcpcnt];
-        TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
+    scan=-2;
+    bmnum=PCPBEAM;
+    intsc=1;
+    intus=0;
+    for (pcpcnt=0;pcpcnt<PCPFNUM;pcpcnt++) {
+      stfrq=pcpfreqs[pcpcnt];
+      TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
-        sprintf(logtxt,"Sounding beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
-                       intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Sounding beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
+                     intsc,intus,hr,mt,sc,us);
+      ErrLog(errlog.sock,progname,logtxt);
+      ErrLog(errlog.sock,progname,"Starting Integration.");
+
+      SiteStartIntt(intsc,intus);
+
+      ErrLog(errlog.sock,progname,"Doing clear frequency search.");
+      sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
+      ErrLog(errlog.sock,progname, logtxt);
+
+      tfreq=SiteFCLR(stfrq,stfrq+frqrng);
+
+      sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
+      ErrLog(errlog.sock,progname,logtxt);
+
+      nave=SiteIntegrate(seq->lags);
+      if (nave<0) {
+        sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
-        ErrLog(errlog.sock,progname,"Starting Integration.");
+        continue;
+      }
+      sprintf(logtxt,"Number of sequences: %d",nave);
+      ErrLog(errlog.sock,progname,logtxt);
 
-        SiteStartIntt(intsc,intus);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
+      OpsBuildIQ(iq,&badtr);
+      OpsBuildRaw(raw);
+      FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
-        ErrLog(errlog.sock,progname,"Doing clear frequency search.");
-        sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
-        ErrLog(errlog.sock,progname, logtxt);
+      /* write out data here */
+      msg.num=0;
+      msg.tsize=0;
+      tmpbuf=RadarParmFlatten(prm,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf, PRM_TYPE,0);
 
-        printf("FRQ: %d %d", stfrq, frqrng);
-        tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);
+      tmpbuf=IQFlatten(iq,prm->nave,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,IQ_TYPE,0);
 
-        sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
-        ErrLog(errlog.sock,progname,logtxt);
+      RMsgSndAdd(&msg,sizeof(unsigned int)*2*iq->tbadtr,
+                 (unsigned char *) badtr,BADTR_TYPE,0);
 
-        nave=SiteIntegrate(lags);
-        if (nave<0) {
-          sprintf(logtxt,"Integration error:%d",nave);
-          ErrLog(errlog.sock,progname,logtxt);
-          continue;
-        }
-        sprintf(logtxt,"Number of sequences: %d",nave);
-        ErrLog(errlog.sock,progname,logtxt);
+      RMsgSndAdd(&msg,strlen(sharedmemory)+1,(unsigned char *) sharedmemory,
+                 IQS_TYPE,0);
 
-        OpsBuildPrm(prm,ptab,lags);
-        OpsBuildIQ(iq,&badtr);
-        OpsBuildRaw(raw);
-        FitACF(prm,raw,fblk,fit,site,tdiff,-999);
+      tmpbuf=RawFlatten(raw,prm->nrang,prm->mplgs,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0);
 
-        /* write out data here */
-        msg.num=0;
-        msg.tsize=0;
-        tmpbuf=RadarParmFlatten(prm,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf, PRM_TYPE,0);
-
-        tmpbuf=IQFlatten(iq,prm->nave,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf,IQ_TYPE,0);
-
-        RMsgSndAdd(&msg,sizeof(unsigned int)*2*iq->tbadtr,
-                   (unsigned char *) badtr,BADTR_TYPE,0);
-
-        RMsgSndAdd(&msg,strlen(sharedmemory)+1,(unsigned char *) sharedmemory,
-                   IQS_TYPE,0);
-
-        tmpbuf=RawFlatten(raw,prm->nrang,prm->mplgs,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0);
-
-        tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
-        RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-        RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *) progname,
-                   NME_TYPE,0);
-        for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
-        for (n=0;n<msg.num;n++) {
-          if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
-          if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
-          if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
-          if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
-        }
+      tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
+      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *) progname,
+                 NME_TYPE,0);
+      for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
+      for (n=0;n<msg.num;n++) {
+        if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
+        if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
+        if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
+        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
       }
     }
     /* ************************** END Single beam sounding to fill remaining time ******************* */
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     SiteEndScan(scnsc,scnus,5000);
 
-  } while (exitpoll==0);
+  } while (1);
 
   for (n=0;n<tnum;n++) RMsgSndClose(task[n].sock);
 

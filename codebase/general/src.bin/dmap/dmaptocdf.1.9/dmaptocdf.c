@@ -77,7 +77,7 @@ int loadmap(FILE *fp) {
     t=0;
     if (strncmp(buf+x,"char",4)==0) t=DATACHAR;
     if (strncmp(buf+x,"short",5)==0) t=DATASHORT;
-    if (strncmp(buf+x,"int",4)==0) t=DATAINT;
+    if (strncmp(buf+x,"int",3)==0) t=DATAINT;
     if (strncmp(buf+x,"float",5)==0) t=DATAFLOAT;
     if (strncmp(buf+x,"double",6)==0) t=DATADOUBLE;
     if (strncmp(buf+x,"string",6)==0) t=DATASTRING;
@@ -182,6 +182,8 @@ int main(int argc,char *argv[]) {
   int counts[CDF_MAX_DIMS];
   int indices[CDF_MAX_DIMS];
 
+  char text[CDF_STATUSTEXT_LEN+1];
+
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
@@ -240,6 +242,8 @@ int main(int argc,char *argv[]) {
   status=CDFopen(argv[arg+2],&id);
   if (status !=CDF_OK) {
     fprintf(stderr,"Error opening CDF file.\n");
+    CDFerror(status,text);
+    fprintf(stderr,"%s\n",text);
     exit(-1);
   }
 
@@ -260,40 +264,53 @@ int main(int argc,char *argv[]) {
         break;
       }
       if (n !=snum) { /* mapped variable */
-        status=CDFlib(GET_,rVAR_NUMBER_,cdfsname[n],&varid,NULL_);
+        status=CDFlib(GET_,zVAR_NUMBER_,cdfsname[n],&varid,NULL_);
         if (status !=CDF_OK) {
           fprintf(stderr,"Error accessing CDF file.\n");
+          CDFerror(status,text);
+          fprintf(stderr,"%s\n",text);
           exit(-1);
         }
 
         switch (sx->type) {
         case DATACHAR:
-          status=CDFlib(SELECT_,rVAR_,varid,
-                        SELECT_,rVARs_RECNUMBER_,block,
-                        PUT_,rVAR_DATA_,sx->data.vptr,NULL_);
+          status=CDFlib(SELECT_,
+                        zVAR_,varid,zVAR_RECNUMBER_,block,
+                        zVAR_RECCOUNT_,1,
+                        zVAR_RECINTERVAL_,1,
+                        PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATASHORT:
-          status=CDFlib(SELECT_,rVAR_,varid,
-                        SELECT_,rVARs_RECNUMBER_,block,
-                        PUT_,rVAR_DATA_,sx->data.vptr,NULL_);
+          status=CDFlib(SELECT_,
+                        zVAR_,varid,zVAR_RECNUMBER_,block,
+                        zVAR_RECCOUNT_,1,
+                        zVAR_RECINTERVAL_,1,
+                        PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATAINT:
-          status=CDFlib(SELECT_,rVAR_,varid,
-                        SELECT_,rVARs_RECNUMBER_,block,
-                        PUT_,rVAR_DATA_,sx->data.vptr,NULL_);
+          status=CDFlib(SELECT_,
+                        zVAR_,varid,zVAR_RECNUMBER_,block,
+                        zVAR_RECCOUNT_,1,
+                        zVAR_RECINTERVAL_,1,
+                        PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATAFLOAT:
-          status=CDFlib(SELECT_,rVAR_,varid,
-                        SELECT_,rVARs_RECNUMBER_,block,
-                        PUT_,rVAR_DATA_,sx->data.vptr,NULL_);
+          status=CDFlib(SELECT_,
+                        zVAR_,varid,zVAR_RECNUMBER_,block,
+                        zVAR_RECCOUNT_,1,
+                        zVAR_RECINTERVAL_,1,
+                        PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATADOUBLE:
-          status=CDFlib(SELECT_,rVAR_,varid,
-                        SELECT_,rVARs_RECNUMBER_,block,
-                        PUT_,rVAR_DATA_,sx->data.vptr,NULL_);
+          status=CDFlib(SELECT_,
+                        zVAR_,varid,zVAR_RECNUMBER_,block,
+                        zVAR_RECCOUNT_,1,
+                        zVAR_RECINTERVAL_,1,
+                        PUT_,zVAR_HYPERDATA_,sx->data.vptr,NULL_);
           break;
         case DATASTRING:
-          status=CDFlib(SELECT_,rVAR_,varid,GET_,rVAR_NUMELEMS_,&nume,NULL_);
+          continue; // because strings are currently broken...
+          status=CDFlib(SELECT_,zVAR_,varid,GET_,zVAR_NUMELEMS_,&nume,NULL_);
           if (status !=CDF_OK) break;
           buf=malloc(nume);
           if (buf==NULL) break;
@@ -301,15 +318,19 @@ int main(int argc,char *argv[]) {
           if (*((char **) sx->data.vptr) !=NULL) 
             strcpy(buf,*((char **) sx->data.vptr));
 
-          status=CDFlib(SELECT_,rVAR_,varid,
-                     SELECT_,rVARs_RECNUMBER_,block,
-                     PUT_,rVAR_DATA_,buf,NULL_);
+          status=CDFlib(SELECT_,
+                        zVAR_,varid,zVAR_RECNUMBER_,block,
+                        zVAR_RECCOUNT_,1,
+                        zVAR_RECINTERVAL_,1,
+                        PUT_,zVAR_HYPERDATA_,buf,NULL_);
 
           free(buf);
           break;
         }
         if (status !=CDF_OK) {
           fprintf(stderr,"Error writing CDF file (%d).\n",(int) status);
+          CDFerror(status,text);
+          fprintf(stderr,"%s\n",text);
           exit(-1);
         }
       }
@@ -323,6 +344,7 @@ int main(int argc,char *argv[]) {
         if (strcmp(ax->name,ay->name) !=0) continue;
         if (ax->type !=ay->type) continue;
         if (ax->dim !=ay->dim) continue;
+        if (ax->dim == 2) continue; // because ltab is currently broken...
         break;
       }
       if (n !=anum) { 
@@ -330,6 +352,8 @@ int main(int argc,char *argv[]) {
         status=CDFlib(GET_,zVAR_NUMBER_,cdfaname[n],&varid,NULL_);
         if (status !=CDF_OK) {
           fprintf(stderr,"Error accessing CDF file.\n");
+          CDFerror(status,text);
+          fprintf(stderr,"%s\n",text);
           exit(-1);
         }
 
@@ -340,6 +364,7 @@ int main(int argc,char *argv[]) {
           counts[x]=ax->rng[x];
           sze=sze*ax->rng[x];
         }
+
         if (sze==0) continue;
 
         if (ax->type==DATASTRING) {
@@ -360,7 +385,7 @@ int main(int argc,char *argv[]) {
                         zVAR_RECINTERVAL_,1,
                         zVAR_DIMINDICES_,indices,
                         zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals, 
+                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,ax->data.vptr,NULL_);
           break;
         case DATASHORT:
@@ -370,7 +395,7 @@ int main(int argc,char *argv[]) {
                         zVAR_RECINTERVAL_,1,
                         zVAR_DIMINDICES_,indices,
                         zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals, 
+                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,ax->data.vptr,NULL_);
           break;
         case DATAINT:
@@ -380,7 +405,7 @@ int main(int argc,char *argv[]) {
                         zVAR_RECINTERVAL_,1,
                         zVAR_DIMINDICES_,indices,
                         zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals, 
+                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,ax->data.vptr,NULL_);
           break;
         case DATAFLOAT:
@@ -390,7 +415,7 @@ int main(int argc,char *argv[]) {
                         zVAR_RECINTERVAL_,1,
                         zVAR_DIMINDICES_,indices,
                         zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals, 
+                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,ax->data.vptr,NULL_);
           break;
         case DATADOUBLE:
@@ -400,7 +425,7 @@ int main(int argc,char *argv[]) {
                         zVAR_RECINTERVAL_,1,
                         zVAR_DIMINDICES_,indices,
                         zVAR_DIMCOUNTS_,counts,
-                        zVAR_DIMINTERVALS_,intervals, 
+                        zVAR_DIMINTERVALS_,intervals,
                         PUT_,zVAR_HYPERDATA_,ax->data.vptr,NULL_);
           break;
         case DATASTRING:
@@ -418,6 +443,8 @@ int main(int argc,char *argv[]) {
 
         if ((status !=CDF_OK) && (status !=VIRTUAL_RECORD_DATA)) {
           fprintf(stderr,"Error writing CDF file (%d).\n",(int) status);
+          CDFerror(status,text);
+          fprintf(stderr,"%s\n",text);
           exit(-1);
         }
 

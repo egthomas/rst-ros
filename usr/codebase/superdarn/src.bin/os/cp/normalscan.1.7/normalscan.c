@@ -57,6 +57,7 @@
 #include "build.h"
 #include "global.h"
 #include "reopen.h"
+#include "sequence.h"
 #include "setup.h"
 #include "sync.h"
 #include "site.h"
@@ -91,46 +92,8 @@ int rst_opterr(char *txt) {
 
 int main(int argc,char *argv[]) {
 
-  /*
-   * commentary here: SGS
-   * It seems that the mode should be decoupled from the pulse sequence.
-   * The pulse table and lag table should be externally defined with some
-   * way of determining the time it takes for a given sequence.
-   */
-
-  int ptab[8] = {0,14,22,24,27,31,42,43};
-  int lags[LAG_SIZE][2] = {
-    { 0, 0},    /*  0 */
-    {42,43},    /*  1 */
-    {22,24},    /*  2 */
-    {24,27},    /*  3 */
-    {27,31},    /*  4 */
-    {22,27},    /*  5 */
-
-    {24,31},    /*  7 */
-    {14,22},    /*  8 */
-    {22,31},    /*  9 */
-    {14,24},    /* 10 */
-    {31,42},    /* 11 */
-    {31,43},    /* 12 */
-    {14,27},    /* 13 */
-    { 0,14},    /* 14 */
-    {27,42},    /* 15 */
-    {27,43},    /* 16 */
-    {14,31},    /* 17 */
-    {24,42},    /* 18 */
-    {24,43},    /* 19 */
-    {22,42},    /* 20 */
-    {22,43},    /* 21 */
-    { 0,22},    /* 22 */
-
-    { 0,24},    /* 24 */
-
-    {43,43}};   /* alternate lag-0  */
-
   char logtxt[1024];
 
-  int exitpoll=0;
   int scannowait=0;
  
   int scnsc=0;      /* total scan period in seconds */
@@ -163,31 +126,19 @@ int main(int argc,char *argv[]) {
   int bmsc    = 6;
   int bmus    = 0;
 
-  if (debug) {
-    printf("Size of int %lu\n",sizeof(int));
-    printf("Size of long %lu\n",sizeof(long));
-    printf("Size of long long %lu\n",sizeof(long long));
-    printf("Size of struct TRTimes %lu\n",sizeof(struct TRTimes));
-    printf("Size of struct SeqPRM %lu\n",sizeof(struct SeqPRM));
-    printf("Size of struct RosData %lu\n",sizeof(struct RosData));
-    printf("Size of struct DataPRM %lu\n",sizeof(struct DataPRM));
-    printf("Size of Struct ControlPRM  %lu\n",sizeof(struct ControlPRM));
-    printf("Size of Struct RadarPRM  %lu\n",sizeof(struct RadarPRM));
-    printf("Size of Struct ROSMsg  %lu\n",sizeof(struct ROSMsg));
-    printf("Size of Struct CLRFreq  %lu\n",sizeof(struct CLRFreqPRM));
-    printf("Size of Struct TSGprm  %lu\n",sizeof(struct TSGprm));
-    printf("Size of Struct SiteSettings  %lu\n",sizeof(struct SiteSettings));
-  }
+  struct sequence *seq;
 
-  cp     = 150;     /* CPID */
-  intsc  = 7;       /* integration period; recomputed below ... */
+  seq=OpsSequenceMake();
+  OpsBuild8pulse(seq);
+
+  cp     = 150;         /* CPID */
+  intsc  = 7;           /* integration period; recomputed below ... */
   intus  = 0;
-  mppul  = 8;       /* number of pulses; tied to array above ... */
-  mplgs  = 23;      /* same here for the number of lags */
-  mpinc  = 1500;    /* multi-pulse increment [us] */
-  nrang  = 100;     /* the number of ranges gets set in SiteXXXStart() */
-  rsep   = 45;      /* same for the range separation */
-  txpl   = 300;     /* pulse length [us]; gets redefined below... */
+  mppul  = seq->mppul;  /* number of pulses */
+  mplgs  = seq->mplgs;  /* number of lags */
+  mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
+  rsep   = 45;          /* same for the range separation */
+  txpl   = 300;         /* pulse length [us]; gets redefined below... */
 
   dmpinc = nmpinc = mpinc;  /* set day and night to the same,
                                but could change */
@@ -264,6 +215,8 @@ int main(int argc,char *argv[]) {
 
   if (ststr==NULL) ststr=dfststr;
 
+  channel = cnum;
+
   OpsStart(ststr);
 
   status = SiteBuild(libstr);
@@ -283,8 +236,9 @@ int main(int argc,char *argv[]) {
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
   if (rxonly) {
-    strcpy(progid, "rxonlybistaticscan");
-    strcpy(progname, "rxonlybistaticscan");
+    strcpy(progid, "rxonlybistaticscan; BISTATIC");
+    strcpy(progname, "rxonlybistaticscan; BISTATIC");
+    txpow = 1;
   } else {
     if (fast) sprintf(progname,"normalscan (fast)");
     else sprintf(progname,"normalscan");
@@ -351,11 +305,6 @@ int main(int argc,char *argv[]) {
 
   txpl = (rsep*20)/3;
 
-/*
-  if (fast) sprintf(progname,"normalscan (fast)");
-  else sprintf(progname,"normalscan");
-*/
-
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
 
@@ -368,7 +317,7 @@ int main(int argc,char *argv[]) {
   OpsFitACFStart();
 
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
-  tsgid = SiteTimeSeq(ptab);
+  tsgid = SiteTimeSeq(seq->ptab);
 
   if (bm_sync) skip = OpsFindSkip(scnsc,scnus, bmsc,bmus, 0);
   else         skip = OpsFindSkip(scnsc,scnus, intsc,intus, 0);
@@ -379,6 +328,8 @@ int main(int argc,char *argv[]) {
     bmnum = sbm+skip;
     if (bmnum > ebm) bmnum = sbm;
   }
+
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -444,12 +395,12 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname, logtxt);
       tfreq = SiteFCLR(stfrq,stfrq+frqrng);
 
-      if ( (fixfrq > 8000) && (fixfrq < 25000) ) tfreq = fixfrq;
+      if (fixfrq > 0) tfreq = fixfrq;
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
-      nave = SiteIntegrate(lags);
+      nave = SiteIntegrate(seq->lags);
       if (nave < 0) {
         sprintf(logtxt,"Integration error:%d",nave);
         ErrLog(errlog.sock,progname,logtxt);
@@ -458,7 +409,7 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      OpsBuildPrm(prm,ptab,lags);
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
@@ -502,7 +453,6 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      if (exitpoll != 0) break;
       scan = 0;
       if (bmnum == ebm) break;
       if (backward) bmnum--;
@@ -517,8 +467,8 @@ int main(int argc,char *argv[]) {
 
     bmnum = sbm;
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-    if ((exitpoll==0) && (scannowait==0)) SiteEndScan(scnsc,scnus,5000);
-  } while (exitpoll==0);
+    if (scannowait==0) SiteEndScan(scnsc,scnus,5000);
+  } while (1);
 
   for (n=0; n<tnum; n++) RMsgSndClose(task[n].sock);
 
