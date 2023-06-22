@@ -13,7 +13,7 @@
 </option>
 <option><on>-cp <ar>cport</ar></on><od>listen for the control program on the local port number <ar>cport</ar> (default is 44001).</od>
 </option>
-<option><on>-sp <ar>sport</ar></on><od>listen for radarshell clients on the local port number <ar>sport</ar> (default is 44002).</od>
+<option><on>-sp <ar>sport</ar></on><od>listen for radarshell clients on the local port number <ar>sport</ar> (default is 45001).</od>
 </option>
 <option><on>-eh <ar>ehost</ar></on><od>connect to the error logger at hostname or IP address <ar>ehost</ar> (default is localhost).</od>
 </option>
