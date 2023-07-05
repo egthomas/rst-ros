@@ -29,7 +29,6 @@
 #include "fitdata.h"
 #include "fitacf.h"
 #include "snddata.h"
-#include "sndwrite.h"
 #include "errlog.h"
 #include "freq.h"
 #include "tcpipmsg.h"
@@ -62,7 +61,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2023/06/05"};
+char progid[80]={"testsound 2023/07/05"};
 char progname[256];
 
 int arg=0;
@@ -103,6 +102,8 @@ int main(int argc,char *argv[])
   int def_intt_sc=0;
   int def_intt_us=0;
   int def_nrang=0;
+  int def_rsep=0;
+  int def_txpl=0;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -118,6 +119,8 @@ int main(int argc,char *argv[])
   int snd_freq;
   int snd_frqrng=100;
   int snd_nrang=75;
+  int snd_rsep=45;
+  int snd_txpl=300;
   int snd_sc=12;
   int snd_intt_sc=1;
   int snd_intt_us=500000;
@@ -299,6 +302,9 @@ int main(int argc,char *argv[])
 
   txpl=(rsep*20)/3;
 
+  def_rsep = rsep;
+  def_txpl = txpl;
+
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
 
@@ -320,7 +326,7 @@ int main(int argc,char *argv[])
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
-    if (def_nrang != snd_nrang) {
+    if (def_nrang != snd_nrang || def_rsep != snd_rsep) {
       printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
       tsgid=SiteTimeSeq(seq->ptab);
     }
@@ -457,13 +463,16 @@ int main(int argc,char *argv[])
     /* set the xcf variable to do cross-correlations (AOA) */
     if (xcnt > 1) xcf = 1;
 
-    /* set the sounding mode integration time and number of ranges */
+    /* set the sounding mode integration time, number of ranges,
+     * and range separation */
     intsc = snd_intt_sc;
     intus = snd_intt_us;
     nrang = snd_nrang;
+    rsep = snd_rsep;
+    txpl = snd_txpl;
 
     /* make a new timing sequence for the sounding */
-    if (def_nrang != snd_nrang) {
+    if (def_nrang != snd_nrang || def_rsep != snd_rsep) {
       tsgid = SiteTimeSeq(seq->ptab);
     }
 
@@ -567,6 +576,8 @@ int main(int argc,char *argv[])
     intsc = def_intt_sc;
     intus = def_intt_us;
     nrang = def_nrang;
+    rsep = def_rsep;
+    txpl = def_txpl;
 
     SiteEndScan(scnsc,scnus,5000);
 

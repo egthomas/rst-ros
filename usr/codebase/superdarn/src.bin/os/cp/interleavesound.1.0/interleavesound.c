@@ -29,7 +29,6 @@
 #include "fitdata.h"
 #include "fitacf.h"
 #include "snddata.h"
-#include "sndwrite.h"
 #include "errlog.h"
 #include "freq.h"
 #include "tcpipmsg.h"
@@ -54,7 +53,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2023/06/05"};
+char progid[80]={"interleavesound 2023/07/05"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -86,6 +85,8 @@ int main(int argc,char *argv[]) {
   int fixfrq=0;
 
   int def_nrang=0;
+  int def_rsep=0;
+  int def_txpl=0;
 
   /* new variables for dynamically creating beam sequences */
   int *bms;           /* scanning beams                                     */
@@ -115,6 +116,8 @@ int main(int argc,char *argv[]) {
   int snd_freq;
   int snd_frqrng=100;
   int snd_nrang=75;
+  int snd_rsep=45;
+  int snd_txpl=300;
   int fast_intt_sc=2;
   int fast_intt_us=400000;
   int snd_intt_sc=1;
@@ -273,6 +276,9 @@ int main(int argc,char *argv[]) {
 
   txpl=(rsep*20)/3;     /* computing TX pulse length */
 
+  def_rsep = rsep;
+  def_txpl = txpl;
+
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
 
@@ -290,7 +296,7 @@ int main(int argc,char *argv[]) {
 
   do {
 
-    if (def_nrang != snd_nrang) {
+    if (def_nrang != snd_nrang || def_rsep != snd_rsep) {
       tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
     }
 
@@ -416,13 +422,16 @@ int main(int argc,char *argv[]) {
     /* set the xcf variable to do cross-correlations (AOA) */
     if (xcnt > 1) xcf = 1;
 
-    /* set the sounding mode integration time and number of ranges */
+    /* set the sounding mode integration time, number of ranges,
+     * and range separation */
     intsc = snd_intt_sc;
     intus = snd_intt_us;
     nrang = snd_nrang;
+    rsep = snd_rsep;
+    txpl = snd_txpl;
 
     /* make a new timing sequence for the sounding */
-    if (def_nrang != snd_nrang) {
+    if (def_nrang != snd_nrang || def_rsep != snd_rsep) {
       tsgid = SiteTimeSeq(seq->ptab);
     }
 
@@ -525,6 +534,8 @@ int main(int argc,char *argv[]) {
     intsc = fast_intt_sc;
     intus = fast_intt_us;
     nrang = def_nrang;
+    rsep = def_rsep;
+    txpl = def_txpl;
 
     SiteEndScan(scnsc,scnus,5000);
 
