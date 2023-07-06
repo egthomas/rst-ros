@@ -106,6 +106,14 @@ int main(int argc,char *argv[]) {
   int bmsw[20] =
              {23,19,15,11, 7,21,17,13, 9, 5,22,18,14,10, 6,20,16,12, 8, 4};
 
+  /*
+    beam sequences for 16-beam radars (forward and backward)
+   */
+  /* count     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 */
+  int bmsf[16] =
+             { 0, 4, 8,12, 2, 6,10,14, 1, 5, 9,13, 3, 7,11,15};
+  int bmsb[16] =
+             {15,11, 7, 3,13, 9, 5, 1,14,10, 6, 2,12, 8, 4, 0};
 
   /* ---------------- Variables for sounding --------------- */
   int *snd_bms;
@@ -207,6 +215,12 @@ int main(int argc,char *argv[]) {
     for (i=0; i<snd_bms_tot; i++)
       snd_bms[i] -= 2;
   } else {
+    if ((strcmp(ststr,"kap") == 0) || (strcmp(ststr,"ksr") == 0)) {
+      bms = bmsb;
+    } else {
+      bms = bmsf;
+    }
+    nintgs = 16;
     snd_bms = snd_bmse;
     snd_bms_tot = 8;
     snd_intt_sc = 2;

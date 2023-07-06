@@ -117,6 +117,15 @@ int main(int argc,char *argv[]) {
   int bmsw[20] =
              {23,19,15,11, 7,21,17,13, 9, 5,22,18,14,10, 6,20,16,12, 8, 4};
 
+  /*
+    beam sequences for 16-beam radars (forward and backward)
+   */
+  /* count     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 */
+  int bmsf[16] =
+             { 0, 4, 8,12, 2, 6,10,14, 1, 5, 9,13, 3, 7,11,15};
+  int bmsb[16] =
+             {15,11, 7, 3,13, 9, 5, 1,14,10, 6, 2,12, 8, 4, 0};
+
   struct sequence *seq;
 
   seq=OpsSequenceMake();
@@ -173,26 +182,29 @@ int main(int argc,char *argv[]) {
     exit(0);
   }
 
-  /* start time of each integration period */
-  for (i=0; i<nintgs; i++)
-    intgt[i] = i*(intsc + intus*1e-6);
-
   if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     bms = bmse;     /* 1-min sequence */
-  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
+  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0) || (strcmp(ststr,"bks") == 0)) {
     bms = bmsw;     /* 1-min sequence */
   } else if (strcmp(ststr,"fhw") == 0) {
     bms = bmsw;     /* 1-min sequence */
     for (i=0; i<nintgs; i++)
       bms[i] -= 2;
   } else {
-    if (hlp) usage();
-    else     printf("Error: Not intended for station %s\n", ststr);
-    return (-1);
+    if ((strcmp(ststr,"kap") == 0) || (strcmp(ststr,"ksr") == 0)) {
+      bms = bmsb;
+    } else {
+      bms = bmsf;
+    }
+    nintgs = 16;
   }
+
+  /* start time of each integration period */
+  for (i=0; i<nintgs; i++)
+    intgt[i] = i*(intsc + intus*1e-6);
 
   if (hlp) {
     usage();
