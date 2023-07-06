@@ -236,7 +236,7 @@ int main(int argc,char *argv[]) {
   if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
-  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
+  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     cbm[0] = 1;
     cbm[1] = 2;
     cbm[2] = 5;
@@ -255,7 +255,7 @@ int main(int argc,char *argv[]) {
       cbm[1] = 12;
       cbm[2] = 13;
     }
-  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
+  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0) || (strcmp(ststr,"bks") == 0)) {
     cbm[0] = 22;
     cbm[1] = 21;
     cbm[2] = 18;
@@ -274,17 +274,20 @@ int main(int argc,char *argv[]) {
       cbm[1] = 16;
       cbm[2] = 15;
     }
+  } else if (strcmp(ststr,"fhw") == 0) {
+    cbm[0] = 20;
+    cbm[1] = 19;
+    cbm[2] = 16;
+    if (fast)
+      bms = altw;       /* odd/even beam sequence */
+    else
+      bms = bmsw;       /* standard 2-min sequence */
+    for (i=0; i<nintgs; i++)
+      bms[i] -= 2;      /* decrement beams by 2 for 22 beam radar */
   } else {
     if (hlp) usage();
     else     printf("Error: Not intended for station %s\n", ststr);
     return (-1);
-  }
-
-  /* SGS: this will likely break... */
-  if (strcmp(ststr,"fhw") == 0) {
-    for (i=0; i<nintgs; i++)
-      bms[i] -= 2; /* decrement beams by 2 for 22 beam radar */
-    for (i=0; i<3; i++) cbm[i] -= 2;
   }
 
   if (hlp) {
