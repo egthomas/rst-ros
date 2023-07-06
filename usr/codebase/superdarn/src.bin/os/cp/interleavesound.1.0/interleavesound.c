@@ -123,8 +123,6 @@ int main(int argc,char *argv[]) {
   int snd_intt_sc=1;
   int snd_intt_us=500000;
   float snd_time, snd_intt, time_needed=1.25;
-
-  snd_intt = snd_intt_sc + snd_intt_us*1e-6;
   /* ------------------------------------------------------- */
 
   struct sequence *seq;
@@ -198,7 +196,7 @@ int main(int argc,char *argv[]) {
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     bms = bmse;
     snd_bms = snd_bmse;
-  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
+  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0) || (strcmp(ststr,"bks") == 0)) {
     bms = bmsw;
     snd_bms = snd_bmsw;
   } else if (strcmp(ststr,"fhw") == 0) {
@@ -209,9 +207,13 @@ int main(int argc,char *argv[]) {
     for (i=0; i<snd_bms_tot; i++)
       snd_bms[i] -= 2;
   } else {
-    printf("Error: Not intended for station %s\n", ststr);
-    return (-1);
+    snd_bms = snd_bmse;
+    snd_bms_tot = 8;
+    snd_intt_sc = 2;
+    snd_intt_us = 0;
   }
+
+  snd_intt = snd_intt_sc + snd_intt_us*1e-6;
 
   OpsStart(ststr);
 
@@ -294,9 +296,13 @@ int main(int argc,char *argv[]) {
 
   if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
+  if ((def_nrang == snd_nrang) && (def_rsep == snd_rsep)) {
+    tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+  }
+
   do {
 
-    if (def_nrang != snd_nrang || def_rsep != snd_rsep) {
+    if ((def_nrang != snd_nrang) || (def_rsep != snd_rsep)) {
       tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
     }
 
@@ -431,7 +437,7 @@ int main(int argc,char *argv[]) {
     txpl = snd_txpl;
 
     /* make a new timing sequence for the sounding */
-    if (def_nrang != snd_nrang || def_rsep != snd_rsep) {
+    if ((def_nrang != snd_nrang) || (def_rsep != snd_rsep)) {
       tsgid = SiteTimeSeq(seq->ptab);
     }
 
