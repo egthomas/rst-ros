@@ -43,8 +43,8 @@ config_t cfg;
 char station[10];
 
 
-void SiteRosExit(int signum)
-{
+void SiteRosExit(int signum) {
+
   struct ROSMsg msg;
 
   switch(signum) {
@@ -92,8 +92,8 @@ void SiteRosExit(int signum)
 }
 
 
-int SiteRosStart(char *host,char *ststr)
-{
+int SiteRosStart(char *host,char *ststr) {
+
   int n,ltemp,retval;
   const char *str;
   char *dfststr="tst";
@@ -315,8 +315,8 @@ int SiteRosStart(char *host,char *ststr)
 }
 
 
-int SiteRosSetupRadar()
-{
+int SiteRosSetupRadar() {
+
   int32 temp32,data_length;;
   char ini_entry_name[80];
   char requested_entry_type,returned_entry_type;
@@ -389,8 +389,8 @@ int SiteRosSetupRadar()
 }
 
 
-int SiteRosStartScan()
-{
+int SiteRosStartScan() {
+
   struct ROSMsg smsg,rmsg;
 
   smsg.type = SET_ACTIVE;
@@ -401,8 +401,8 @@ int SiteRosStartScan()
 }
 
 
-int SiteRosStartIntt(int sec,int usec)
-{
+int SiteRosStartIntt(int sec,int usec) {
+
   struct ROSMsg smsg,rmsg;
   int total_samples=0;
   double secs;
@@ -458,8 +458,8 @@ int SiteRosStartIntt(int sec,int usec)
 }
 
 
-int SiteRosFCLR(int stfreq,int edfreq)
-{
+int SiteRosFCLR(int stfreq,int edfreq) {
+
   int32 tfreq;
   struct ROSMsg smsg,rmsg;
   struct CLRFreqPRM fprm;
@@ -516,8 +516,8 @@ int SiteRosFCLR(int stfreq,int edfreq)
 }
 
 
-int SiteRosTimeSeq(int *ptab)
-{
+int SiteRosTimeSeq(int *ptab) {
+
   int i;
   int flag,index=0;
   struct ROSMsg smsg,rmsg;
@@ -580,8 +580,8 @@ int SiteRosTimeSeq(int *ptab)
 }
 
 
-int SiteRosIntegrate(int (*lags)[2])
-{
+int SiteRosIntegrate(int (*lags)[2]) {
+
   int *lagtable[2]={NULL,NULL};
   int lagsum[LAG_SIZE];
 
@@ -990,8 +990,8 @@ int SiteRosIntegrate(int (*lags)[2])
 }
 
 
-int SiteRosEndScan(int bsc,int bus, unsigned sleepus)
-{
+int SiteRosEndScan(int bsc,int bus, unsigned sleepus) {
+
   struct ROSMsg smsg,rmsg;
   struct timeval tock;
   struct timeval tick;
