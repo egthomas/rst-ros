@@ -57,7 +57,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalsound 2023/07/05"};
+char progid[80]={"normalsound 2023/07/11"};
 char progname[256];
 
 int arg=0;
@@ -117,7 +117,7 @@ int main(int argc,char *argv[])
   int snd_nrang=75;
   int snd_rsep=45;
   int snd_txpl=300;
-  int snd_sc=12;
+  int snd_sc=-1;
   int snd_intt_sc=1;
   int snd_intt_us=500000;
   float snd_time, snd_intt, time_needed=1.25;
@@ -280,9 +280,11 @@ int main(int argc,char *argv[])
     cp    = 157;
     scnsc = 60;
     scnus = 0;
+    if (snd_sc < 0) snd_sc = 12;
   } else {
     scnsc = 120;
     scnus = 0;
+    if (snd_sc < 0) snd_sc = 20;
   }
 
   /* Automatically calculate the integration times */
