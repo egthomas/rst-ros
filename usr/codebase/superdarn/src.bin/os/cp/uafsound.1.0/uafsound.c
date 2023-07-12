@@ -308,7 +308,7 @@ int main(int argc,char *argv[]) {
 
  /* ========= SET PARAMETER TO EMULATE OTHER CONTROL PROGRAMS ============= */
 
-  /* NORMAL beam order  or CAMPING one one beam */
+  /* NORMAL beam order */
   fprintf(stderr, "Initializing normal beam pattern...\n");
   nBeams_per_scan = abs(ebm-sbm)+1;
   current_beam = sbm;
@@ -434,7 +434,6 @@ int main(int argc,char *argv[]) {
         
     fprintf(stdout,"Control Program Argument Parameters::\n");
     fprintf(stdout,"  xcf arg:: xcnt: %d\n",xcnt);
-    fprintf(stdout,"  baud arg:: nbaud: %d\n",nbaud);
     fprintf(stdout,"  clrskip arg:: value: %d\n",clrskip);
     fprintf(stdout,"  cpid: %d progname: \'%s\'\n",cp,progname);
     fprintf(stdout,"Scan Sequence Parameters::\n");
@@ -726,8 +725,10 @@ int main(int argc,char *argv[]) {
               snd_beam_number_list[snd_iBeam], snd_clrfreq_fstart_list[snd_iBeam] );
     }
 
+    snd_iBeam = 0;
+
     /* send sounding scan data to usrp_sever */
-    //if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list, snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_scnsc, snd_scnus, snd_intsc, snd_intus, iBeam) !=0){
+    //if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list, snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_scnsc, snd_scnus, snd_intt_sc, snd_intt_us, snd_iBeam) !=0){
     if (SiteStartScan() !=0){
          ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");  
          sleep(1);
@@ -754,8 +755,6 @@ int main(int argc,char *argv[]) {
     /* minus a safety factor given in time_needed */
     TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     snd_time = 60.0 - (sc + us*1e-6);
-
-    snd_iBeam = 0;
 
     while (snd_time-snd_intt > time_needed) {
 
