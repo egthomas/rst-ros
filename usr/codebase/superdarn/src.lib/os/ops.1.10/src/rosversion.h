@@ -2,5 +2,5 @@
    ============ */
 
 #define MAJOR_VERSION 4
-#define MINOR_VERSION 2
+#define MINOR_VERSION 3
 
