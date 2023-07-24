@@ -544,8 +544,7 @@ int main(int argc,char *argv[]) {
     iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,0);
 
     /* send scan data to usrp_sever */
-    //if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list, scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times, scnsc, scnus, intsc, intus, iBeam) !=0){
-    if (SiteStartScan() !=0){
+    if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list, scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times, scnsc, scnus, intsc, intus, iBeam) !=0){
          ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");  
          sleep(1);
          continue;
@@ -728,8 +727,7 @@ int main(int argc,char *argv[]) {
     snd_iBeam = 0;
 
     /* send sounding scan data to usrp_sever */
-    //if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list, snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_scnsc, snd_scnus, snd_intt_sc, snd_intt_us, snd_iBeam) !=0){
-    if (SiteStartScan() !=0){
+    if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list, snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_scnsc, snd_scnus, snd_intt_sc, snd_intt_us, snd_iBeam) !=0){
          ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");  
          sleep(1);
          continue;
