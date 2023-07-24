@@ -45,8 +45,8 @@ char station[10];
 int iqbufsize=0;
 
 
-void SiteRosExit(int signum)
-{
+void SiteRosExit(int signum) {
+
   struct ROSMsg msg;
 
   switch(signum) {
@@ -94,8 +94,8 @@ void SiteRosExit(int signum)
 }
 
 
-int SiteRosStart(char *host,char *ststr)
-{
+int SiteRosStart(char *host,char *ststr) {
+
   int n,ltemp,retval;
   const char *str;
   char *dfststr="tst";
@@ -325,8 +325,8 @@ int SiteRosStart(char *host,char *ststr)
 }
 
 
-int SiteRosSetupRadar()
-{
+int SiteRosSetupRadar() {
+
   int32 temp32,data_length;;
   char ini_entry_name[80];
   char requested_entry_type,returned_entry_type;
@@ -411,8 +411,8 @@ int SiteRosStartScan(int32_t periods_per_scan, int32_t *scan_beam_list,
                      int32_t *clrfreq_fstart_list, int32_t *clrfreq_bandwidth_list,
                      int32_t fixFreq, int32_t sync_scan, int32_t *beam_times,
                      int32_t scn_sc, int32_t scn_us, int32_t int_sc, int32_t int_us,
-                     int32_t start_period)
-{
+                     int32_t start_period) {
+
   struct ROSMsg smsg,rmsg;
 
   smsg.type = SET_ACTIVE;
@@ -442,8 +442,8 @@ int SiteRosStartScan(int32_t periods_per_scan, int32_t *scan_beam_list,
 }
 
 
-int SiteRosStartIntt(int sec,int usec)
-{
+int SiteRosStartIntt(int sec,int usec) {
+
   struct ROSMsg smsg,rmsg;
   int total_samples=0;
   double secs;
@@ -499,8 +499,8 @@ int SiteRosStartIntt(int sec,int usec)
 }
 
 
-int SiteRosFCLR(int stfreq,int edfreq)
-{
+int SiteRosFCLR(int stfreq,int edfreq) {
+
   int32 tfreq;
   struct ROSMsg smsg,rmsg;
   struct CLRFreqPRM fprm;
@@ -559,8 +559,8 @@ int SiteRosFCLR(int stfreq,int edfreq)
 }
 
 
-int SiteRosTimeSeq(int *ptab)
-{
+int SiteRosTimeSeq(int *ptab) {
+
   int i;
   int flag,index=0;
   struct ROSMsg smsg,rmsg;
@@ -644,8 +644,8 @@ int SiteRosTimeSeq(int *ptab)
 }
 
 
-int SiteRosIntegrate(int (*lags)[2])
-{
+int SiteRosIntegrate(int (*lags)[2]) {
+
   int *lagtable[2]={NULL,NULL};
   int lagsum[LAG_SIZE];
 
@@ -1054,8 +1054,8 @@ int SiteRosIntegrate(int (*lags)[2])
 }
 
 
-int SiteRosEndScan(int bsc,int bus, unsigned sleepus)
-{
+int SiteRosEndScan(int bsc,int bus, unsigned sleepus) {
+
   struct ROSMsg smsg,rmsg;
   struct timeval tock;
   struct timeval tick;

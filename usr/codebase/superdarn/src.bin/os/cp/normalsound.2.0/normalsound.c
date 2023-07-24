@@ -57,7 +57,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalsound 2023/06/05"};
+char progid[80]={"normalsound 2023/07/11"};
 char progname[256];
 
 int arg=0;
@@ -98,6 +98,8 @@ int main(int argc,char *argv[])
   int def_intt_sc=0;
   int def_intt_us=0;
   int def_nrang=0;
+  int def_rsep=0;
+  int def_txpl=0;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -113,12 +115,12 @@ int main(int argc,char *argv[])
   int snd_freq;
   int snd_frqrng=100;
   int snd_nrang=75;
-  int snd_sc=12;
+  int snd_rsep=45;
+  int snd_txpl=300;
+  int snd_sc=-1;
   int snd_intt_sc=1;
   int snd_intt_us=500000;
   float snd_time, snd_intt, time_needed=1.25;
-
-  snd_intt = snd_intt_sc + snd_intt_us*1e-6;
   /* ------------------------------------------------------- */
 
   struct sequence *seq;
@@ -205,16 +207,20 @@ int main(int argc,char *argv[])
   /* Point to the beams here */
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     snd_bms = snd_bmse;
-  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
+  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0) || (strcmp(ststr,"bks") == 0)) {
     snd_bms = snd_bmsw;
   } else if (strcmp(ststr,"fhw") == 0) {
     snd_bms = snd_bmsw;
     for (i=0; i<snd_bms_tot; i++)
       snd_bms[i] -= 2;
   } else {
-    printf("Error: Not intended for station %s\n", ststr);
-    return (-1);
+    snd_bms = snd_bmse;
+    snd_bms_tot = 8;
+    snd_intt_sc = 2;
+    snd_intt_us = 0;
   }
+
+  snd_intt = snd_intt_sc + snd_intt_us*1e-6;
 
   OpsStart(ststr);
 
@@ -274,9 +280,11 @@ int main(int argc,char *argv[])
     cp    = 157;
     scnsc = 60;
     scnus = 0;
+    if (snd_sc < 0) snd_sc = 12;
   } else {
     scnsc = 120;
     scnus = 0;
+    if (snd_sc < 0) snd_sc = 20;
   }
 
   /* Automatically calculate the integration times */
@@ -293,6 +301,9 @@ int main(int argc,char *argv[])
   if (discretion) cp = -cp;
 
   txpl=(rsep*20)/3;
+
+  def_rsep = rsep;
+  def_txpl = txpl;
 
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
@@ -312,10 +323,15 @@ int main(int argc,char *argv[])
 
   if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
+  if ((def_nrang == snd_nrang) && (def_rsep == snd_rsep)) {
+    printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
+    tsgid=SiteTimeSeq(seq->ptab);
+  }
+
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
-    if (def_nrang != snd_nrang) {
+    if ((def_nrang != snd_nrang) || (def_rsep != snd_rsep)) {
       printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
       tsgid=SiteTimeSeq(seq->ptab);
       if (tsgid !=0) {
@@ -463,13 +479,16 @@ int main(int argc,char *argv[])
     /* set the xcf variable to do cross-correlations (AOA) */
     if (xcnt > 1) xcf = 1;
 
-    /* set the sounding mode integration time and number of ranges */
+    /* set the sounding mode integration time, number of ranges,
+     * and range separation */
     intsc = snd_intt_sc;
     intus = snd_intt_us;
     nrang = snd_nrang;
+    rsep = snd_rsep;
+    txpl = snd_txpl;
 
     /* make a new timing sequence for the sounding */
-    if (def_nrang != snd_nrang) {
+    if ((def_nrang != snd_nrang) || (def_rsep != snd_rsep)) {
       tsgid = SiteTimeSeq(seq->ptab);
       if (tsgid !=0) {
         if (tsgid==-2) {
@@ -583,6 +602,8 @@ int main(int argc,char *argv[])
     intsc = def_intt_sc;
     intus = def_intt_us;
     nrang = def_nrang;
+    rsep = def_rsep;
+    txpl = def_txpl;
 
     SiteEndScan(scnsc,scnus,5000);
 
