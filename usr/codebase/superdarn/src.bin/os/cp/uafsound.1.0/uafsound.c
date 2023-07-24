@@ -727,7 +727,7 @@ int main(int argc,char *argv[]) {
     snd_iBeam = 0;
 
     /* send sounding scan data to usrp_sever */
-    if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list, snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_scnsc, snd_scnus, snd_intt_sc, snd_intt_us, snd_iBeam) !=0){
+    if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list, snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_sc, 0, snd_intt_sc, snd_intt_us, snd_iBeam) !=0){
          ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");  
          sleep(1);
          continue;
