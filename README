@@ -1,5 +1,5 @@
-RST Radar Operating Software (RST-ROS)
-======================================
+RST Radar Operating System (RST-ROS)
+====================================
 R.J.Barnes   (original developer)
 J.D.Spaleta  (original developer)
 J.T.Klein    (UAF radar engineer)
@@ -22,7 +22,7 @@ Version Log
 Introduction
 ------------
 
-The RST Radar Operating Software (RST-ROS) is the software used to
+The RST Radar Operating System (RST-ROS) is the software used to
 operate the SuperDARN radar network. The software is distributed in
 the form of source code and data tables for Linux platforms.
 
