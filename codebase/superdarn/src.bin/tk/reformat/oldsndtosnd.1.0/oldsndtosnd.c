@@ -79,6 +79,19 @@ struct data_struct {
   short AOA;
 } data;
 
+struct header_struct_adak {
+  long  stime;
+  short site_id;
+  short beam_no;
+  short freq;
+  short noise;
+  short frange;
+  short rsep;
+  short gsct[SND_NRANG];
+  short qflg[SND_NRANG];
+  char  program_name[40];
+} header_adak;
+
 #pragma pack(1)
 struct header_struct_new {
   int   stime;
@@ -146,6 +159,7 @@ int main (int argc,char *argv[]) {
 
   int old=0;
   int new=0;
+  int adak=0;
 
   time_t ctime;
   int c,n;
@@ -166,6 +180,7 @@ int main (int argc,char *argv[]) {
 
   OptionAdd(&opt,"old",'x',&old);
   OptionAdd(&opt,"new",'x',&new);
+  OptionAdd(&opt,"adak",'x',&adak);
   OptionAdd(&opt,"vb",'x',&vb);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
@@ -406,6 +421,87 @@ int main (int argc,char *argv[]) {
                       snd->bmnum,snd->tfreq);
     }
 
+  } else if (adak) {
+    /* Read the sounding data files that do not use internal compression
+     * and have a different size stime in the header */
+    while(fread(&header_adak,sizeof(header_adak),1,fp) == 1) {
+
+      if ((header_adak.site_id <= 0) || (header_adak.site_id > network->radar[network->rnum-1].id)) {
+        fprintf(stderr,"Invalid site_id (%d): ",header_adak.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
+
+      snd->origin.code=1;
+      ctime = time((time_t) 0);
+      SndSetOriginCommand(snd,command);
+      strcpy(tmstr,asctime(gmtime(&ctime)));
+      tmstr[24]=0;
+      SndSetOriginTime(snd,tmstr);
+
+      TimeEpochToYMDHMS(header_adak.stime,&yr,&mo,&dy,&hr,&mt,&sc);
+
+      radar = RadarGetRadar(network,header_adak.site_id);
+      if (radar == NULL) {
+        fprintf(stderr,"Invalid site_id (%d): ",header_adak.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
+
+      site = RadarYMDHMSGetSite(radar,yr,mo,dy,hr,mt,sc);
+      if (site == NULL) {
+        fprintf(stderr,"Invalid site_id (%d): ",header_adak.site_id);
+        fprintf(stderr,"file likely in different snd format\n");
+        break;
+      }
+      offset = site->maxbeam/2.0-0.5;
+
+      snd->stid = header_adak.site_id;
+      snd->time.yr = yr;
+      snd->time.mo = mo;
+      snd->time.dy = dy;
+      snd->time.hr = hr;
+      snd->time.mt = mt;
+      snd->time.sc = (int) sc;
+      snd->lagfr = header_adak.frange*20/3;
+      snd->smsep = header_adak.rsep*20/3;
+      snd->noise.mean = header_adak.noise;
+      snd->bmnum = header_adak.beam_no;
+      snd->bmazm = site->boresite + site->bmsep*(header_adak.beam_no-offset) + site->bmoff;
+      snd->intt.sc = 2;
+      snd->intt.us = 0;
+      snd->nrang = SND_NRANG;
+      snd->frang = header_adak.frange;
+      snd->rsep = header_adak.rsep;
+      snd->tfreq = header_adak.freq;
+      snd->snd_revision.major = SND_MAJOR_REVISION;
+      snd->snd_revision.minor = SND_MINOR_REVISION;
+
+      SndSetCombf(snd,header_adak.program_name);
+
+      SndSetRng(snd,SND_NRANG);
+
+      for (i=0;i<SND_NRANG;i++) {
+        snd->rng[i].qflg = header_adak.qflg[i];
+        snd->rng[i].gsct = header_adak.gsct[i];
+        if (header_adak.qflg[i] == 1) {
+          status=fread(&data,sizeof(data),1,fp);
+          if (status != 1) break;
+          snd->rng[i].v = data.vel;
+          snd->rng[i].p_l = data.pwr;
+          snd->rng[i].w_l = data.width;
+        }
+      }
+
+      status=SndFwrite(stdout,snd);
+
+      if (status==-1) break;
+
+      if (vb) fprintf(stderr,"%.4d-%.2d-%.2d %.2d:%.2d:%.2d  (b:%.2d f:%5d)\n",
+                      snd->time.yr,snd->time.mo,snd->time.dy,
+                      snd->time.hr,snd->time.mt,snd->time.sc,
+                      snd->bmnum,snd->tfreq);
+    }
   } else {
     /* Read the sounding data files that do not use internal compression */
     while(fread(&header,sizeof(header),1,fp) == 1) {
