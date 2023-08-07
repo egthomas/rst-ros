@@ -230,7 +230,7 @@ int main(int argc,char *argv[]) {
     exit(-1);
   }
 
-  status = load_all_models(envstr,imod);
+  status = load_all_models(envstr,imod,ecdip);
   if (status != 0) {
     fprintf(stderr,"Failed to load statistical model.\n");
     exit(-1);

@@ -258,7 +258,7 @@ struct model *load_model(FILE *fp, int ihem, int ilev, int iang,
 }
 
 
-int load_all_models(char *path, int imod)
+int load_all_models(char *path, int imod, int ecdip)
 {
   char fname[256];
   FILE *fp;
