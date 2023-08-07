@@ -138,6 +138,8 @@ int main(int argc,char *argv[]) {
   int ts18_kp = 0;
   int imod = 0;
 
+  int magflg = 0;
+
   float bndstep = 5.; /* HMB parameters */
   float latref = 59;
   int bndnp;
@@ -213,10 +215,14 @@ int main(int argc,char *argv[]) {
   if (ts18_kp) imod = TS18_Kp;
   if (ts18)    imod = TS18;
 
-  if (ecdip) && (imod != TS18) {
+  if (ecdip && imod != TS18) {
     fprintf(stderr,"Eccentric dipole coordinates are only valid for TS18 model.\n");
     exit(-1);
   }
+
+  if (ecdip) magflg = 2;
+  else if (old_aacgm) magflg = 1;
+  else magflg = 0;
 
   envstr=getenv("SD_MODEL_TABLE");
   if (envstr==NULL) {
