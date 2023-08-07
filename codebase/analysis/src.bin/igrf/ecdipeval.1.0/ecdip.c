@@ -36,8 +36,6 @@
 #include "rmath.h"
 #include "errstr.h"
 #include "hlpstr.h"
-#include "aacgm.h"
-#include "aacgmlib_v2.h"
 #include "igrflib.h"
 
 
@@ -122,7 +120,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
-  OptionAdd(&opt,"m",'x',&mag);                 /* Input is in magnetic rather than geographic coords */
+  OptionAdd(&opt,"i",'x',&mag);                 /* Input is in magnetic rather than geographic coords */
   OptionAdd(&opt,"lon",'d',&ilon);              /* Longitude [deg] */
   OptionAdd(&opt,"lat",'d',&ilat);              /* Latitude [deg] */
   OptionAdd(&opt,"alt",'d',&alt);               /* Altitude [km] */

@@ -12,7 +12,7 @@ SRC=hlpstr.h errstr.h ecdip.c
 DSTPATH = $(BINPATH)
 OUTPUT = ecdipeval
 LNK=$(ARC)
-LIBS=-laacgm.1 -lopt.1 -lrtime.1 -laacgm_v2.1 -ligrf_v2.1 -lastalg.1
+LIBS=-lopt.1 -lrtime.1 -ligrf_v2.1 -lastalg.1
 SLIB=-lm
 
  

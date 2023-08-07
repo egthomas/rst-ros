@@ -4,7 +4,6 @@
 #include <time.h>
 #include <string.h>
 #include "igrflib.h"
-#include "genmag.h"
 #include "astalg.h"
 #include "rtime.h"
 
@@ -1321,6 +1320,7 @@ int geod2ecdip(double lat, double lon, double alt, double out[])
     /* set to nans? */
     latmag = NAN;
     lonmag = NAN;
+    return -1;
   }
 
   //rr   = RE/r;
