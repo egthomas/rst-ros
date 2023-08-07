@@ -96,7 +96,7 @@ int main(int argc,char *argv[]) {
   int arg;
  
   double ilon=0.0,ilat=0.0,alt=0.0;
-  double out[3];
+  double out[3],omlt=0.0;
   char *fmt=NULL;
   char *dfmt="%f %f\n";
   char *fname=NULL;
@@ -106,10 +106,12 @@ int main(int argc,char *argv[]) {
   unsigned char help=0;
   unsigned char version=0;
   unsigned char mag=0;
+  unsigned char mlt=0;
   int c;
 
   char *tmetxt=NULL;
   char *dtetxt=NULL;
+  double Re=6371.0;
   double dval=-1;
   double tval=-1;
   int yr,mo,dy,hr,mt,sc,dno;
@@ -121,9 +123,11 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
   OptionAdd(&opt,"i",'x',&mag);                 /* Input is in magnetic rather than geographic coords */
+  OptionAdd(&opt,"mlt",'x',&mlt);               /* Longitude is in MLT rather than magnetic */
   OptionAdd(&opt,"lon",'d',&ilon);              /* Longitude [deg] */
   OptionAdd(&opt,"lat",'d',&ilat);              /* Latitude [deg] */
   OptionAdd(&opt,"alt",'d',&alt);               /* Altitude [km] */
+  OptionAdd(&opt,"re",'d',&Re);                 /* Earth radius [km] */
   OptionAdd(&opt,"fmt",'t',&fmt);
   OptionAdd(&opt,"f",'t',&fname);
   OptionAdd(&opt,"t",'t',&tmetxt);              /* Time for eccentric dipole transformation */
@@ -173,8 +177,13 @@ int main(int argc,char *argv[]) {
   }
 
   if (fname==NULL) {
-    if (mag) ecdip2geod(ilat,ilon,alt,out);
+    if (mag) ecdip2geod(ilat,ilon,alt+Re,out);
     else     geod2ecdip(ilat,ilon,alt,out);
+    if (mlt) {
+      if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+      else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+      out[1] = omlt;
+    }
     fprintf(stdout,fmt,out[0],out[1]);
   } else {
     if (strcmp(fname,"-")==0) fp=stdin;
@@ -186,8 +195,13 @@ int main(int argc,char *argv[]) {
       if (txt[c]=='#') continue;
       if (sscanf(txt,"%lf %lf %lf\n",
           &ilat,&ilon,&alt) !=3) continue;
-      if (mag) ecdip2geod(ilat,ilon,alt,out);
+      if (mag) ecdip2geod(ilat,ilon,alt+Re,out);
       else     geod2ecdip(ilat,ilon,alt,out);
+      if (mlt) {
+        if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+        else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+        out[1] = omlt;
+      }
       fprintf(stdout,fmt,out[0],out[1]);
     }
     if (fp !=stdin) fclose(fp);
