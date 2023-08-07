@@ -177,12 +177,14 @@ int main(int argc,char *argv[]) {
   }
 
   if (fname==NULL) {
-    if (mag) ecdip2geod(ilat,ilon,alt+Re,out);
-    else     geod2ecdip(ilat,ilon,alt,out);
     if (mlt) {
-      if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+      if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,ilon);
       else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+      out[0] = ilat;
       out[1] = omlt;
+    } else {
+      if (mag) ecdip2geod(ilat,ilon,alt+Re,out);
+      else     geod2ecdip(ilat,ilon,alt,out);
     }
     fprintf(stdout,fmt,out[0],out[1]);
   } else {
@@ -195,12 +197,14 @@ int main(int argc,char *argv[]) {
       if (txt[c]=='#') continue;
       if (sscanf(txt,"%lf %lf %lf\n",
           &ilat,&ilon,&alt) !=3) continue;
-      if (mag) ecdip2geod(ilat,ilon,alt+Re,out);
-      else     geod2ecdip(ilat,ilon,alt,out);
       if (mlt) {
-        if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+        if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,ilon);
         else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+        out[0] = ilat;
         out[1] = omlt;
+      } else {
+        if (mag) ecdip2geod(ilat,ilon,alt+Re,out);
+        else     geod2ecdip(ilat,ilon,alt,out);
       }
       fprintf(stdout,fmt,out[0],out[1]);
     }
