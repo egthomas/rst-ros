@@ -396,8 +396,8 @@ int RPosInvMag(int bm, int rn, int year, struct RadarSite *hdw, double frang,
      * coordinates (mlat,mlon) */
     if (magflg == 2) {
       s=geod2ecdip(gdlat,gdlon,tmp_ht,out);
-      mlat = &out[0];
-      mlon = &out[1];
+      *mlat = out[0];
+      *mlon = out[1];
     } else if (magflg == 1) s=AACGMConvert(flat,flon,tmp_ht,mlat,mlon,&dummy,0);
     else s=AACGM_v2_Convert(flat,flon,tmp_ht,mlat,mlon,&dummy,0);
     if (s==-1) return -1;
