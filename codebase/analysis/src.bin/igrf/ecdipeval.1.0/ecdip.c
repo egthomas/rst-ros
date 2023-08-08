@@ -179,7 +179,7 @@ int main(int argc,char *argv[]) {
   if (fname==NULL) {
     if (mlt) {
       if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,ilon);
-      else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+      else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,ilon);
       out[0] = ilat;
       out[1] = omlt;
     } else {
@@ -199,7 +199,7 @@ int main(int argc,char *argv[]) {
           &ilat,&ilon,&alt) !=3) continue;
       if (mlt) {
         if (mag) omlt = inv_ecdip_mlt(yr,mo,dy,hr,mt,sc,ilon);
-        else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,out[1]);
+        else     omlt = ecdip_mlt(yr,mo,dy,hr,mt,sc,ilon);
         out[0] = ilat;
         out[1] = omlt;
       } else {
