@@ -43,6 +43,7 @@
 #define IGRF_MISMATCHELMS -2
 #define IGRF_BADTYPE -3
 #define IGRF_DATENOTSET -4
+#define IGRF_BADRTP -5
 
 static IDL_MSG_DEF msg_arr[] =
   {
@@ -51,6 +52,7 @@ static IDL_MSG_DEF msg_arr[] =
     {  "IGRF_MISMATCHELMS","%NNumber of array elements do not match %s"},
     {  "IGRF_BADTYPE","%NArrays of floating point type are allowed %s"},
     {  "IGRF_DATENOTSET","%NDate and Time are not currently set"},
+    {  "IGRF_BADRTP","%NNumber of input rtp array elements must be 3 %s"},
   };
 
 static IDL_MSG_BLOCK msg_block;
@@ -586,205 +588,69 @@ static IDL_VPTR IDLECDIP_MLT(int argc,IDL_VPTR *argv,char *argk) {
 
 
 
-//This is the start of the IGRF_compute DLM
-/*static IDL_VPTR IDLIGRF_compute(int argc,IDL_VPTR *argv) {   //I still need to add keyword capabilities here
-    int n;
+static IDL_VPTR IDLIGRF_compute(int argc,IDL_VPTR *argv) {
 
-    if (argv[0]->flags & IDL_V_ARR) {
-        int nval;
-        IDL_VPTR vigrf;
-        double *igrfptr=NULL;
-        double rtp[3], brtp[3]
-        double igrf=0;
+    int s;
+    IDL_VPTR vbrtp;
+    double *brtpptr=NULL;
+    double rtptmp[3],brtptmp[3];
 
-        union IDLIGRFPtr yr,mo,dy,hr,mt,sc;
-        int yrtyp=0,motyp=0,dytyp=0,hrtyp=0,mttyp=0,sctyp=0;
+    union IDLIGRFPtr rtp;
+    int rtptyp=0;
 
-        yr.vptr=NULL;
+    rtp.vptr=NULL;
 
-        nval=argv[0]->value.arr->n_elts;
+    IDL_ENSURE_ARRAY(argv[0]);
 
-        for (n=1;n<6;n++) IDL_ENSURE_ARRAY(argv[n]);
-
-        for (n=0;n<6;n++) {
-            if ((argv[n]->type !=IDL_TYP_INT) &&
-                (argv[n]->type !=IDL_TYP_LONG) &&
-                (argv[n]->type !=IDL_TYP_FLOAT) &&
-                (argv[n]->type !=IDL_TYP_DOUBLE)) {
-
-                // bad type 
-                char msg[256];
-                sprintf(msg,"of argument %d in IGRF_Tilt()",n+1);
-                IDL_MessageFromBlock(msg_block,IGRF_BADTYPE,IDL_MSG_LONGJMP,
-                                        msg);
-            }
-        }
-
-        for (n=0;n<6;n++) {
-            if (argv[n]->value.arr->n_elts !=nval) 
-                IDL_MessageFromBlock(msg_block,IGRF_MISMATCHELMS,IDL_MSG_LONGJMP,
-                                        "in IGRF_Tilt()");
-        }
-
-        yr.vptr=(void *) argv[0]->value.arr->data;  //Wait isn't argv[0] just the name of the function??
-        yrtyp=argv[0]->type;
-
-        mo.vptr=(void *) argv[1]->value.arr->data;
-        motyp=argv[1]->type;
-
-        dy.vptr=(void *) argv[2]->value.arr->data;
-        dytyp=argv[2]->type;
-
-        hr.vptr=(void *) argv[3]->value.arr->data;
-        hrtyp=argv[3]->type;
-
-        mt.vptr=(void *) argv[4]->value.arr->data;
-        mttyp=argv[4]->type;
-
-        sc.vptr=(void *) argv[5]->value.arr->data;
-        sctyp=argv[5]->type;
-
-        igrfptr=(double *) IDL_MakeTempArray(IDL_TYP_DOUBLE,
-                                            argv[0]->value.arr->n_dim,
-                                            argv[0]->value.arr->dim,
-                                            IDL_ARR_INI_ZERO,&vigrf);
-
-        for (n=0;n<nval;n++) {
-            switch (yrtyp) {
-                case IDL_TYP_INT:
-                    yrtmp=yr.iptr[n];
-                    break;
-                case IDL_TYP_LONG:
-                    yrtmp=yr.lptr[n];
-                    break;
-                case IDL_TYP_FLOAT:
-                    yrtmp=yr.fptr[n];
-                    break;
-                case IDL_TYP_DOUBLE:
-                    yrtmp=yr.dptr[n];
-                    break;
-                default:
-                    yrtmp=1970;
-            }
-            //should this default year be changed??
-
-            switch (motyp) {
-                case IDL_TYP_INT:
-                    motmp=mo.iptr[n];
-                    break;
-                case IDL_TYP_LONG:
-                    motmp=mo.lptr[n];
-                    break;
-                case IDL_TYP_FLOAT:
-                    motmp=mo.fptr[n];
-                    break;
-                case IDL_TYP_DOUBLE:
-                    motmp=mo.dptr[n];
-                    break;
-                default:
-                    motmp=1;
-            }
-
-            switch (dytyp) {
-                case IDL_TYP_INT:
-                    dytmp=dy.iptr[n];
-                    break;
-                case IDL_TYP_LONG:
-                    dytmp=dy.lptr[n];
-                    break;
-                case IDL_TYP_FLOAT:
-                    dytmp=dy.fptr[n];
-                    break;
-                case IDL_TYP_DOUBLE:
-                    dytmp=dy.dptr[n];
-                    break;
-                default:
-                    dytmp=1;
-            }
-
-            switch (hrtyp) {
-                case IDL_TYP_INT:
-                    hrtmp=hr.iptr[n];
-                    break;
-                case IDL_TYP_LONG:
-                    hrtmp=hr.lptr[n];
-                    break;
-                case IDL_TYP_FLOAT:
-                    hrtmp=hr.fptr[n];
-                    break;
-                case IDL_TYP_DOUBLE:
-                    hrtmp=hr.dptr[n];
-                    break;
-                default:
-                    hrtmp=0;
-            }
-
-            switch (mttyp) {
-                case IDL_TYP_INT:
-                    mttmp=mt.iptr[n];
-                    break;
-                case IDL_TYP_LONG:
-                    mttmp=mt.lptr[n];
-                    break;
-                case IDL_TYP_FLOAT:
-                    mttmp=mt.fptr[n];
-                    break;
-                case IDL_TYP_DOUBLE:
-                    mttmp=mt.dptr[n];
-                    break;
-                default:
-                    mttmp=0;
-            }
-
-            switch (sctyp) {
-                case IDL_TYP_INT:
-                    sctmp=sc.iptr[n];
-                    break;
-                case IDL_TYP_LONG:
-                    sctmp=sc.lptr[n];
-                    break;
-                case IDL_TYP_FLOAT:
-                    sctmp=sc.fptr[n];
-                    break;
-                case IDL_TYP_DOUBLE:
-                    sctmp=sc.dptr[n];
-                    break;
-                default:
-                    sctmp=0;
-            }
-
-            igrf=IGRF_Tilt(yrtmp,motmp,dytmp,hrtmp,mttmp,sctmp);
-            igrfptr[n]=igrf;
-        }
-        return (vigrf);
-
-    } else {
-        // scalar
-        int yr,mo,dy,hr,mt,sc;
-        double igrf;
-        IDL_VPTR vigrf;
-
-        for (n=1;n<6;n++) IDL_ENSURE_SCALAR(argv[n]);
-
-        yr=IDL_LongScalar(argv[0]);
-        mo=IDL_LongScalar(argv[1]);
-        dy=IDL_LongScalar(argv[2]);
-        hr=IDL_LongScalar(argv[3]);
-        mt=IDL_LongScalar(argv[4]);
-        sc=IDL_LongScalar(argv[5]);
-
-        igrf=IGRF_Tilt(yr,mo,dy,hr,mt,sc);
-
-        vigrf=IDL_Gettmp();
-        vigrf->type=IDL_TYP_DOUBLE;
-        vigrf->value.d=igrf;
-
-        return (vigrf);
+    if (argv[0]->value.arr->n_elts !=3) {
+      /* wrong input array dimensions */
+      IDL_MessageFromBlock(msg_block,IGRF_BADRTP,IDL_MSG_LONGJMP,
+                           "in IGRF_compute()");
     }
 
-    return (IDL_GettmpLong(0));
+    brtpptr=(double *) IDL_MakeTempArray(IDL_TYP_DOUBLE,
+                                         argv[0]->value.arr->n_dim,
+                                         argv[0]->value.arr->dim,
+                                         IDL_ARR_INI_ZERO,&vbrtp);
+
+    if ((argv[0]->type !=IDL_TYP_FLOAT) &&
+        (argv[0]->type !=IDL_TYP_DOUBLE)) {
+
+        /* bad type */
+         char msg[256];
+         sprintf(msg,"of argument in IGRF_compute()");
+         IDL_MessageFromBlock(msg_block,IGRF_BADTYPE,IDL_MSG_LONGJMP,
+                              msg);
+    }
+
+    rtp.vptr=(void *) argv[0]->value.arr->data;
+    rtptyp=argv[0]->type;
+
+    switch (rtptyp) {
+        case IDL_TYP_FLOAT:
+            rtptmp[0]=rtp.fptr[0];
+            rtptmp[1]=rtp.fptr[1];
+            rtptmp[2]=rtp.fptr[2];
+            break;
+        case IDL_TYP_DOUBLE:
+            rtptmp[0]=rtp.dptr[0];
+            rtptmp[1]=rtp.dptr[1];
+            rtptmp[2]=rtp.dptr[2];
+            break;
+        default:
+            rtptmp[0]=0;
+            rtptmp[1]=0;
+            rtptmp[2]=0;
+    }
+
+    s=IGRF_compute(rtptmp,brtptmp);
+    brtpptr[0]=brtptmp[0];
+    brtpptr[1]=brtptmp[1];
+    brtpptr[2]=brtptmp[2];
+
+    return vbrtp;
 }
-*/
+
 
 static IDL_VPTR IDLIGRFModelCall(int argc,IDL_VPTR *argv) {
   
@@ -1002,6 +868,7 @@ int IDL_Load(void) {
     { {IDLIGRF_SetDateTime},"IGRF_SETDATETIME",1,6,0,0},
     { {IDLIGRF_SetNow},"IGRF_SETNOW",0,0,0,0},
     { {IDLIGRF_Tilt},"IGRF_TILT",6,6,0,0},
+    { {IDLIGRF_compute},"IGRF_COMPUTE",1,1,0,0},
     { {IDLECDIP_MLT},"ECDIP_MLT",7,7,IDL_SYSFUN_DEF_F_KEYWORDS,0},
   };
 
