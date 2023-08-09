@@ -347,6 +347,135 @@ static IDL_VPTR IDLIGRF_Tilt(int argc,IDL_VPTR *argv) {
 }
 
 
+static IDL_VPTR IDLECDIP_Convert(int argc,IDL_VPTR *argv,char *argk) {
+
+    int s=0,n;
+
+    IDL_VPTR outargv[6];
+    IDL_VPTR volat,volon,vr;
+
+    double inlat,inlon,height;
+    double outlat,outlon,r;
+    double *latptr,*lonptr,*rptr;
+
+    double out[3];
+    double Re=6371.0;
+
+    static IDL_LONG inverse;
+
+    static IDL_KW_PAR kw_pars[]={IDL_KW_FAST_SCAN,
+        {"INVERSE",IDL_TYP_LONG,1,IDL_KW_ZERO,0,IDL_CHARA(inverse)},
+        {NULL}};
+
+    IDL_KWCleanup(IDL_KW_MARK);
+    IDL_KWGetParams(argc,argv,argk,kw_pars,outargv,1);
+
+    IDL_EXCLUDE_EXPR(outargv[3]);
+    IDL_EXCLUDE_EXPR(outargv[4]);
+    IDL_EXCLUDE_EXPR(outargv[5]);
+
+    if (argv[1]->flags & IDL_V_ARR) {
+        int nval;
+        IDL_ENSURE_ARRAY(outargv[1]);
+        IDL_ENSURE_ARRAY(outargv[2]);
+
+        nval=outargv[0]->value.arr->n_elts;
+        if ( (outargv[1]->value.arr->n_elts !=nval) ||
+             (outargv[2]->value.arr->n_elts !=nval)) {
+
+            /* array size mismatch */
+            IDL_MessageFromBlock(msg_block,IGRF_MISMATCHELMS,IDL_MSG_LONGJMP,
+                                    "in ECDIP_Convert()");
+        }
+
+        if ((outargv[0]->type !=IDL_TYP_FLOAT) &&
+            (outargv[0]->type !=IDL_TYP_DOUBLE)) {
+
+            /* bad type */
+            IDL_MessageFromBlock(msg_block,IGRF_BADTYPE,IDL_MSG_LONGJMP,
+                                    "of lat in ECDIP_Convert()");
+        }
+
+        if ((outargv[1]->type !=IDL_TYP_FLOAT) &&
+            (outargv[1]->type !=IDL_TYP_DOUBLE)) {
+
+            /* bad type */
+            IDL_MessageFromBlock(msg_block,IGRF_BADTYPE,IDL_MSG_LONGJMP,
+                                    "of lon in ECDIP_Convert()");
+        }
+
+        if ((outargv[2]->type !=IDL_TYP_FLOAT) &&
+            (outargv[2]->type !=IDL_TYP_DOUBLE)) {
+
+            /* bad type */
+            IDL_MessageFromBlock(msg_block,IGRF_BADTYPE,IDL_MSG_LONGJMP,
+                                    "of height in ECDIP_Convert()");
+        }
+
+        latptr=(double *) IDL_MakeTempArray(IDL_TYP_DOUBLE,
+                                            outargv[0]->value.arr->n_dim,
+                                            outargv[0]->value.arr->dim,
+                                            IDL_ARR_INI_ZERO,&volat);
+
+        lonptr=(double *) IDL_MakeTempArray(IDL_TYP_DOUBLE,
+                                            outargv[0]->value.arr->n_dim,
+                                            outargv[0]->value.arr->dim,
+                                            IDL_ARR_INI_ZERO,&volon);
+
+        rptr=(double *) IDL_MakeTempArray(IDL_TYP_DOUBLE,
+                                          outargv[0]->value.arr->n_dim,
+                                          outargv[0]->value.arr->dim,
+                                          IDL_ARR_INI_ZERO,&vr);
+
+        for (n=0;n<nval;n++) {
+            if (outargv[0]->type==IDL_TYP_FLOAT)
+                 inlat= ((float *) outargv[0]->value.arr->data)[n];
+            else inlat=((double *) outargv[0]->value.arr->data)[n];
+            if (outargv[1]->type==IDL_TYP_FLOAT)
+                 inlon= ((float *) outargv[1]->value.arr->data)[n];
+            else inlon=((double *) outargv[1]->value.arr->data)[n];
+            if (outargv[2]->type==IDL_TYP_FLOAT)
+                 height= ((float *) outargv[2]->value.arr->data)[n];
+            else height=((double *) outargv[2]->value.arr->data)[n];
+
+            if (inverse) s=ecdip2geod(inlat,inlon,height+Re,out);
+            else         s=geod2ecdip(inlat,inlon,height,out);
+            latptr[n]=out[0];
+            lonptr[n]=out[1];
+            rptr[n]=out[2];
+        }
+
+        IDL_VarCopy(volat,argv[3]);
+        IDL_VarCopy(volon,argv[4]);
+        IDL_VarCopy(vr,argv[5]);
+
+    } else {
+        /* scalar */
+
+        IDL_ENSURE_SCALAR(outargv[1]);
+        IDL_ENSURE_SCALAR(outargv[2]);
+
+        inlat=IDL_DoubleScalar(outargv[0]);
+        inlon=IDL_DoubleScalar(outargv[1]);
+        height=IDL_DoubleScalar(outargv[2]);
+
+        if (inverse) s=ecdip2geod(inlat,inlon,height+Re,out);
+        else         s=geod2ecdip(inlat,inlon,height,out);
+        outlat=out[0];
+        outlon=out[1];
+        r=out[2];
+
+        IDL_StoreScalar(outargv[3],IDL_TYP_DOUBLE,(IDL_ALLTYPES *) &outlat);
+        IDL_StoreScalar(outargv[4],IDL_TYP_DOUBLE,(IDL_ALLTYPES *) &outlon);
+        IDL_StoreScalar(outargv[5],IDL_TYP_DOUBLE,(IDL_ALLTYPES *) &r);
+    }
+
+    IDL_KWCleanup(IDL_KW_CLEAN);
+    return (IDL_GettmpLong(s));
+}
+
+
+
 static IDL_VPTR IDLECDIP_MLT(int argc,IDL_VPTR *argv,char *argk) {   
 
     int n;
@@ -585,7 +714,6 @@ static IDL_VPTR IDLECDIP_MLT(int argc,IDL_VPTR *argv,char *argk) {
     IDL_KWCleanup(IDL_KW_CLEAN);
     return (IDL_GettmpLong(0));
 }
-
 
 
 static IDL_VPTR IDLIGRF_compute(int argc,IDL_VPTR *argv) {
@@ -869,6 +997,7 @@ int IDL_Load(void) {
     { {IDLIGRF_SetNow},"IGRF_SETNOW",0,0,0,0},
     { {IDLIGRF_Tilt},"IGRF_TILT",6,6,0,0},
     { {IDLIGRF_compute},"IGRF_COMPUTE",1,1,0,0},
+    { {IDLECDIP_Convert},"ECDIP_CONVERT",6,6,IDL_SYSFUN_DEF_F_KEYWORDS,0},
     { {IDLECDIP_MLT},"ECDIP_MLT",7,7,IDL_SYSFUN_DEF_F_KEYWORDS,0},
   };
 
