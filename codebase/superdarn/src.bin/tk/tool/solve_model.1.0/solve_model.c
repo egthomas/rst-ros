@@ -287,7 +287,8 @@ int main(int argc,char *argv[]) {
       else          fprintf(stdout,"\n");
       break;
     case TS18:
-      fprintf(stdout,"Model: TS18\n");
+      if (ecdip) fprintf(stdout,"Model: TS18 (Eccentric Dipole)\n");
+      else       fprintf(stdout,"Model: TS18\n");
       fprintf(stdout,"Bin:   %s, %s, %s",mod->level,mod->angle,mod->tilt);
       if (nointerp) fprintf(stdout," tilt\n");
       else          fprintf(stdout,"\n");
