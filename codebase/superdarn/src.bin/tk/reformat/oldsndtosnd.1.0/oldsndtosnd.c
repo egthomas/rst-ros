@@ -328,7 +328,7 @@ int main (int argc,char *argv[]) {
           if (data_old.vel < 0) {
             snd->rng[i].v = -(data_old.vel+1)*min_vel/32767;
           } else {
-            snd->rng[i].v = data_old.vel*max_vel/326767;
+            snd->rng[i].v = data_old.vel*max_vel/32767;
           }
           snd->rng[i].p_l = max_power*data_old.pwr/255.;
           snd->rng[i].w_l = max_width*data_old.width/65535.;
@@ -649,6 +649,7 @@ double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, int elevation)
   selv = sin(elevation*PI/180.);
 
   psi_obs = 2.*PI * tfreq*1e3 * ((1./C)*(X*sp0 + Y*sqrt(cp0*cp0 - selv*selv) + Z*selv) - site->tdiff[0]*1e-6);
+//  psi_obs = 2.*PI * tfreq*1e3 * ((1./C)*(Y*sqrt(cp0*cp0 - selv*selv)) - site->tdiff[0]*1e-6);
 
   while (psi_obs > PI) psi_obs -= 2.*PI;
   while (psi_obs < -PI) psi_obs += 2.*PI;
