@@ -24,6 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 Modifications:
 */ 
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -37,6 +38,7 @@ Modifications:
 #include "rtypes.h"
 #include "dmap.h"
 #include "rtime.h"
+#include "rmath.h"
 #include "option.h"
 #include "dmap.h"
 #include "radar.h"
@@ -134,6 +136,8 @@ struct data_struct_old {
   unsigned char pwr;
 } data_old;
 
+double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, int elevation);
+
 int rst_opterr (char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
   fprintf(stderr,"Please try: oldsndtosnd --help\n");
@@ -173,6 +177,7 @@ int main (int argc,char *argv[]) {
   double max_vel=3000;
   double max_power=50;
   double max_width=1000;
+  double max_AOA=90;
 
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
@@ -301,6 +306,7 @@ int main (int argc,char *argv[]) {
       snd->nrang = SND_NRANG;
       snd->frang = header_old.frange;
       snd->rsep = header_old.rsep;
+      snd->xcf = 1;
       snd->tfreq = header_old.freq;
       snd->snd_revision.major = SND_MAJOR_REVISION;
       snd->snd_revision.minor = SND_MINOR_REVISION;
@@ -314,7 +320,7 @@ int main (int argc,char *argv[]) {
         if ( (header_old.qflg[byte]>>(i%8)) & 0x01 ) {
           snd->rng[i].qflg = 1;
           if ( (header_old.gsct[byte]>>(i%8)) & 0x01 ) {
-            snd->rng[i].gsct=1;
+            snd->rng[i].gsct = 1;
           }
           //status=fread(&data_old,sizeof(data_old),1,fp);
           status=fread(&data_old,sizeof(unsigned char)*8,1,fp);
@@ -326,6 +332,13 @@ int main (int argc,char *argv[]) {
           }
           snd->rng[i].p_l = max_power*data_old.pwr/255.;
           snd->rng[i].w_l = max_width*data_old.width/65535.;
+          if ((data_old.AOA == 0) || (data_old.AOA == 65535)) {
+            snd->rng[i].x_qflg = 0;
+            snd->rng[i].phi0 = 0;
+          } else {
+            snd->rng[i].x_qflg = 1;
+            snd->rng[i].phi0 = calc_psi_obs(site,snd->bmnum,snd->tfreq,max_AOA*data_old.AOA/65535.);
+          }
         }
       }
 
@@ -391,6 +404,7 @@ int main (int argc,char *argv[]) {
       snd->nrang = header_new.nrang;
       snd->frang = header_new.frange;
       snd->rsep = header_new.rsep;
+      snd->xcf = 1;
       snd->tfreq = header_new.freq;
       snd->snd_revision.major = SND_MAJOR_REVISION;
       snd->snd_revision.minor = SND_MINOR_REVISION;
@@ -408,6 +422,13 @@ int main (int argc,char *argv[]) {
           snd->rng[i].v = data.vel;
           snd->rng[i].p_l = data.pwr;
           snd->rng[i].w_l = data.width;
+          if (data.AOA == 0) {
+            snd->rng[i].x_qflg = 0;
+            snd->rng[i].phi0 = 0;
+          } else {
+            snd->rng[i].x_qflg = 1;
+            snd->rng[i].phi0 = calc_psi_obs(site,snd->bmnum,snd->tfreq,data.AOA);
+          }
         }
       }
 
@@ -473,6 +494,7 @@ int main (int argc,char *argv[]) {
       snd->nrang = SND_NRANG;
       snd->frang = header_adak.frange;
       snd->rsep = header_adak.rsep;
+      snd->xcf = 1;
       snd->tfreq = header_adak.freq;
       snd->snd_revision.major = SND_MAJOR_REVISION;
       snd->snd_revision.minor = SND_MINOR_REVISION;
@@ -490,6 +512,13 @@ int main (int argc,char *argv[]) {
           snd->rng[i].v = data.vel;
           snd->rng[i].p_l = data.pwr;
           snd->rng[i].w_l = data.width;
+          if (data.AOA == 0) {
+            snd->rng[i].x_qflg = 0;
+            snd->rng[i].phi0 = 0;
+          } else {
+            snd->rng[i].x_qflg = 1;
+            snd->rng[i].phi0 = calc_psi_obs(site,snd->bmnum,snd->tfreq,data.AOA);
+          }
         }
       }
 
@@ -553,6 +582,7 @@ int main (int argc,char *argv[]) {
       snd->nrang = SND_NRANG;
       snd->frang = header.frange;
       snd->rsep = header.rsep;
+      snd->xcf = 1;
       snd->tfreq = header.freq;
       snd->snd_revision.major = SND_MAJOR_REVISION;
       snd->snd_revision.minor = SND_MINOR_REVISION;
@@ -570,6 +600,13 @@ int main (int argc,char *argv[]) {
           snd->rng[i].v = data.vel;
           snd->rng[i].p_l = data.pwr;
           snd->rng[i].w_l = data.width;
+          if (data.AOA == 0) {
+            snd->rng[i].x_qflg = 0;
+            snd->rng[i].phi0 = 0;
+          } else {
+            snd->rng[i].x_qflg = 1;
+            snd->rng[i].phi0 = calc_psi_obs(site,snd->bmnum,snd->tfreq,data.AOA);
+          }
         }
       }
 
@@ -590,3 +627,31 @@ int main (int argc,char *argv[]) {
   return 0;
 }
 
+
+double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, int elevation) {
+
+  double X,Y,Z;     /* interferometer offsets [m]                    */
+  double boff;      /* offset in beam widths to edge of FOV          */
+  double phi0;      /* beam direction off boresight [rad]            */
+  double cp0,sp0;   /* cosine and sine of phi0                       */
+  double selv;      /* sine of elevation angle                       */
+  double psi_obs;   /* observed phase difference [rad]               */
+
+  X = site->interfer[0];
+  Y = site->interfer[1];
+  Z = site->interfer[2];
+
+  boff = site->maxbeam/2. - 0.5;
+  phi0 = (site->bmoff + site->bmsep*(bmnum - boff))*PI/180.;
+  cp0 = cos(phi0);
+  sp0 = sin(phi0);
+
+  selv = sin(elevation*PI/180.);
+
+  psi_obs = 2.*PI * tfreq*1e3 * ((1./C)*(X*sp0 + Y*sqrt(cp0*cp0 - selv*selv) + Z*selv) - site->tdiff[0]*1e-6);
+
+  while (psi_obs > PI) psi_obs -= 2.*PI;
+  while (psi_obs < -PI) psi_obs += 2.*PI;
+
+  return psi_obs;
+}
