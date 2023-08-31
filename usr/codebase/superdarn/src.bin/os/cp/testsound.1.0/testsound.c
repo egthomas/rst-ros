@@ -61,7 +61,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2023/07/11"};
+char progid[80]={"testsound 2023/08/31"};
 char progname[256];
 
 int arg=0;
@@ -247,6 +247,8 @@ int main(int argc,char *argv[])
   arg=OptionProcess(1,argc,argv,&opt,NULL);
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
+  if (slow) fast = 0;
+
   if (fast) sprintf(progname,"testsound (fast)");
   else sprintf(progname,"testsound");
 
@@ -276,8 +278,6 @@ int main(int argc,char *argv[])
   }
 
   printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
-
-  if (slow) fast = 0;
 
   beams=abs(ebm-sbm)+1;
   if (fast) {
