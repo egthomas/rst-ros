@@ -136,7 +136,7 @@ struct data_struct_old {
   unsigned char pwr;
 } data_old;
 
-double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, int elevation);
+double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, double elevation);
 
 int rst_opterr (char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
@@ -628,7 +628,7 @@ int main (int argc,char *argv[]) {
 }
 
 
-double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, int elevation) {
+double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, double elevation) {
 
   double X,Y,Z;     /* interferometer offsets [m]                    */
   double boff;      /* offset in beam widths to edge of FOV          */
@@ -648,8 +648,8 @@ double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, int elevation)
 
   selv = sin(elevation*PI/180.);
 
-  psi_obs = 2.*PI * tfreq*1e3 * ((1./C)*(X*sp0 + Y*sqrt(cp0*cp0 - selv*selv) + Z*selv) - site->tdiff[0]*1e-6);
-//  psi_obs = 2.*PI * tfreq*1e3 * ((1./C)*(Y*sqrt(cp0*cp0 - selv*selv)) - site->tdiff[0]*1e-6);
+  /* only consider interferometer Y-offset to replicate original function */
+  psi_obs = 2.*PI * tfreq*1e3 * ((1./C)*(Y*sqrt(cp0*cp0 - selv*selv)) - site->tdiff[0]*1e-6);
 
   while (psi_obs > PI) psi_obs -= 2.*PI;
   while (psi_obs < -PI) psi_obs += 2.*PI;
