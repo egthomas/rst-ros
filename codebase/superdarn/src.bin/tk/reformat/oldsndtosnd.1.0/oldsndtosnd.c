@@ -129,11 +129,9 @@ struct header_struct_old {
 struct data_struct_old {
   short vel;
   unsigned short width;
-  unsigned short AOA;
-  short unused1;
-  short unused2;
-  char  unused3;
   unsigned char pwr;
+  unsigned char AOA;
+  short unused1;
 } data_old;
 
 double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, double elevation);
@@ -322,22 +320,21 @@ int main (int argc,char *argv[]) {
           if ( (header_old.gsct[byte]>>(i%8)) & 0x01 ) {
             snd->rng[i].gsct = 1;
           }
-          //status=fread(&data_old,sizeof(data_old),1,fp);
-          status=fread(&data_old,sizeof(unsigned char)*8,1,fp);
+          status=fread(&data_old,sizeof(data_old),1,fp);
           if (status != 1) break;
           if (data_old.vel < 0) {
-            snd->rng[i].v = -(data_old.vel+1)*min_vel/32767;
+            snd->rng[i].v = -(data_old.vel+1)*min_vel/32767.;
           } else {
-            snd->rng[i].v = data_old.vel*max_vel/32767;
+            snd->rng[i].v = data_old.vel*max_vel/32767.;
           }
           snd->rng[i].p_l = max_power*data_old.pwr/255.;
           snd->rng[i].w_l = max_width*data_old.width/65535.;
-          if ((data_old.AOA == 0) || (data_old.AOA == 65535)) {
+          if ((data_old.AOA == 0) || (data_old.AOA == 255)) {
             snd->rng[i].x_qflg = 0;
             snd->rng[i].phi0 = 0;
           } else {
             snd->rng[i].x_qflg = 1;
-            snd->rng[i].phi0 = calc_psi_obs(site,snd->bmnum,snd->tfreq,max_AOA*data_old.AOA/65535.);
+            snd->rng[i].phi0 = calc_psi_obs(site,snd->bmnum,snd->tfreq,max_AOA*data_old.AOA/255.);
           }
         }
       }
@@ -630,21 +627,18 @@ int main (int argc,char *argv[]) {
 
 double calc_psi_obs(struct RadarSite *site, int bmnum, int tfreq, double elevation) {
 
-  double X,Y,Z;     /* interferometer offsets [m]                    */
+  double Y;         /* interferometer Y-offset [m]                   */
   double boff;      /* offset in beam widths to edge of FOV          */
   double phi0;      /* beam direction off boresight [rad]            */
-  double cp0,sp0;   /* cosine and sine of phi0                       */
+  double cp0;       /* cosine of phi0                                */
   double selv;      /* sine of elevation angle                       */
   double psi_obs;   /* observed phase difference [rad]               */
 
-  X = site->interfer[0];
   Y = site->interfer[1];
-  Z = site->interfer[2];
 
   boff = site->maxbeam/2. - 0.5;
   phi0 = (site->bmoff + site->bmsep*(bmnum - boff))*PI/180.;
   cp0 = cos(phi0);
-  sp0 = sin(phi0);
 
   selv = sin(elevation*PI/180.);
 
