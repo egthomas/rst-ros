@@ -325,6 +325,8 @@ int main(int argc,char *argv[]) {
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
   tsgid = SiteTimeSeq(seq->ptab);
 
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
+
   if (bm_sync) skip = OpsFindSkip(scnsc,scnus, bmsc,bmus, 0);
   else         skip = OpsFindSkip(scnsc,scnus, intsc,intus, 0);
   if (backward) {
@@ -334,8 +336,6 @@ int main(int argc,char *argv[]) {
     bmnum = sbm+skip;
     if (bmnum > ebm) bmnum = sbm;
   }
-
-  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -362,18 +362,6 @@ int main(int argc,char *argv[]) {
         cnt = 0;
       } else xcf = 0;
     } else xcf = 0;
-
-/*
-    skip=OpsFindSkip(scnsc,scnus);
-    
-    if (backward) {
-      bmnum = sbm-skip;
-      if (bmnum < ebm) bmnum = sbm;
-    } else {
-      bmnum = sbm+skip;
-      if (bmnum > ebm) bmnum = sbm;
-    }
-*/
 
     do {  /* start of scan */
 

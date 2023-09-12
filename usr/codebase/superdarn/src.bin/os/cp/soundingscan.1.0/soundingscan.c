@@ -336,18 +336,6 @@ int main(int argc,char *argv[]) {
       } else xcf = 0;
     } else xcf = 0;
 
-/*
-    skip = OpsFindSkip(scnsc,scnus);
-
-    if (backward) {
-      bmnum = sbm-skip;
-      if (bmnum < ebm) bmnum = sbm;
-    } else {
-      bmnum = sbm+skip;
-      if (bmnum > ebm) bmnum = sbm;
-    }
-*/
-
     /* Logic to change frequency band on every scan, but also sync to minute */
     TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 /*    freqcnt = mt % (scnsc/60 * nfreqs); WTF is this?! */

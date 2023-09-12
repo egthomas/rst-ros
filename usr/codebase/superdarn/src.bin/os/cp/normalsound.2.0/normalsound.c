@@ -328,6 +328,16 @@ int main(int argc,char *argv[])
     tsgid=SiteTimeSeq(seq->ptab);
   }
 
+  skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
+
+  if (backward) {
+    bmnum=sbm-skip;
+    if (bmnum<ebm) bmnum=sbm;
+  } else {
+    bmnum=sbm+skip;
+    if (bmnum>ebm) bmnum=sbm;
+  }
+
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
@@ -368,16 +378,6 @@ int main(int argc,char *argv[])
         cnt=0;
       } else xcf=0;
     } else xcf=0;
-
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
-
-    if (backward) {
-      bmnum=sbm-skip;
-      if (bmnum<ebm) bmnum=sbm;
-    } else {
-      bmnum=sbm+skip;
-      if (bmnum>ebm) bmnum=sbm;
-    }
 
     do {
 
@@ -599,6 +599,7 @@ int main(int argc,char *argv[])
     /* now wait for the next normalscan */
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
 
+    bmnum = sbm;
     intsc = def_intt_sc;
     intus = def_intt_us;
     nrang = def_nrang;
