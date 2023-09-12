@@ -213,9 +213,9 @@ int main(int argc,char *argv[])
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
-  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l dfrang l nfrang l"
-                  " dmpinc l nmpinc l frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
-                  &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);
+  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l"
+                  " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
+                  &frqrng,&xcnt);
 
   status=SiteSetupRadar();
   if (status !=0) {
@@ -257,6 +257,16 @@ int main(int argc,char *argv[])
 
   if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
+  skip=OpsFindSkip(scnsc,scnus,skipsc,skipus,0);
+
+  if (backward) {
+    bmnum=sbm-skip;
+    if (bmnum<ebm) bmnum=sbm;
+  } else {
+    bmnum=sbm+skip;
+    if (bmnum>ebm) bmnum=sbm;
+  }
+
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
@@ -281,16 +291,6 @@ int main(int argc,char *argv[])
         cnt=0;
       } else xcf=0;
     } else xcf=0;
-
-    skip=OpsFindSkip(scnsc,scnus,skipsc,skipus,0);
-
-    if (backward) {
-      bmnum=sbm-skip;
-      if (bmnum<ebm) bmnum=sbm;
-    } else {
-      bmnum=sbm+skip;
-      if (bmnum>ebm) bmnum=sbm;
-    }
 
     do {
 
@@ -405,6 +405,7 @@ int main(int argc,char *argv[])
 
     } while (1);
 
+    bmnum = sbm;
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     SiteEndScan(scnsc,scnus,5000);
 

@@ -377,17 +377,21 @@ int main(int argc,char *argv[]) {
       printw("scan  = %3d  noise.sky    = %g\n", prm->scan,fit->noise.skynoise);
       clrtoeol();
       printw("mppul = %3d  mpinc = %d\n", prm->mppul,prm->mpinc);
-      clrtoeol();
-      printw("origin.code = %d\n", prm->origin.code);
 
-      if (prm->origin.time != NULL) {
-        clrtoeol();
-        printw("origin.time = %s\n",prm->origin.time);
-      }
-      if (prm->origin.command !=NULL) {
-        clrtoeol();
-        printw("origin.command = %s\n\n",prm->origin.command);
-      }
+      clrtoeol();
+      printw("origin.code = ");
+      if ((prm->origin.time !=NULL) && (prm->origin.command !=NULL)) printw("%d\n", prm->origin.code);
+      else printw("\n");
+
+      clrtoeol();
+      printw("origin.time = ");
+      if (prm->origin.time != NULL) printw("%s\n",prm->origin.time);
+      else printw("\n");
+
+      clrtoeol();
+      printw("origin.command = ");
+      if (prm->origin.command !=NULL) printw("%s\n\n",prm->origin.command);
+      else printw("\n\n");
 
       /* Draw a menu explaining the keyboard controls */
       if (colorflg) {

@@ -111,9 +111,6 @@ int main(int argc,char *argv[])
   txpl   = 100;         /* pulse length [us]; gets redefined below... */
   nbaud  = 1;
 
-  dmpinc = nmpinc = mpinc;  /* set day and night to the same,
-                               but could change */
-
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 
   OptionAdd(&opt, "di",     'x', &discretion);
@@ -219,9 +216,9 @@ int main(int argc,char *argv[])
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
-  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l dfrang l nfrang l"
-                  " dmpinc l nmpinc l frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
-                  &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);
+  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l"
+                  " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
+                  &frqrng,&xcnt);
 
   status=SiteSetupRadar();
   if (status !=0) {
@@ -254,6 +251,38 @@ int main(int argc,char *argv[])
 
   txpl = (nbaud*rsep*20)/3;
 
+  /* Attempt to adjust mpinc to be a multiple of 10 and a multiple of txpl */
+  if ((mpinc % txpl) || (mpinc % 10)) {
+    ErrLog(errlog.sock,progname,"Error: mpinc not multiple of txpl, checking to see if it can be adjusted.");
+    sprintf(logtxt,"Initial: mpinc: %d  txpl: %d  nbaud: %d  rsep: %d",mpinc,txpl,nbaud,rsep);
+    ErrLog(errlog.sock,progname,logtxt);
+
+    if ((txpl % 10)==0) {
+      ErrLog(errlog.sock,progname,"Attempting to adjust mpinc.");
+      if (mpinc < txpl) mpinc = txpl;
+      int minus_remain = mpinc % txpl;
+      int plus_remain  = txpl - (mpinc % txpl);
+      if (plus_remain > minus_remain) {
+        mpinc = mpinc - minus_remain;
+      } else {
+        mpinc = mpinc + plus_remain;
+      }
+      if (mpinc==0) mpinc = mpinc + plus_remain;
+
+      sprintf(logtxt,"Adjusted: mpinc: %d  txpl: %d  nbaud: %d  rsep: %d",mpinc,txpl,nbaud,rsep);
+      ErrLog(errlog.sock,progname,logtxt);
+    } else {
+      ErrLog(errlog.sock,progname,"Cannot adjust mpinc.");
+    }
+  }
+
+  /* Check mpinc and if still invalid, exit with error */
+  if ((mpinc % txpl) || (mpinc % 10) || (mpinc==0)) {
+    sprintf(logtxt,"Error: mpinc: %d  txpl: %d  nbaud: %d  rsep: %d",mpinc,txpl,nbaud,rsep);
+    ErrLog(errlog.sock,progname,logtxt);
+    SiteExit(0);
+  }
+
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
 
@@ -269,6 +298,16 @@ int main(int argc,char *argv[])
   tsgid=SiteTimeSeq(seq->ptab);
 
   if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
+
+  skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
+
+  if (backward) {
+    bmnum=sbm-skip;
+    if (bmnum<ebm) bmnum=sbm;
+  } else {
+    bmnum=sbm+skip;
+    if (bmnum>ebm) bmnum=sbm;
+  }
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -295,28 +334,14 @@ int main(int argc,char *argv[])
       } else xcf=0;
     } else xcf=0;
 
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
-
-    if (backward) {
-      bmnum=sbm-skip;
-      if (bmnum<ebm) bmnum=sbm;
-    } else {
-      bmnum=sbm+skip;
-      if (bmnum>ebm) bmnum=sbm;
-    }
-
     do {
 
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
       if (OpsDayNight()==1) {
         stfrq=dfrq;
-        mpinc=dmpinc;
-        frang=dfrang;
       } else {
         stfrq=nfrq;
-        mpinc=nmpinc;
-        frang=nfrang;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",
@@ -397,6 +422,7 @@ int main(int argc,char *argv[])
 
     } while (1);
 
+    bmnum = sbm;
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     SiteEndScan(scnsc,scnus,5000);
 

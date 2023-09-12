@@ -40,7 +40,7 @@ else
   patn=""
 fi
 
-log="${LOGPATH}/superdarn-rst.build"
+log="${LOGPATH}/superdarn-rst-ros.build"
 dtval=$(date +%Y%m%d.%H%M)
 
 

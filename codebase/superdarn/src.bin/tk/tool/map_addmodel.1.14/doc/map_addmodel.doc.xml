@@ -20,6 +20,8 @@
 </option>
 <option><on>-old_aacgm</on><od>uses the older AACGM software and coefficients. The default</od></option>
 <option><on></on><od>  is to use AACGM-v2.</od></option>
+<option><on>-ecdip</on><od>use eccentric dipole coordinates rather than AACGM.</od>
+</option>
 <option><on>-rg96</on><od>uses the RG96 statistical model.</od>
 </option>
 <option><on>-psr10</on><od>uses the PSR10 statistical model (equivalent to the RG05 model.)</od>

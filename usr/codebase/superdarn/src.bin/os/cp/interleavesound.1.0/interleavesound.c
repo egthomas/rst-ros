@@ -145,7 +145,6 @@ int main(int argc,char *argv[]) {
   mppul  = seq->mppul;
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
-  dmpinc = seq->mpinc;
   rsep   = 45;
   txpl   = 300;     /* note: recomputed below */
 
@@ -273,9 +272,9 @@ int main(int argc,char *argv[]) {
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
-  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l dfrang l nfrang l"
-                  " dmpinc l nmpinc l frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
-                  &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);
+  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l"
+                  " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
+                  &frqrng,&xcnt);
 
   status=SiteSetupRadar();
 
@@ -352,12 +351,8 @@ int main(int argc,char *argv[]) {
 
       if (OpsDayNight()==1) {
         stfrq=dfrq;
-        mpinc=dmpinc;
-        frang=dfrang;
       } else {
         stfrq=nfrq;
-        mpinc=nmpinc;
-        frang=nfrang;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,

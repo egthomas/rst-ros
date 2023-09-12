@@ -108,8 +108,6 @@ int main(int argc,char *argv[]) {
   mplgs=seq->mplgs;   /* There are 12 lags counting lag zero. No lags are missing */
   mplgexs=seq->mplgexs;
   mpinc=seq->mpinc;
-  nmpinc=seq->mpinc;
-  dmpinc=seq->mpinc;
   rsep=45;
   txpl=300;
 
@@ -206,10 +204,10 @@ int main(int argc,char *argv[]) {
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
-  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l dfrang l nfrang l "
-                           "dmpinc l nmpinc l frqrng l xcnt l",
-                           &sbm,&ebm, &dfrq,&nfrq, &dfrang,&nfrang,
-                           &dmpinc,&nmpinc, &frqrng,&xcnt);
+  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l "
+                           "frqrng l xcnt l",
+                           &sbm,&ebm, &dfrq,&nfrq,
+                           &frqrng,&xcnt);
 
   /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
   status=SiteSetupRadar();
@@ -255,6 +253,17 @@ int main(int argc,char *argv[]) {
   /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
   tsgid=SiteTimeSeq(seq->ptab);
 
+  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/sync.c */
+  skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
+
+  if (backward) {
+    bmnum=sbm-skip;
+    if (bmnum<ebm) bmnum=sbm;
+  } else {
+    bmnum=sbm+skip;
+    if (bmnum>ebm) bmnum=sbm;
+  }
+
   printf("entering Scan Loop Station ID: %s %d\n",ststr, stid);
   do {
 
@@ -282,29 +291,14 @@ int main(int argc,char *argv[]) {
       } else xcf=0;
     } else xcf=0;
 
-    /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/sync.c */
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
-
-    if (backward) {
-      bmnum=sbm-skip;
-      if (bmnum<ebm) bmnum=sbm;
-    } else {
-      bmnum=sbm+skip;
-      if (bmnum>ebm) bmnum=sbm;
-    }
-
     do {
 
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
       if (OpsDayNight()==1) {
         stfrq=dfrq;
-        mpinc=dmpinc;
-        frang=dfrang;
       } else {
         stfrq=nfrq;
-        mpinc=nmpinc;
-        frang=nfrang;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)"
@@ -390,6 +384,7 @@ int main(int argc,char *argv[]) {
 
     } while (1);
 
+    bmnum = sbm;
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
     if (scannowait==0) SiteEndScan(scnsc,scnus,5000);

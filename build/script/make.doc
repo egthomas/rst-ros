@@ -39,7 +39,7 @@ for arg in ${*}
 
 build=${BUILD}
 
-log="${LOGPATH}/superdarn-rst.doc"
+log="${LOGPATH}/superdarn-rst-ros.doc"
 dtval=`date +%Y%m%d.%H%M`
 
 

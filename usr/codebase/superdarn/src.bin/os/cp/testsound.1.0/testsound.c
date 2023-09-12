@@ -61,7 +61,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2023/07/11"};
+char progid[80]={"testsound 2023/08/31"};
 char progname[256];
 
 int arg=0;
@@ -140,9 +140,6 @@ int main(int argc,char *argv[])
   mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
   rsep   = 45;          /* same for the range separation */
   txpl   = 300;         /* pulse length [us]; gets redefined below... */
-
-  dmpinc = nmpinc = mpinc;  /* set day and night to the same,
-                               but could change */
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 
@@ -247,6 +244,8 @@ int main(int argc,char *argv[])
   arg=OptionProcess(1,argc,argv,&opt,NULL);
   backward = (sbm > ebm) ? 1 : 0;   /* this almost certainly got reset */
 
+  if (slow) fast = 0;
+
   if (fast) sprintf(progname,"testsound (fast)");
   else sprintf(progname,"testsound");
 
@@ -265,9 +264,9 @@ int main(int argc,char *argv[])
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
-  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l dfrang l nfrang l"
-                  " dmpinc l nmpinc l frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
-                  &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);
+  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l"
+                  " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
+                  &frqrng,&xcnt);
 
   status=SiteSetupRadar();
   if (status !=0) {
@@ -276,8 +275,6 @@ int main(int argc,char *argv[])
   }
 
   printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
-
-  if (slow) fast = 0;
 
   beams=abs(ebm-sbm)+1;
   if (fast) {
@@ -332,6 +329,16 @@ int main(int argc,char *argv[])
     tsgid=SiteTimeSeq(seq->ptab);
   }
 
+  skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
+
+  if (backward) {
+    bmnum=sbm-skip;
+    if (bmnum<ebm) bmnum=sbm;
+  } else {
+    bmnum=sbm+skip;
+    if (bmnum>ebm) bmnum=sbm;
+  }
+
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
@@ -362,28 +369,14 @@ int main(int argc,char *argv[])
       } else xcf=0;
     } else xcf=0;
 
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
-
-    if (backward) {
-      bmnum=sbm-skip;
-      if (bmnum<ebm) bmnum=sbm;
-    } else {
-      bmnum=sbm+skip;
-      if (bmnum>ebm) bmnum=sbm;
-    }
-
     do {
 
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
       if (OpsDayNight()==1) {
         stfrq=dfrq;
-        mpinc=dmpinc;
-        frang=dfrang;
       } else {
         stfrq=nfrq;
-        mpinc=nmpinc;
-        frang=nfrang;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",
@@ -582,6 +575,7 @@ int main(int argc,char *argv[])
     /* now wait for the next normalscan */
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
 
+    bmnum = sbm;
     intsc = def_intt_sc;
     intus = def_intt_us;
     nrang = def_nrang;

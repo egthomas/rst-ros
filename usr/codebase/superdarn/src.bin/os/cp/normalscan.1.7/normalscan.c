@@ -140,9 +140,6 @@ int main(int argc,char *argv[]) {
   rsep   = 45;          /* same for the range separation */
   txpl   = 300;         /* pulse length [us]; gets redefined below... */
 
-  dmpinc = nmpinc = mpinc;  /* set day and night to the same,
-                               but could change */
-
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 
   OptionAdd(&opt, "di",     'x', &discretion);
@@ -258,9 +255,9 @@ int main(int argc,char *argv[]) {
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
-  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l dfrang l nfrang l"
-                  " dmpinc l nmpinc l frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
-                  &dfrang,&nfrang, &dmpinc,&nmpinc, &frqrng,&xcnt);
+  RadarShellParse(&rstable,"sbm l ebm l dfrq l nfrq l"
+                  " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
+                  &frqrng,&xcnt);
 
   status = SiteSetupRadar();
   if (status !=0) {
@@ -319,6 +316,8 @@ int main(int argc,char *argv[]) {
   printf("Preparing SiteTimeSeq Station ID: %s  %d\n",ststr,stid);
   tsgid = SiteTimeSeq(seq->ptab);
 
+  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
+
   if (bm_sync) skip = OpsFindSkip(scnsc,scnus, bmsc,bmus, 0);
   else         skip = OpsFindSkip(scnsc,scnus, intsc,intus, 0);
   if (backward) {
@@ -328,8 +327,6 @@ int main(int argc,char *argv[]) {
     bmnum = sbm+skip;
     if (bmnum > ebm) bmnum = sbm;
   }
-
-  if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
@@ -356,29 +353,14 @@ int main(int argc,char *argv[]) {
       } else xcf = 0;
     } else xcf = 0;
 
-/* moving outside scan loop *
-    skip = OpsFindSkip(scnsc,scnus);
-    
-    if (backward) {
-      bmnum = sbm-skip;
-      if (bmnum < ebm) bmnum = sbm;
-    } else {
-      bmnum = sbm+skip;
-      if (bmnum > ebm) bmnum = sbm;
-    }
-*/
     do {  /* start of scan */
 
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
       if (OpsDayNight()==1) {
         stfrq = dfrq;
-        mpinc = dmpinc;
-        frang = dfrang;
       } else {
         stfrq = nfrq;
-        mpinc = nmpinc;
-        frang = nfrang;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",
