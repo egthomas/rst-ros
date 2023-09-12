@@ -162,7 +162,6 @@ int main(int argc,char *argv[]) {
   mppul  = seq->mppul;
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
-  dmpinc = seq->mpinc;
   rsep   = 45;
   txpl   = 300;
   nbaud  = 1;
@@ -443,7 +442,6 @@ int main(int argc,char *argv[]) {
      mppul=seq->mppul;
      mplgs=seq->mplgs;
      mpinc=seq->mpinc;
-     dmpinc=seq->mpinc;
      nrang=100;
 
      sync_scan = 0; 

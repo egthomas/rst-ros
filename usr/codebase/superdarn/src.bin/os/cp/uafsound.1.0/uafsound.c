@@ -190,7 +190,6 @@ int main(int argc,char *argv[]) {
   mppul  = seq->mppul;
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
-  dmpinc = seq->mpinc;
   rsep   = 45;
   txpl   = 300;
   nbaud  = 1;
