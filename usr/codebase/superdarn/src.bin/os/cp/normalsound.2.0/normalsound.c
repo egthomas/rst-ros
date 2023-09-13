@@ -533,7 +533,6 @@ int main(int argc,char *argv[])
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
-      ErrLog(errlog.sock, progname, "Sending SND messages.");
       msg.num = 0;
       msg.tsize = 0;
 
