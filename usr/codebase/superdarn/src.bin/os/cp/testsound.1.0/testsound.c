@@ -61,7 +61,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2023/08/31"};
+char progid[80]={"testsound 2023/09/12"};
 char progname[256];
 
 int arg=0;
@@ -515,7 +515,6 @@ int main(int argc,char *argv[])
       ErrLog(errlog.sock,progname,logtxt);
 
       OpsBuildPrm(prm,seq->ptab,seq->lags);
-      OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
@@ -531,10 +530,8 @@ int main(int argc,char *argv[])
 
       RMsgSndSend(task[RT_TASK].sock,&msg);
       for (n=0;n<msg.num;n++) {
-        if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
+        if ( (msg.data[n].type == PRM_TYPE) ||
+             (msg.data[n].type == FIT_TYPE) )  free(msg.ptr[n]);
       }
 
       sprintf(logtxt, "SBC: %d  SFC: %d", snd_bm_cnt, snd_freq_cnt);

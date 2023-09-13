@@ -84,7 +84,7 @@ int rst_opterr(char *txt) {
 
 
 int main(int argc,char *argv[]) {
-  char progid[80]={"uafsound 2023/07/12"};
+  char progid[80]={"uafsound 2023/09/12"};
   char progname[256]="uafsound";
   char modestr[32];
 
@@ -787,7 +787,6 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
 
       OpsBuildPrm(prm,seq->ptab,seq->lags);
-      OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
@@ -803,10 +802,8 @@ int main(int argc,char *argv[]) {
 
       RMsgSndSend(task[RT_TASK].sock,&msg);
       for (n=0;n<msg.num;n++) {
-        if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
+        if ( (msg.data[n].type == PRM_TYPE) ||
+             (msg.data[n].type == FIT_TYPE) )  free(msg.ptr[n]);
       }
 
       sprintf(logtxt, "SBC: %d  SFC: %d", snd_bc[snd_iBeam], snd_fc[snd_iBeam]);
