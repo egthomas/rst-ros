@@ -228,6 +228,8 @@ int main(int argc,char *argv[]) {
     }
   }
 
+  if (nrng > MAX_RANGE) nrng = MAX_RANGE;
+
   do {
 
     /* Check for key press to exit */
@@ -343,7 +345,7 @@ int main(int argc,char *argv[]) {
       /* Store data from most recent beam in buffer */
       buffer.beam[prm->bmnum]=1;
       for (i=0; i<nrng; i++) {
-        if ((i >= prm->nrang) || (i >= MAX_RANGE)) break;
+        if (i >= prm->nrang) break;
         buffer.qflg[prm->bmnum][i]=fit->rng[i].qflg;
         if (fit->rng[i].qflg == 1) {
           buffer.gsct[prm->bmnum][i]=fit->rng[i].gsct;
@@ -454,7 +456,7 @@ int main(int argc,char *argv[]) {
       /* Draw range gate labels */
       move(12, 0);
       printw("B\\G 0         ");
-      for (i=1;i*10<nrng;i++) {
+      for (i=1; i*10<nrng; i++) {
         if (i*10 < 100) printw("%d        ",i*10);
         else            printw("%d       ",i*10);
       }

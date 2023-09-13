@@ -268,6 +268,8 @@ int main(int argc,char *argv[]) {
     }
   }
 
+  if (plot.nrng > MAX_RANGE) plot.nrng = MAX_RANGE;
+
 
   do {
 
@@ -498,7 +500,7 @@ void read_fit_data(struct RadarParm *prm, struct FitData *fit,
   if (prm->bmnum > plot->max_beam) plot->max_beam = prm->bmnum;
 
   for (i=0; i<plot->nrng; i++) {
-    if ((i >= prm->nrang) || (i >= MAX_RANGE)) break;
+    if (i >= prm->nrang) break;
     fbuf->qflg[prm->bmnum][i] = fit->rng[i].qflg;
     if (fit->rng[i].qflg == 1) {
       fbuf->gsct[prm->bmnum][i] = fit->rng[i].gsct;
@@ -660,7 +662,7 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
   /* Draw range gate labels */
   move(12, 0);
   printw("B\\G 0         ");
-  for (i=1;i*10<plot->nrng;i++) {
+  for (i=1; i*10<plot->nrng; i++) {
     if (i*10 < 100) printw("%d        ",i*10);
     else            printw("%d       ",i*10);
   }
@@ -721,7 +723,7 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
   /* Draw range gate labels */
   move(12, 0);
   printw("F\\G 0         ");
-  for (i=1;i*10<plot->nrng;i++) {
+  for (i=1; i*10<SND_RANGE; i++) {
     if (i*10 < 100) printw("%d        ",i*10);
     else            printw("%d       ",i*10);
   }
@@ -738,7 +740,7 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
 
     if (sbuf->beam[plot->b][j] == 0) continue;
 
-    for (i=0; i<plot->nrng; i++) {
+    for (i=0; i<SND_RANGE; i++) {
       if (sbuf->qflg[plot->b][i][j] == 1) {
         if (plot->colorflg) {
           if (plot->pwrflg)      val = (int)((sbuf->pow[plot->b][i][j]-plot->smin)/(plot->smax-plot->smin)*plot->nlevels)+1;
@@ -767,7 +769,7 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
   }
 
   /* Clear higher beams if necessary */
-  if (plot->max_beam > SND_FREQS) {
+  if (plot->max_beam >= SND_FREQS) {
     move(SND_FREQS+13, 0);
     clrtoeol();
     move(SND_FREQS+14, 0);
@@ -792,8 +794,12 @@ void draw_colorbar(struct PlotOptions *plot) {
 
   int i,j;
   int start=12;
+  int rng;
 
-  move(11, plot->nrng+4);
+  if (plot->sndflg) rng = SND_RANGE;
+  else              rng = plot->nrng;
+
+  move(11, rng+4);
   if (plot->pwrflg)      printw("Pow [dB]");
   else if (plot->velflg) printw("Vel [m/s]");
   else if (plot->widflg) printw("Wid [m/s]");
@@ -802,11 +808,11 @@ void draw_colorbar(struct PlotOptions *plot) {
   for (j=12; j>6; j--) {
     attron(COLOR_PAIR(j));
     for (i=start; i<start+2; i++) {
-      move(i, plot->nrng+5);
+      move(i, rng+5);
       printw(" ");
     }
     attroff(COLOR_PAIR(j));
-    move(i-1, plot->nrng+7);
+    move(i-1, rng+7);
     clrtoeol();
     printw("%d",(int)((j-7)*(plot->smax-plot->smin)/plot->nlevels+plot->smin));
     start=start+2;
@@ -814,12 +820,12 @@ void draw_colorbar(struct PlotOptions *plot) {
 
   if (plot->velflg && plot->gflg) {
     attron(COLOR_PAIR(14));
-    move(25, plot->nrng+5);
+    move(25, rng+5);
     printw(" ");
     attroff(COLOR_PAIR(14));
     printw(" GS");
   } else {
-    move(25, plot->nrng+5);
+    move(25, rng+5);
     clrtoeol();
   }
 }
