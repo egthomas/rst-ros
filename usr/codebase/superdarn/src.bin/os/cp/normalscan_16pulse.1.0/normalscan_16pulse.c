@@ -400,9 +400,6 @@ int main(int argc,char *argv[])
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
 
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *)progname,
-                 NME_TYPE,0);
-
       for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
 
       for (n=0; n<msg.num; n++) {
