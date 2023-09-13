@@ -219,6 +219,7 @@ int main(int argc,char *argv[]) {
   /* Make getch a non-blocking call */
   nodelay(stdscr,TRUE);
 
+  /* Disable input line buffering and don't echo */
   cbreak();
   noecho();
 
@@ -299,19 +300,24 @@ int main(int argc,char *argv[]) {
       /* Draw a color bar */
       if (plot.colorflg) draw_colorbar(&plot);
 
+      /* Send output to terminal */
       refresh();
 
     }
 
   } while(1);
 
+  /* Exit and restore terminal settings */
   endwin();
+
+  RadarParmFree(prm);
+  FitFree(fit);
 
   return 0;
 }
 
 
-
+/* Initialize plotting options */
 void init_plot(struct PlotOptions *plot) {
 
   plot->nrng = 75;
@@ -349,6 +355,7 @@ void init_plot(struct PlotOptions *plot) {
 }
 
 
+/* Check for key press to change options or exit */
 int check_key(int c, struct PlotOptions *plot) {
 
   if (plot->colorflg) {
