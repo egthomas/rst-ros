@@ -147,6 +147,9 @@ int main(int argc,char *argv[]) {
   int c=0;
   int ret=0;
 
+  memset(&fbuf,0,sizeof(struct FitBuffer));
+  memset(&sbuf,0,sizeof(struct SndBuffer));
+
   prm=RadarParmMake();
   fit=FitMake();
 
@@ -715,7 +718,7 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
 
   int yr,mo,dy,hr,mt;
   double sc;
-  double ftime;
+  double ftime=0.;
 
   int val=0;
 
@@ -780,7 +783,6 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
     printw("\n");
   }
 
-  ftime = 0;
   for (j=0; j<SND_FREQS; j++) {
     if (sbuf->time[plot->b][j] > ftime) {
       ftime = sbuf->time[plot->b][j];
@@ -788,8 +790,8 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
   }
   TimeEpochToYMDHMS(ftime,&yr,&mo,&dy,&hr,&mt,&sc);
   move(11, 0);
-  printw("SND Beam: %02d   SND Time: %04d-%02d-%02d %02d:%02d:%02d",
-         plot->b,yr,mo,dy,hr,mt,(int)sc);
+  printw("SND Beam: %02d   SND Time:", plot->b);
+  if (ftime > 0) printw(" %04d-%02d-%02d %02d:%02d:%02d", yr,mo,dy,hr,mt,(int)sc);
 
 }
 
