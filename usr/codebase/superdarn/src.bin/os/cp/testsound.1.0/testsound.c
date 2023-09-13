@@ -553,7 +553,7 @@ int main(int argc,char *argv[])
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
       write_raw_snd_record(progname, prm, raw);
 
-      ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
+      ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       /* check for the end of a beam loop */
       snd_freq_cnt++;

@@ -524,7 +524,7 @@ int main(int argc,char *argv[]) {
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
-      ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
+      ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       /* check for the end of a beam loop */
       snd_freq_cnt++;

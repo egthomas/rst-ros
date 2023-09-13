@@ -824,7 +824,7 @@ int main(int argc,char *argv[]) {
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
-      ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
+      ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       snd_iBeam++;
       if (snd_iBeam >= snd_nBeams_per_scan) break;
