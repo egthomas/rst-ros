@@ -178,6 +178,7 @@ int main(int argc,char *argv[]) {
   /* Make getch a non-blocking call */
   nodelay(stdscr,TRUE);
 
+  /* Disable input line buffering and don't echo */
   cbreak();
   noecho();
 
@@ -450,7 +451,7 @@ int main(int argc,char *argv[]) {
         printw("* Press any key to quit *");
       }
 
-      /* Draw beam and gate labels */
+      /* Draw range gate labels */
       move(12, 0);
       printw("B\\G 0         ");
       for (i=1;i*10<nrng;i++) {
@@ -528,12 +529,14 @@ int main(int argc,char *argv[]) {
         }
       }
 
+      /* Send output to terminal */
       refresh();
 
     }
 
   } while(1);
 
+  /* Exit and restore terminal settings */
   endwin();
 
   RadarParmFree(prm);

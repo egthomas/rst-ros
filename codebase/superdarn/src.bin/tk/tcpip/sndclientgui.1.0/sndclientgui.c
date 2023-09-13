@@ -657,7 +657,7 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
   int i,j;
   int val=0;
 
-  /* Draw beam and gate labels */
+  /* Draw range gate labels */
   move(12, 0);
   printw("B\\G 0         ");
   for (i=1;i*10<plot->nrng;i++) {
@@ -673,8 +673,6 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
 
     if (fbuf->beam[j] == 0) continue;
 
-    move(j+13, 0);
-    clrtoeol();
     if ((j==prm->bmnum) && plot->colorflg) attron(COLOR_PAIR(6));
     printw("%02d: ",j);
     if ((j==prm->bmnum) && plot->colorflg) attroff(COLOR_PAIR(6));
@@ -720,7 +718,7 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
 
   int val=0;
 
-  /* Draw frequency and gate labels */
+  /* Draw range gate labels */
   move(12, 0);
   printw("F\\G 0         ");
   for (i=1;i*10<plot->nrng;i++) {
@@ -729,29 +727,16 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
   }
   printw("\n");
 
-  for (i=0; i<SND_FREQS; i++) {
-    move(i+13, 0);
-    printw("%3d",i*5+80);
-  }
-
-  if (plot->max_beam > SND_FREQS) {
-    move(SND_FREQS+13, 0);
-    clrtoeol();
-    move(SND_FREQS+14, 0);
-    clrtoeol();
-  }
-
   /* Draw range gate for each frequency */
   for (j=0; j<SND_FREQS; j++) {
-    move(j+13, 3);
+    move(j+13, 0);
     clrtoeol();
 
-    if (sbuf->beam[plot->b][j] == 0) continue;
-
-    move(j+13, 0);
     if ((j==plot->f) && (prm->bmnum==plot->b) && plot->snd && plot->colorflg) attron(COLOR_PAIR(6));
     printw("%3d ",j*5+80);
     if ((j==plot->f) && (prm->bmnum==plot->b) && plot->snd && plot->colorflg) attroff(COLOR_PAIR(6));
+
+    if (sbuf->beam[plot->b][j] == 0) continue;
 
     for (i=0; i<plot->nrng; i++) {
       if (sbuf->qflg[plot->b][i][j] == 1) {
@@ -779,6 +764,14 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
       }
     }
     printw("\n");
+  }
+
+  /* Clear higher beams if necessary */
+  if (plot->max_beam > SND_FREQS) {
+    move(SND_FREQS+13, 0);
+    clrtoeol();
+    move(SND_FREQS+14, 0);
+    clrtoeol();
   }
 
   for (j=0; j<SND_FREQS; j++) {
