@@ -175,7 +175,7 @@ int main(int argc,char *argv[]) {
   int snd_sc=-1;
   int snd_intt_sc=1;
   int snd_intt_us=500000;
-  float snd_time, snd_intt, time_needed=1.25;
+  float snd_time, snd_intt, time_needed=0.1;
   /* ------------------------------------------------------- */
 
   struct sequence *seq;
