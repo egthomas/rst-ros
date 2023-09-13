@@ -314,7 +314,7 @@ int main(int argc,char *argv[])
         tsgid=SiteTimeSeq(seq_long->ptab);
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus mppul:%d (%d:%d:%d:%d)",
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus mppul:%d (%02d:%02d:%02d:%06d)",
                      bmnum,intsc,intus,mppul,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
 

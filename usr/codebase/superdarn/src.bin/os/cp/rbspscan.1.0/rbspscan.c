@@ -462,7 +462,7 @@ int main(int argc,char *argv[]) {
         stfrq=nfrq;
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,
               intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
 

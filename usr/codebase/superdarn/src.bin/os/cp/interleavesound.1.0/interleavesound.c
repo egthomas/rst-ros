@@ -355,8 +355,8 @@ int main(int argc,char *argv[]) {
         stfrq=nfrq;
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
-          intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,
+              intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
 
       ErrLog(errlog.sock,progname,"Starting Integration.");
@@ -461,7 +461,7 @@ int main(int argc,char *argv[]) {
       snd_freq = snd_freqs[snd_freq_cnt];
 
       /* the scanning code is here */
-      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
       ErrLog(errlog.sock,progname,"Starting SND Integration.");
       SiteStartIntt(intsc,intus);

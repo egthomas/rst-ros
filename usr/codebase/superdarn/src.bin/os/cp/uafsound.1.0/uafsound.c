@@ -606,7 +606,7 @@ int main(int argc,char *argv[]) {
               rsep,mpinc,sbm,ebm,nrang,nbaud,clrskip,clrscan,cp);
       ErrLog(errlog.sock,progname,logtxt);
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum, intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum, intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
             
       printf("Entering Site Start Intt Station ID: %s  %d\n",ststr,stid);
@@ -762,7 +762,7 @@ int main(int argc,char *argv[]) {
       snd_freq = snd_clrfreq_fstart_list[snd_iBeam];
 
       /* the scanning code is here */
-      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
       ErrLog(errlog.sock,progname,"Starting SND Integration.");
       SiteStartIntt(intsc,intus);

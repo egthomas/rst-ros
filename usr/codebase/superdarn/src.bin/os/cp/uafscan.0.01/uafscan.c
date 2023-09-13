@@ -794,7 +794,7 @@ int main(int argc,char *argv[]) {
               rsep,mpinc,sbm,ebm,nrang,nbaud,nowait,clrskip,clrscan,cp);
       ErrLog(errlog.sock,progname,logtxt);
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum, intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum, intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
             
       printf("Entering Site Start Intt Station ID: %s  %d\n",ststr,stid);
