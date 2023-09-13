@@ -509,7 +509,7 @@ int main(int argc,char *argv[])
       /* the scanning code is here */
       sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
-      ErrLog(errlog.sock,progname,"Setting SND beam.");
+      ErrLog(errlog.sock,progname,"Starting SND Integration.");
       SiteStartIntt(intsc,intus);
 
       ErrLog(errlog.sock, progname, "Doing SND clear frequency search.");
