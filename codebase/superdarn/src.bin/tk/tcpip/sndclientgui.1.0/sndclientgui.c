@@ -734,9 +734,9 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
   }
 
   if (plot->max_beam > SND_FREQS) {
-    move(i+13, 0);
+    move(SND_FREQS+13, 0);
     clrtoeol();
-    move(i+14, 0);
+    move(SND_FREQS+14, 0);
     clrtoeol();
   }
 
