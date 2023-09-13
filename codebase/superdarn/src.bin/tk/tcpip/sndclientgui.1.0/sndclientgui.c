@@ -98,7 +98,6 @@ struct PlotOptions {
   unsigned char elvflg;
   double emin;
   double emax;
-  int min_beam;
   int max_beam;
   int sndflg;
   int b;
@@ -340,7 +339,6 @@ void init_plot(struct PlotOptions *plot) {
   plot->emin = 0;
   plot->emax = 40;
 
-  plot->min_beam = 100;
   plot->max_beam = -100;
 
   plot->sndflg = 0;
@@ -489,6 +487,8 @@ void read_fit_data(struct RadarParm *prm, struct FitData *fit,
   plot->snd = 0;
 
   fbuf->beam[prm->bmnum]=1;
+
+  if (prm->bmnum > plot->max_beam) plot->max_beam = prm->bmnum;
 
   for (i=0; i<plot->nrng; i++) {
     if ((i >= prm->nrang) || (i >= MAX_RANGE)) break;
@@ -658,15 +658,6 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
     else            printw("%d       ",i*10);
   }
   printw("\n");
-
-  if (plot->colorflg) {
-    if (prm->bmnum < plot->min_beam) plot->min_beam = prm->bmnum;
-    if (prm->bmnum > plot->max_beam) plot->max_beam = prm->bmnum;
-    for (i=plot->min_beam; i<plot->max_beam+1; i++) {
-      move(i+13, 0);
-      printw("%02d:",i);
-    }
-  }
 
   /* Draw each range gate for each beam */
   for (j=0; j<MAX_BEAMS; j++) {
