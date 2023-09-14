@@ -42,8 +42,6 @@ struct timeval tock;
 config_t cfg;
 char station[10];
 
-int iqbufsize=0;
-
 
 void SiteRosExit(int signum) {
 
