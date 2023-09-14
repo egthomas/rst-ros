@@ -30,6 +30,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -80,3 +81,22 @@ int ShMemFree(unsigned char *p,char *memname,int size,int unlink,int fd) {
   return s;
 }
 
+int ShMemSizeFd(int fd) {
+  struct stat filestat;
+  int memsize = -1;
+
+  if (fd > 0) {
+    fstat(fd, &filestat);
+    memsize = (int) filestat.st_size;
+  }
+
+  return memsize;
+}
+
+int ShMemSizeName(char *memname) {
+  int bufsize, fd;
+  fd = shm_open(memname,O_RDONLY,0777);
+  bufsize = ShMemSizeFd(fd);
+  close(fd);
+  return bufsize;
+}
