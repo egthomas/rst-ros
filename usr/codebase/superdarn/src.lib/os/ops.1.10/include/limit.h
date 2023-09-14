@@ -18,6 +18,5 @@
 #define LAG_SIZE 300            
 #define MAX_RANGE 700
 #define MAXNAVE 300
-#define IQBUFSIZE 5242880
 
 #endif

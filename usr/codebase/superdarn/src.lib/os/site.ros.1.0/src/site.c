@@ -66,7 +66,7 @@ void SiteRosExit(int signum) {
         close(ros.sock);
         config_destroy(&cfg);
         if (samples != NULL)
-          ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
+          ShMemFree((unsigned char *)samples,sharedmemory,iqbufsize,1,shmemfd);
         exit(errno);
       }
       break;
@@ -84,7 +84,7 @@ void SiteRosExit(int signum) {
         close(ros.sock);
         config_destroy(&cfg);
         if (samples != NULL)
-          ShMemFree((unsigned char *)samples,sharedmemory,IQBUFSIZE,1,shmemfd);
+          ShMemFree((unsigned char *)samples,sharedmemory,iqbufsize,1,shmemfd);
         exit(errno);
       }
       break;
@@ -383,7 +383,7 @@ int SiteRosSetupRadar() {
   sprintf(sharedmemory,"IQBuff_%s_%d_%d",station,rnum,cnum);
 
   samples=(int16 *)
-    ShMemAlloc(sharedmemory,IQBUFSIZE,O_RDWR | O_CREAT,1,&shmemfd);
+    ShMemAlloc(sharedmemory,iqbufsize,O_RDWR | O_CREAT,1,&shmemfd);
 
   return 0;
 }
@@ -872,7 +872,7 @@ int SiteRosIntegrate(int (*lags)[2]) {
 
       dest = (void *)(samples);  /* look iqoff bytes into samples area */
       dest += iqoff;
-      if ((iqoff+total_samples*2*sizeof(uint32)) < IQBUFSIZE) {
+      if ((iqoff+total_samples*2*sizeof(uint32)) < iqbufsize) {
         memmove(dest,rdata.main,total_samples*sizeof(uint32));
         /* skip ahead number of samples * 32 bit per sample to account for
            rdata.main */
