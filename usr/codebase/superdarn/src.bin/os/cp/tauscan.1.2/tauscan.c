@@ -209,15 +209,6 @@ int main(int argc,char *argv[]) {
                            &sbm,&ebm, &dfrq,&nfrq,
                            &frqrng,&xcnt);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-  status=SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  printf("Initial Setup Complete: Station ID: %s %d\n",ststr,stid);
-
   beams=abs(ebm-sbm)+1;
   if (fast) {
     cp=503;
@@ -227,11 +218,23 @@ int main(int argc,char *argv[]) {
     scnsc=120;
     scnus=0;
   }
+
   /* some trickery to get integration time from beams and total scan time */
   total_scan_usecs=(scnsc-3)*1E6+scnus;
   total_integration_usecs=total_scan_usecs/beams;
   intsc=total_integration_usecs/1E6;
   intus=total_integration_usecs-(intsc*1E6);
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
+  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
+  status=SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  printf("Initial Setup Complete: Station ID: %s %d\n",ststr,stid);
 
   if (discretion) cp= -cp;
 
@@ -301,7 +304,7 @@ int main(int argc,char *argv[]) {
         stfrq=nfrq;
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)"
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)"
               " mpinc:%d", bmnum,intsc,intus,hr,mt,sc,us,mplgexs);
       ErrLog(errlog.sock,progname,logtxt);
 
@@ -362,9 +365,6 @@ int main(int argc,char *argv[]) {
 
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *)progname,
-                 NME_TYPE,0);
 
       for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
 

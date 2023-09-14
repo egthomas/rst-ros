@@ -146,6 +146,7 @@ struct {
   unsigned int *length;
 } seqbadtr[MAXNAVE];
 
+int iqbufsize;
 int16 *samples;
 
 unsigned int *badtr;

@@ -98,7 +98,6 @@ struct PlotOptions {
   unsigned char elvflg;
   double emin;
   double emax;
-  int min_beam;
   int max_beam;
   int sndflg;
   int b;
@@ -146,6 +145,9 @@ int main(int argc,char *argv[]) {
 
   int c=0;
   int ret=0;
+
+  memset(&fbuf,0,sizeof(struct FitBuffer));
+  memset(&sbuf,0,sizeof(struct SndBuffer));
 
   prm=RadarParmMake();
   fit=FitMake();
@@ -217,6 +219,7 @@ int main(int argc,char *argv[]) {
   /* Make getch a non-blocking call */
   nodelay(stdscr,TRUE);
 
+  /* Disable input line buffering and don't echo */
   cbreak();
   noecho();
 
@@ -265,6 +268,8 @@ int main(int argc,char *argv[]) {
     }
   }
 
+  if (plot.nrng > MAX_RANGE) plot.nrng = MAX_RANGE;
+
 
   do {
 
@@ -297,19 +302,24 @@ int main(int argc,char *argv[]) {
       /* Draw a color bar */
       if (plot.colorflg) draw_colorbar(&plot);
 
+      /* Send output to terminal */
       refresh();
 
     }
 
   } while(1);
 
+  /* Exit and restore terminal settings */
   endwin();
+
+  RadarParmFree(prm);
+  FitFree(fit);
 
   return 0;
 }
 
 
-
+/* Initialize plotting options */
 void init_plot(struct PlotOptions *plot) {
 
   plot->nrng = 75;
@@ -337,7 +347,6 @@ void init_plot(struct PlotOptions *plot) {
   plot->emin = 0;
   plot->emax = 40;
 
-  plot->min_beam = 100;
   plot->max_beam = -100;
 
   plot->sndflg = 0;
@@ -348,6 +357,7 @@ void init_plot(struct PlotOptions *plot) {
 }
 
 
+/* Check for key press to change options or exit */
 int check_key(int c, struct PlotOptions *plot) {
 
   if (plot->colorflg) {
@@ -487,8 +497,10 @@ void read_fit_data(struct RadarParm *prm, struct FitData *fit,
 
   fbuf->beam[prm->bmnum]=1;
 
+  if (prm->bmnum > plot->max_beam) plot->max_beam = prm->bmnum;
+
   for (i=0; i<plot->nrng; i++) {
-    if ((i >= prm->nrang) || (i >= MAX_RANGE)) break;
+    if (i >= prm->nrang) break;
     fbuf->qflg[prm->bmnum][i] = fit->rng[i].qflg;
     if (fit->rng[i].qflg == 1) {
       fbuf->gsct[prm->bmnum][i] = fit->rng[i].gsct;
@@ -647,23 +659,14 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
   int i,j;
   int val=0;
 
-  /* Draw beam and gate labels */
+  /* Draw range gate labels */
   move(12, 0);
   printw("B\\G 0         ");
-  for (i=1;i*10<plot->nrng;i++) {
+  for (i=1; i*10<plot->nrng; i++) {
     if (i*10 < 100) printw("%d        ",i*10);
     else            printw("%d       ",i*10);
   }
   printw("\n");
-
-  if (plot->colorflg) {
-    if (prm->bmnum < plot->min_beam) plot->min_beam = prm->bmnum;
-    if (prm->bmnum > plot->max_beam) plot->max_beam = prm->bmnum;
-    for (i=plot->min_beam; i<plot->max_beam+1; i++) {
-      move(i+13, 0);
-      printw("%02d:",i);
-    }
-  }
 
   /* Draw each range gate for each beam */
   for (j=0; j<MAX_BEAMS; j++) {
@@ -672,8 +675,6 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
 
     if (fbuf->beam[j] == 0) continue;
 
-    move(j+13, 0);
-    clrtoeol();
     if ((j==prm->bmnum) && plot->colorflg) attron(COLOR_PAIR(6));
     printw("%02d: ",j);
     if ((j==prm->bmnum) && plot->colorflg) attroff(COLOR_PAIR(6));
@@ -715,44 +716,31 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
 
   int yr,mo,dy,hr,mt;
   double sc;
-  double ftime;
+  double ftime=0.;
 
   int val=0;
 
-  /* Draw frequency and gate labels */
+  /* Draw range gate labels */
   move(12, 0);
   printw("F\\G 0         ");
-  for (i=1;i*10<plot->nrng;i++) {
+  for (i=1; i*10<SND_RANGE; i++) {
     if (i*10 < 100) printw("%d        ",i*10);
     else            printw("%d       ",i*10);
   }
   printw("\n");
 
-  for (i=0; i<SND_FREQS; i++) {
-    move(i+13, 0);
-    printw("%3d",i*5+80);
-  }
-
-  if (plot->max_beam > SND_FREQS) {
-    move(i+13, 0);
-    clrtoeol();
-    move(i+14, 0);
-    clrtoeol();
-  }
-
   /* Draw range gate for each frequency */
   for (j=0; j<SND_FREQS; j++) {
-    move(j+13, 3);
+    move(j+13, 0);
     clrtoeol();
 
-    if (sbuf->beam[plot->b][j] == 0) continue;
-
-    move(j+13, 0);
     if ((j==plot->f) && (prm->bmnum==plot->b) && plot->snd && plot->colorflg) attron(COLOR_PAIR(6));
     printw("%3d ",j*5+80);
     if ((j==plot->f) && (prm->bmnum==plot->b) && plot->snd && plot->colorflg) attroff(COLOR_PAIR(6));
 
-    for (i=0; i<plot->nrng; i++) {
+    if (sbuf->beam[plot->b][j] == 0) continue;
+
+    for (i=0; i<SND_RANGE; i++) {
       if (sbuf->qflg[plot->b][i][j] == 1) {
         if (plot->colorflg) {
           if (plot->pwrflg)      val = (int)((sbuf->pow[plot->b][i][j]-plot->smin)/(plot->smax-plot->smin)*plot->nlevels)+1;
@@ -780,7 +768,14 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
     printw("\n");
   }
 
-  ftime = 0;
+  /* Clear higher beams if necessary */
+  if (plot->max_beam >= SND_FREQS) {
+    move(SND_FREQS+13, 0);
+    clrtoeol();
+    move(SND_FREQS+14, 0);
+    clrtoeol();
+  }
+
   for (j=0; j<SND_FREQS; j++) {
     if (sbuf->time[plot->b][j] > ftime) {
       ftime = sbuf->time[plot->b][j];
@@ -788,8 +783,8 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
   }
   TimeEpochToYMDHMS(ftime,&yr,&mo,&dy,&hr,&mt,&sc);
   move(11, 0);
-  printw("SND Beam: %02d   SND Time: %04d-%02d-%02d %02d:%02d:%02d",
-         plot->b,yr,mo,dy,hr,mt,(int)sc);
+  printw("SND Beam: %02d   SND Time:", plot->b);
+  if (ftime > 0) printw(" %04d-%02d-%02d %02d:%02d:%02d", yr,mo,dy,hr,mt,(int)sc);
 
 }
 
@@ -799,8 +794,12 @@ void draw_colorbar(struct PlotOptions *plot) {
 
   int i,j;
   int start=12;
+  int rng;
 
-  move(11, plot->nrng+4);
+  if (plot->sndflg) rng = SND_RANGE;
+  else              rng = plot->nrng;
+
+  move(11, rng+4);
   if (plot->pwrflg)      printw("Pow [dB]");
   else if (plot->velflg) printw("Vel [m/s]");
   else if (plot->widflg) printw("Wid [m/s]");
@@ -809,11 +808,11 @@ void draw_colorbar(struct PlotOptions *plot) {
   for (j=12; j>6; j--) {
     attron(COLOR_PAIR(j));
     for (i=start; i<start+2; i++) {
-      move(i, plot->nrng+5);
+      move(i, rng+5);
       printw(" ");
     }
     attroff(COLOR_PAIR(j));
-    move(i-1, plot->nrng+7);
+    move(i-1, rng+7);
     clrtoeol();
     printw("%d",(int)((j-7)*(plot->smax-plot->smin)/plot->nlevels+plot->smin));
     start=start+2;
@@ -821,12 +820,12 @@ void draw_colorbar(struct PlotOptions *plot) {
 
   if (plot->velflg && plot->gflg) {
     attron(COLOR_PAIR(14));
-    move(25, plot->nrng+5);
+    move(25, rng+5);
     printw(" ");
     attroff(COLOR_PAIR(14));
     printw(" GS");
   } else {
-    move(25, plot->nrng+5);
+    move(25, rng+5);
     clrtoeol();
   }
 }

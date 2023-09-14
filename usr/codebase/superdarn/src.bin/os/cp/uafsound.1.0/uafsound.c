@@ -84,7 +84,7 @@ int rst_opterr(char *txt) {
 
 
 int main(int argc,char *argv[]) {
-  char progid[80]={"uafsound 2023/07/12"};
+  char progid[80]={"uafsound 2023/09/12"};
   char progname[256]="uafsound";
   char modestr[32];
 
@@ -175,7 +175,7 @@ int main(int argc,char *argv[]) {
   int snd_sc=-1;
   int snd_intt_sc=1;
   int snd_intt_us=500000;
-  float snd_time, snd_intt, time_needed=1.25;
+  float snd_time, snd_intt, time_needed=0.1;
   /* ------------------------------------------------------- */
 
   struct sequence *seq;
@@ -492,6 +492,9 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"Test option enabled, exiting\n");
     return 0;
   }
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
   /* SiteSetupRadar, establish connection to usrp_server and do initial setup of memory buffers for raw samples */
   printf("Running SiteSetupRadar Station ID: %s  %d\n",ststr,stid);
   status=SiteSetupRadar();
@@ -605,7 +608,7 @@ int main(int argc,char *argv[]) {
               rsep,mpinc,sbm,ebm,nrang,nbaud,clrskip,clrscan,cp);
       ErrLog(errlog.sock,progname,logtxt);
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum, intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum, intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
             
       printf("Entering Site Start Intt Station ID: %s  %d\n",ststr,stid);
@@ -661,8 +664,6 @@ int main(int argc,char *argv[]) {
  
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0); 
-
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *) progname, NME_TYPE,0);   
      
      
       for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg); 
@@ -762,9 +763,9 @@ int main(int argc,char *argv[]) {
       snd_freq = snd_clrfreq_fstart_list[snd_iBeam];
 
       /* the scanning code is here */
-      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
-      ErrLog(errlog.sock,progname,"Setting SND beam.");
+      ErrLog(errlog.sock,progname,"Starting SND Integration.");
       SiteStartIntt(intsc,intus);
 
       ErrLog(errlog.sock, progname, "Doing SND clear frequency search.");
@@ -785,11 +786,9 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
 
       OpsBuildPrm(prm,seq->ptab,seq->lags);
-      OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
-      ErrLog(errlog.sock, progname, "Sending SND messages.");
       msg.num = 0;
       msg.tsize = 0;
 
@@ -801,10 +800,8 @@ int main(int argc,char *argv[]) {
 
       RMsgSndSend(task[RT_TASK].sock,&msg);
       for (n=0;n<msg.num;n++) {
-        if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
+        if ( (msg.data[n].type == PRM_TYPE) ||
+             (msg.data[n].type == FIT_TYPE) )  free(msg.ptr[n]);
       }
 
       sprintf(logtxt, "SBC: %d  SFC: %d", snd_bc[snd_iBeam], snd_fc[snd_iBeam]);
@@ -822,7 +819,7 @@ int main(int argc,char *argv[]) {
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
-      ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
+      ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       snd_iBeam++;
       if (snd_iBeam >= snd_nBeams_per_scan) break;

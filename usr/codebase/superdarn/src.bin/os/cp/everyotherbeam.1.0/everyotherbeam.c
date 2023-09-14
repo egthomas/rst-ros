@@ -264,6 +264,8 @@ int main(int argc,char *argv[]) {
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
   status = SiteSetupRadar();
 
   fprintf(stderr,"Status:%d\n",status);
@@ -363,7 +365,7 @@ int main(int argc,char *argv[]) {
         stfrq = nfrq;
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",
               bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
 
@@ -415,9 +417,6 @@ int main(int argc,char *argv[]) {
 
       tmpbuf = FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *)progname,
-            NME_TYPE,0);
 
       for (n=0; n<tnum; n++) RMsgSndSend(task[n].sock,&msg);
 

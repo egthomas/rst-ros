@@ -57,7 +57,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalsound 2023/08/31"};
+char progid[80]={"normalsound 2023/09/12"};
 char progname[256];
 
 int arg=0;
@@ -120,7 +120,7 @@ int main(int argc,char *argv[])
   int snd_sc=-1;
   int snd_intt_sc=1;
   int snd_intt_us=500000;
-  float snd_time, snd_intt, time_needed=1.25;
+  float snd_time, snd_intt, time_needed=0.1;
   /* ------------------------------------------------------- */
 
   struct sequence *seq;
@@ -264,14 +264,6 @@ int main(int argc,char *argv[])
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  status=SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
-
   beams=abs(ebm-sbm)+1;
   if (fast) {
     cp    = 157;
@@ -290,15 +282,24 @@ int main(int argc,char *argv[])
   def_intt_sc = total_integration_usecs/1E6;
   def_intt_us = total_integration_usecs - (def_intt_sc*1e6);
 
-  def_nrang = nrang;
-
   intsc = def_intt_sc;
   intus = def_intt_us;
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
+  status=SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
 
   if (discretion) cp = -cp;
 
   txpl=(rsep*20)/3;
 
+  def_nrang = nrang;
   def_rsep = rsep;
   def_txpl = txpl;
 
@@ -386,7 +387,7 @@ int main(int argc,char *argv[])
         stfrq=nfrq;
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",
                      bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
 
@@ -441,9 +442,6 @@ int main(int argc,char *argv[])
 
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *)progname,
-                 NME_TYPE,0);
 
       for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
 
@@ -510,9 +508,9 @@ int main(int argc,char *argv[])
       snd_freq = snd_freqs[snd_freq_cnt];
 
       /* the scanning code is here */
-      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,intsc,intus,hr,mt,sc,us);
+      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
-      ErrLog(errlog.sock,progname,"Setting SND beam.");
+      ErrLog(errlog.sock,progname,"Starting SND Integration.");
       SiteStartIntt(intsc,intus);
 
       ErrLog(errlog.sock, progname, "Doing SND clear frequency search.");
@@ -533,11 +531,9 @@ int main(int argc,char *argv[])
       ErrLog(errlog.sock,progname,logtxt);
 
       OpsBuildPrm(prm,seq->ptab,seq->lags);
-      OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
 
-      ErrLog(errlog.sock, progname, "Sending SND messages.");
       msg.num = 0;
       msg.tsize = 0;
 
@@ -549,10 +545,8 @@ int main(int argc,char *argv[])
 
       RMsgSndSend(task[RT_TASK].sock,&msg);
       for (n=0;n<msg.num;n++) {
-        if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==IQ_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
+        if ( (msg.data[n].type == PRM_TYPE) ||
+             (msg.data[n].type == FIT_TYPE) )  free(msg.ptr[n]);
       }
 
       sprintf(logtxt, "SBC: %d  SFC: %d", snd_bm_cnt, snd_freq_cnt);
@@ -570,7 +564,7 @@ int main(int argc,char *argv[])
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
-      ErrLog(errlog.sock, progname, "Polling SND for exit.\n");
+      ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       /* check for the end of a beam loop */
       snd_freq_cnt++;

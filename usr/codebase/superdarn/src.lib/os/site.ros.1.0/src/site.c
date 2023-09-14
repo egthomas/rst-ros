@@ -392,13 +392,10 @@ int SiteRosSetupRadar() {
 
   sprintf(sharedmemory,"IQBuff_%s_%d_%d",station,rnum,cnum);
 
-  /* calculate size of IQ buffer (JTK) */
-  iqbufsize = 2 * (mppul) * sizeof(int32) * 1e6 * (intsc + intus/1e6) * nbaud / mpinc;
-
   samples=(int16 *)
     ShMemAlloc(sharedmemory,iqbufsize,O_RDWR | O_CREAT,1,&shmemfd);
 
-  if (samples==NULL) {
+  if (samples == NULL) {
     fprintf(stderr,"IQBuffer %s is Null\n",sharedmemory);
     SiteRosExit(-1);
   }

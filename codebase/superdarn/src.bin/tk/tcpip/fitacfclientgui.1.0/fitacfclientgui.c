@@ -78,9 +78,6 @@ int main(int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
-  int min_beam=100;
-  int max_beam=-100;
-
   unsigned char colorflg=1;
   unsigned char gflg=0;
   unsigned char menu=1;
@@ -181,6 +178,7 @@ int main(int argc,char *argv[]) {
   /* Make getch a non-blocking call */
   nodelay(stdscr,TRUE);
 
+  /* Disable input line buffering and don't echo */
   cbreak();
   noecho();
 
@@ -229,6 +227,8 @@ int main(int argc,char *argv[]) {
       smax=emax;
     }
   }
+
+  if (nrng > MAX_RANGE) nrng = MAX_RANGE;
 
   do {
 
@@ -345,7 +345,7 @@ int main(int argc,char *argv[]) {
       /* Store data from most recent beam in buffer */
       buffer.beam[prm->bmnum]=1;
       for (i=0; i<nrng; i++) {
-        if ((i >= prm->nrang) || (i >= MAX_RANGE)) break;
+        if (i >= prm->nrang) break;
         buffer.qflg[prm->bmnum][i]=fit->rng[i].qflg;
         if (fit->rng[i].qflg == 1) {
           buffer.gsct[prm->bmnum][i]=fit->rng[i].gsct;
@@ -453,23 +453,14 @@ int main(int argc,char *argv[]) {
         printw("* Press any key to quit *");
       }
 
-      /* Draw beam and gate labels */
+      /* Draw range gate labels */
       move(12, 0);
       printw("B\\G 0         ");
-      for (i=1;i*10<nrng;i++) {
+      for (i=1; i*10<nrng; i++) {
         if (i*10 < 100) printw("%d        ",i*10);
         else            printw("%d       ",i*10);
       }
       printw("\n");
-
-      if (colorflg) {
-        if (prm->bmnum < min_beam) min_beam = prm->bmnum;
-        if (prm->bmnum > max_beam) max_beam = prm->bmnum;
-        for (i=min_beam;i<max_beam+1; i++) {
-          move(i+13, 0);
-          printw("%02d:",i);
-        }
-      }
 
       /* Draw each range gate for each beam */
       for (j=0; j<MAX_BEAMS; j++) {
@@ -540,12 +531,14 @@ int main(int argc,char *argv[]) {
         }
       }
 
+      /* Send output to terminal */
       refresh();
 
     }
 
   } while(1);
 
+  /* Exit and restore terminal settings */
   endwin();
 
   RadarParmFree(prm);

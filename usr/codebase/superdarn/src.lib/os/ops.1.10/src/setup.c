@@ -187,3 +187,8 @@ void OpsSetupShell() {
   RadarShellAdd(&rstable,"cp",var_LONG,&cp);
   RadarShellAdd(&rstable,"combf",var_STRING,combf);
 }
+
+
+void OpsSetupIQBuf(int intsc,int intus,int mppul,int mpinc,int nbaud) {
+  iqbufsize = 2 * (mppul) * sizeof(int32) * 1e6 * (intsc + intus/1e6) * nbaud / mpinc;
+}

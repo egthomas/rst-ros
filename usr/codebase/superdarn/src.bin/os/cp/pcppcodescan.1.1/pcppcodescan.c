@@ -223,19 +223,10 @@ int main(int argc,char *argv[]) {
                   &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  status=SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  cp=PCPCPID;    /* why do we need this block? SGS */
   scnsc=60;
   scnus=0;
   intsc=2;
   intus=0;
-
-  if (discretion) cp= -cp;
 
   txpl=(nbaud*rsep*20)/3;
 
@@ -270,6 +261,18 @@ int main(int argc,char *argv[]) {
     ErrLog(errlog.sock,progname,logtxt);
     SiteExit(0);
   }
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
+  status=SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  cp=PCPCPID;    /* why do we need this block? SGS */
+
+  if (discretion) cp= -cp;
 
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
@@ -339,7 +342,7 @@ int main(int argc,char *argv[]) {
         stfrq=nfrq;
       }
 
-      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
+      sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,
                       intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
       ErrLog(errlog.sock,progname,"Starting Integration.");
@@ -390,7 +393,6 @@ int main(int argc,char *argv[]) {
 
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *)progname,NME_TYPE,0);
       for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
       for (n=0;n<msg.num;n++) {
         if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
@@ -418,7 +420,7 @@ int main(int argc,char *argv[]) {
       stfrq=pcpfreqs[pcpcnt];
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
-      sprintf(logtxt,"Sounding beam:%d intt:%ds.%dus (%d:%d:%d:%d)",bmnum,
+      sprintf(logtxt,"Sounding beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,
                      intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
       ErrLog(errlog.sock,progname,"Starting Integration.");
@@ -468,8 +470,6 @@ int main(int argc,char *argv[]) {
 
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
-      RMsgSndAdd(&msg,strlen(progname)+1,(unsigned char *) progname,
-                 NME_TYPE,0);
       for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
       for (n=0;n<msg.num;n++) {
         if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
