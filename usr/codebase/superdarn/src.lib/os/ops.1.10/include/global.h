@@ -103,6 +103,7 @@ extern struct {
   unsigned int *length;
 } seqbadtr[MAXNAVE];
 
+extern int iqbufsize;
 extern int16 *samples;
 
 extern unsigned int *badtr;

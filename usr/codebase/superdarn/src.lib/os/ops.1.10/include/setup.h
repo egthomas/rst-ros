@@ -21,5 +21,6 @@ int OpsFitACFStart();
 void OpsLogStart(int sock,char *name,int argc,char *argv[]);
 void OpsSetupTask(int tnum,struct TCPIPMsgHost *task,int sock,char *name);
 void OpsSetupShell();
+void OpsSetupIQBuf(int intsc,int intus,int mppul,int mpinc,int nbaud);
 
 #endif
