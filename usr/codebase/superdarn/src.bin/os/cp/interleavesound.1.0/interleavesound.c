@@ -140,8 +140,6 @@ int main(int argc,char *argv[]) {
 
   /* standard radar defaults */
   cp     = 197;
-  intsc  = fast_intt_sc;
-  intus  = fast_intt_us;
   mppul  = seq->mppul;
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
@@ -220,11 +218,16 @@ int main(int argc,char *argv[]) {
       bms = bmsf;
     }
     nintgs = 16;
+    fast_intt_sc = 3;
+    fast_intt_us = 0;
     snd_bms = snd_bmse;
     snd_bms_tot = 8;
     snd_intt_sc = 2;
     snd_intt_us = 0;
   }
+
+  intsc = fast_intt_sc;
+  intus = fast_intt_us;
 
   snd_intt = snd_intt_sc + snd_intt_us*1e-6;
 
