@@ -17,7 +17,7 @@ extern struct SndData *snd;
 void OpsLoadSndFreqs(char *ststr);
 int OpsSndStart();
 void OpsFindSndSkip(char *ststr,int *snd_bms,int snd_bms_tot,int *snd_bm_cnt,int *odd_beams);
-void OpsBuildSnd(struct RadarParm *prm, struct FitData *fit);
+void OpsBuildSnd(struct SndData *snd, struct RadarParm *prm, struct FitData *fit);
 void OpsWriteSnd(int sock, char *name, struct SndData *snd, char *ststr);
 
 #endif

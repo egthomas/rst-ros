@@ -156,7 +156,7 @@ void OpsFindSndSkip(char *ststr,int *snd_bms,int snd_bms_tot,int *snd_bm_cnt,int
 }
 
 
-void OpsBuildSnd(struct RadarParm *prm, struct FitData *fit) {
+void OpsBuildSnd(struct SndData *snd, struct RadarParm *prm, struct FitData *fit) {
   SndSetOriginTime(snd,prm->origin.time);
   SndSetOriginCommand(snd,(char *)command);
   SndSetCombf(snd,combf);

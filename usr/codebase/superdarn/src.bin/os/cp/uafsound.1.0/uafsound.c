@@ -816,7 +816,7 @@ int main(int argc,char *argv[]) {
         prm->scan = 0;
       }
 
-      OpsBuildSnd(prm,fit);
+      OpsBuildSnd(snd,prm,fit);
 
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
