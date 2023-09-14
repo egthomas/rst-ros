@@ -53,7 +53,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2023/09/12"};
+char progid[80]={"interleavesound 2023/09/13"};
 char progname[256];
 int arg=0;
 struct OptionData opt;

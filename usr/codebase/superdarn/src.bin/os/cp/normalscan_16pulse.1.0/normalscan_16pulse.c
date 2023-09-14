@@ -53,7 +53,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalscan_16pulse 2023/03/15"};
+char progid[80]={"normalscan_16pulse 2023/09/13"};
 char progname[256];
 
 int arg=0;

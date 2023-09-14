@@ -84,7 +84,7 @@ int rst_opterr(char *txt) {
 
 
 int main(int argc,char *argv[]) {
-  char progid[80]={"uafsound 2023/09/12"};
+  char progid[80]={"uafsound 2023/09/13"};
   char progname[256]="uafsound";
   char modestr[32];
 
