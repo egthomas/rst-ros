@@ -57,7 +57,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"normalsound 2023/09/12"};
+char progid[80]={"normalsound 2023/09/13"};
 char progname[256];
 
 int arg=0;
@@ -559,7 +559,7 @@ int main(int argc,char *argv[])
         prm->scan = 0;
       }
 
-      OpsBuildSnd(prm,fit);
+      OpsBuildSnd(snd,prm,fit);
 
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);

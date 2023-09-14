@@ -53,7 +53,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2023/09/12"};
+char progid[80]={"interleavesound 2023/09/13"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -140,8 +140,6 @@ int main(int argc,char *argv[]) {
 
   /* standard radar defaults */
   cp     = 197;
-  intsc  = fast_intt_sc;
-  intus  = fast_intt_us;
   mppul  = seq->mppul;
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
@@ -220,11 +218,16 @@ int main(int argc,char *argv[]) {
       bms = bmsf;
     }
     nintgs = 16;
+    fast_intt_sc = 3;
+    fast_intt_us = 0;
     snd_bms = snd_bmse;
     snd_bms_tot = 8;
     snd_intt_sc = 2;
     snd_intt_us = 0;
   }
+
+  intsc = fast_intt_sc;
+  intus = fast_intt_us;
 
   snd_intt = snd_intt_sc + snd_intt_us*1e-6;
 
@@ -513,7 +516,7 @@ int main(int argc,char *argv[]) {
         prm->scan = 0;
       }
 
-      OpsBuildSnd(prm,fit);
+      OpsBuildSnd(snd,prm,fit);
 
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
