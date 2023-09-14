@@ -220,14 +220,6 @@ int main(int argc,char *argv[]) {
                            " frqrng l xcnt l",
                            &sbm,&ebm, &dfrq,&nfrq,
                            &frqrng,&xcnt);      
- 
-  status = SiteSetupRadar();
-  if (status != 0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  printf("Initial Setup Complete: Station ID: %s  %d\n", ststr, stid);
 
   if (fast) {
     cp    += 1;
@@ -247,6 +239,16 @@ int main(int argc,char *argv[]) {
   total_integration_usecs = total_scan_usecs/nbm;
   intsc = total_integration_usecs/1e6;
   intus = total_integration_usecs -(intsc*1e6);
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+ 
+  status = SiteSetupRadar();
+  if (status != 0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  printf("Initial Setup Complete: Station ID: %s  %d\n", ststr, stid);
 
   if (discretion) cp = -cp;
 

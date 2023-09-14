@@ -209,15 +209,6 @@ int main(int argc,char *argv[]) {
                            &sbm,&ebm, &dfrq,&nfrq,
                            &frqrng,&xcnt);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
-  status=SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  printf("Initial Setup Complete: Station ID: %s %d\n",ststr,stid);
-
   beams=abs(ebm-sbm)+1;
   if (fast) {
     cp=503;
@@ -227,11 +218,23 @@ int main(int argc,char *argv[]) {
     scnsc=120;
     scnus=0;
   }
+
   /* some trickery to get integration time from beams and total scan time */
   total_scan_usecs=(scnsc-3)*1E6+scnus;
   total_integration_usecs=total_scan_usecs/beams;
   intsc=total_integration_usecs/1E6;
   intus=total_integration_usecs-(intsc*1E6);
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
+  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
+  status=SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  printf("Initial Setup Complete: Station ID: %s %d\n",ststr,stid);
 
   if (discretion) cp= -cp;
 

@@ -276,6 +276,8 @@ int main(int argc,char *argv[]) {
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
   status=SiteSetupRadar();
 
   fprintf(stderr,"Status:%d\n",status);
@@ -285,12 +287,11 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
-  def_nrang = nrang;
-
   if (discretion) cp = -cp;
 
   txpl=(rsep*20)/3;     /* computing TX pulse length */
 
+  def_nrang = nrang;
   def_rsep = rsep;
   def_txpl = txpl;
 

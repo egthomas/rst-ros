@@ -492,6 +492,9 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"Test option enabled, exiting\n");
     return 0;
   }
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
   /* SiteSetupRadar, establish connection to usrp_server and do initial setup of memory buffers for raw samples */
   printf("Running SiteSetupRadar Station ID: %s  %d\n",ststr,stid);
   status=SiteSetupRadar();

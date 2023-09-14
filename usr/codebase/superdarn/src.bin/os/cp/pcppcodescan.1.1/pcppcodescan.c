@@ -223,19 +223,10 @@ int main(int argc,char *argv[]) {
                   &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  status=SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  cp=PCPCPID;    /* why do we need this block? SGS */
   scnsc=60;
   scnus=0;
   intsc=2;
   intus=0;
-
-  if (discretion) cp= -cp;
 
   txpl=(nbaud*rsep*20)/3;
 
@@ -270,6 +261,18 @@ int main(int argc,char *argv[]) {
     ErrLog(errlog.sock,progname,logtxt);
     SiteExit(0);
   }
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
+  status=SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  cp=PCPCPID;    /* why do we need this block? SGS */
+
+  if (discretion) cp= -cp;
 
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);

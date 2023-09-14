@@ -362,6 +362,8 @@ int main(int argc,char *argv[]) {
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
   status=SiteSetupRadar();
 
   fprintf(stderr,"Status:%d\n",status);

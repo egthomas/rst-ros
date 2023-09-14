@@ -268,14 +268,6 @@ int main(int argc,char *argv[])
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  status=SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
-
   beams=abs(ebm-sbm)+1;
   if (fast) {
     cp    = 1101;
@@ -294,15 +286,24 @@ int main(int argc,char *argv[])
   def_intt_sc = total_integration_usecs/1E6;
   def_intt_us = total_integration_usecs - (def_intt_sc*1e6);
 
-  def_nrang = nrang;
-
   intsc = def_intt_sc;
   intus = def_intt_us;
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
+  status=SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
 
   if (discretion) cp = -cp;
 
   txpl=(rsep*20)/3;
 
+  def_nrang = nrang;
   def_rsep = rsep;
   def_txpl = txpl;
 

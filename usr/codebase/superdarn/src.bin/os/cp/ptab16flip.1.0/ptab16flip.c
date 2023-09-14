@@ -217,14 +217,6 @@ int main(int argc,char *argv[])
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  status=SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit(1);
-  }
-
-  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
-
   beams=2*(abs(ebm-sbm)+1);
 
   /* Automatically calculate the integration times */
@@ -239,6 +231,16 @@ int main(int argc,char *argv[])
   total_skip_usecs = 2*(intsc*1e6 + intus);
   skipsc = total_skip_usecs/1e6;
   skipus = total_skip_usecs - (skipsc*1e6);
+
+  OpsSetupIQBuf(intsc,intus,seq_long->mppul,seq_long->mpinc,nbaud);
+
+  status=SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit(1);
+  }
+
+  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
 
   if (discretion) cp = -cp;
 

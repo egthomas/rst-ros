@@ -259,14 +259,6 @@ int main(int argc,char *argv[]) {
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  status = SiteSetupRadar();
-  if (status !=0) {
-    ErrLog(errlog.sock,progname,"Error locating hardware.");
-    exit (1);
-  }
-
-  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
-
   beams = abs(ebm-sbm)+1;
   if (scnsc + scnus == 0) {  /* not set with command-line */
     if (fast) {     /* simple operation: 2-min scan or 1-min with fast set */
@@ -278,8 +270,6 @@ int main(int argc,char *argv[]) {
      scnus = 0;
     }
   }
-  if (cpid) cp = cpid;  /* user is setting the CPID;
-                           discretionary flips sign below */
 
   if ((scannowait==0) && (setintt==0)) {
     /* recomputing the integration period for each beam */
@@ -297,6 +287,19 @@ int main(int argc,char *argv[]) {
     intsc = total_integration_usecs/1e6;
     intus = total_integration_usecs - (intsc*1e6);
   }
+
+  OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
+
+  status = SiteSetupRadar();
+  if (status !=0) {
+    ErrLog(errlog.sock,progname,"Error locating hardware.");
+    exit (1);
+  }
+
+  printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
+
+  if (cpid) cp = cpid;  /* user is setting the CPID;
+                           discretionary flips sign below */
 
   if (discretion) cp = -cp;
 
