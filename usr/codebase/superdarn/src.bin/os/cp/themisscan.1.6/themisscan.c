@@ -30,10 +30,6 @@
             scan in a counter-clockwise direction.
  */
 
-/*
- (c) 2010 JHU/APL & Others - Please Consult LICENSE.superdarn-rst.3.1-beta-18-gf704e97.txt for more information.
- */
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

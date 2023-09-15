@@ -4,10 +4,6 @@
    Based on algorithms developed by R.A. Greenwald and K.Oksavik
 */
 
-/*
- (c) 2010 JHU/APL & Others - Please Consult LICENSE.superdarn-rst.3.1-beta-18-gf704e97.txt for more information.
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
