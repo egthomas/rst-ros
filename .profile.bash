@@ -5,7 +5,6 @@ export OSTYPE="linux"
 export SYSTEM="linux"
 export VISUAL="vim"
 export EDITOR="$VISUAL"
-export PATH="${PATH}:/opt/local/bin:/usr/bin/:${HOME}/bin:${HOME}/script"
 
 if [ -z "${RSTPATH}" ] ; then
   export RSTPATH="/home/radar_user/rst-ros"
