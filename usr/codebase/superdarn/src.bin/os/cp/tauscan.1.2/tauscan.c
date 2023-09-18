@@ -160,7 +160,7 @@ int main(int argc,char *argv[]) {
   /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
   /* NOTE: the function just assigns the remaing functions starting with
    *       'Site' to the appropriate site specific functions, i.e.,
-   *       SiteStart() is SiteCveStart() for cve, etc. */
+   *       SiteStart() is SiteRosStart(), etc. */
   status=SiteBuild(libstr);
 
   if (status==-1) {
