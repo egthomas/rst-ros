@@ -84,7 +84,7 @@ int rst_opterr(char *txt) {
 
 
 int main(int argc,char *argv[]) {
-  char progid[80]={"uafsound 2023/09/13"};
+  char progid[80]={"uafsound 2023/09/18"};
   char progname[256]="uafsound";
   char modestr[32];
 
@@ -553,6 +553,7 @@ int main(int argc,char *argv[]) {
          continue;
     }
 
+    TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
       ErrLog(errlog.sock,progname,"Opening new files.");
       for (n=0;n<tnum;n++) {

@@ -307,6 +307,7 @@ int main(int argc,char *argv[]) {
 
     if (SiteStartScan() !=0) continue;
 
+    TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
       ErrLog(errlog.sock,progname,"Opening new files.");
       for (n=0;n<tnum;n++) {

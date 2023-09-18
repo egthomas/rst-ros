@@ -741,6 +741,7 @@ int main(int argc,char *argv[]) {
      if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list, scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times, scnsc, scnus, intsc, intus, iBeam) !=0) continue;
 */
 
+    TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
       ErrLog(errlog.sock,progname,"Opening new files.");
       for (n=0;n<tnum;n++) {
