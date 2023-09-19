@@ -98,7 +98,7 @@ int main(int argc,char *argv[]) {
   struct sigaction act;
   struct sigaction oldact;
 
-  schedule.refresh=10*60;
+  schedule.refresh=24*3600;
 
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
