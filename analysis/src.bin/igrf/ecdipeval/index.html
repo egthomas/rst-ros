@@ -1,0 +1,75 @@
+<head>
+<title>ecdipeval</title>
+<link rel=stylesheet href="../../../../css/doc.css" type=text/css>
+</head>
+<body>
+<div id="root">
+
+<div id="banner">
+
+</div>
+
+<div id="location">
+<table width=100% class="location"><tr>
+<td><a href="../../../../index.html">Home</a><td>|</td>
+<td><a href=../../../../analysis/index.html>analysis</a></td>
+<td>|</td><td><a href=../../../../analysis/src.bin/index.html>src.bin</a></td><td>|</td><td><a href=../../../../analysis/src.bin/igrf/index.html>igrf</a></td><td>|</td>
+<td>ecdipeval</td>
+<td width=100% align=right><a href=../../../../analysis/src.bin/indexdoc.html>Index</a></td>
+</tr>
+</table>
+</div>
+
+<div id="main">
+<h2 class="doctitle">ecdipeval</h2>
+<table>
+<tr><td class="docsubtitle" valign=top>Syntax</td></tr>
+<tr><td></td><td width=80% class="docbox" style="font-family: courier;">
+ecdipeval --help<br>ecdipeval [-i] [-lat <em>lat</em>] [-lon <em>lon</em>] [-alt <em>alt</em>] [-fmt <em>format</em>]<br>ecdipeval [-i] [-f <em>filename</em>]  [-fmt <em>format</em>]<br></td></tr>
+<tr><td class="docsubtitle">Synopsis</td></tr>
+<tr><td></td><td><p>Convert to and from eccentric dipole coordinates.</p></td></tr>
+
+<tr><td class="docsubtitle">Options</td></tr>
+<tr><td></td><td>
+<table width=100%><tr><td width="150" valign="top"><code>--help</code></td><td valign="top">print the help message and exit.</td></tr>
+<tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
+<tr><td width="150" valign="top"><code>-i</code></td><td valign="top">perform the inverse conversion.</td></tr>
+<tr><td width="150" valign="top"><code>-mlt</code></td><td valign="top">perform the conversion between magnetic longitude and magnetic local time.</td></tr>
+<tr><td width="150" valign="top"><code>-lat <em>lat</em></code></td><td valign="top">calculate for the latitude <em>lat</em>.</td></tr>
+<tr><td width="150" valign="top"><code>-lon <em>lon</em></code></td><td valign="top">calculate for the longitude <em>lon</em>.</td></tr>
+<tr><td width="150" valign="top"><code>-alt <em>alt</em></code></td><td valign="top">calculate for the altitude in kilometers, <em>alt</em>.</td></tr>
+<tr><td width="150" valign="top"><code>-re <em>Re</em></code></td><td valign="top">calculate for the Earth radius in kilometers, <em>Re</em> (inverse only).</td></tr>
+<tr><td width="150" valign="top"><code>-d <em>yyyymmdd</em></code></td><td valign="top">calculate for the date <em>yyyymmdd</em>.</td></tr>
+<tr><td width="150" valign="top"><code>-t <em>hr:mn</em></code></td><td valign="top">calculate for the time <em>hr:mn</em>.</td></tr>
+<tr><td width="150" valign="top"><code>-fmt <em>format</em></code></td><td valign="top">use the string <em>fmt</em>, to format the output.</td></tr>
+<tr><td width="150" valign="top"><code>-f <em>filename</em></code></td><td valign="top">read a sequence of latitudes, longitudes and altitudes from the ASCII file, <em>filename</em>.</td></tr>
+</table></td></tr>
+<tr><td class="docsubtitle">Description</td></tr>
+<tr><td></td><td>
+<p>Converts to and from eccentric dipole coordinates. The output is written to standard output using the formatting string given by the "<code>-fmt</code>" option. The format string should be in the same format as that used by the <code>printf</code> function and will take two double precision floating point numbers as arguments.</p>
+<p>If the "<code>-f</code>" option is given, the latitude,longitude and altitude are read from a space separated ASCII file. If the filename is "<code>-</code>" input is read from standard input.</p>
+</td></tr>
+<tr><td class="docsubtitle">Examples</td></tr>
+<tr><td></td><td>
+<table ><tr><td class="docbox" ><pre width="80">ecdipeval -lat 85.4 -lon 32.4 -alt 300.0</pre></td></tr></table>
+<p>Convert the coordinate given by latitude of 85.4 degrees, longitude 32.4 degrees and altitude of 300 kilometers to eccentric dipole coordinates.</p>
+
+<table ><tr><td class="docbox" ><pre width="80">ecdipeval -i -f ecdip.txt</pre></td></tr></table>
+<p>Convert the eccentric dipole coordinates in the file "<code>ecdip.txt</code>", back to geographic coordinates.</p>
+</td></tr>
+
+
+</table>
+<br><br>
+</div>
+
+<div id="tail">
+</div>
+
+</div>
+
+</body>
+
+
+
+

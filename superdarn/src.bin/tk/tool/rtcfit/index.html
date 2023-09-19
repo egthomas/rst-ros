@@ -50,10 +50,10 @@ rtcfit --help<br>rtcfit [-vb] [-mp <em>minpwr</em>]  [-L <em>logname</em>] [-p <
 </td></tr>
 <tr><td class="docsubtitle">Examples</td></tr>
 <tr><td></td><td>
-<table ><tr><td class="docbox" ><pre width="80">make_cfit -L log -if pid.id kapqnx.jhuapl.edu 1024</pre></td></tr></table>
+<table ><tr><td class="docbox" ><pre width="80">rtcfit -L log -if pid.id kapqnx.jhuapl.edu 1024</pre></td></tr></table>
 <p>Generates <code>cfit</code> files from the host "<code>kapqnx.jhuapl.edu</code>", served at port 1024. The process identifier is recorded in the file "<code>pid.id</code>", and logs of all transactions are recorded in the file "<code>log.<em>yyyymmdd</em></code>" where <em>yyyy</em> is the year, <em>mm</em> is the month, and <em>dd</em> is the day.</p>
 
-<table ><tr><td class="docbox" ><pre width="80">make_cfit -L log -if pid.id -rpf port.kap kapqnx.jhuapl.edu</pre></td></tr></table>
+<table ><tr><td class="docbox" ><pre width="80">rtcfit -L log -if pid.id -rpf port.kap kapqnx.jhuapl.edu</pre></td></tr></table>
 <p>Generates <code>cfit</code> files from the host "<code>kapqnx.jhuapl.edu</code>", served at port contained in the file "<code>port.kap</code>". The process identifier is recorded in the file "<code>pid.id</code>", and logs of all transactions are recorded in the file "<code>log.<em>yyyymmdd</em></code>" where <em>yyyy</em> is the year, <em>mm</em> is the month, and <em>dd</em> is the day.</p>
 </td></tr>
 

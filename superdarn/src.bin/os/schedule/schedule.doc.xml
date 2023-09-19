@@ -11,11 +11,11 @@
 </option>
 <option><on>--version</on><od>print the RST version number and exit.</od>
 </option>
-<option><on>-d</on><od>reload the schedule once a day.</od>
+<option><on>-d</on><od>reload the schedule once a day (default).</od>
 </option>
 <option><on>-h</on><od>reload the schedule once an hour.</od>
 </option>
-<option><on>-t</on><od>reload the schedule once every 10 minutes (default).</od>
+<option><on>-t</on><od>reload the schedule once every 10 minutes.</od>
 </option>
 <option><on>-m</on><od>reload the schedule once a minute.</od>
 </option>
