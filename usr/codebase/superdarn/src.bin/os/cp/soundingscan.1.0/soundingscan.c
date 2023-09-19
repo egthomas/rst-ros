@@ -317,6 +317,7 @@ int main(int argc,char *argv[]) {
     printf("Entering Site Start Scan Station ID: %s  %d\n",ststr,stid);
     if (SiteStartScan() !=0) continue;
 
+    TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
       ErrLog(errlog.sock,progname,"Opening new files.");
       for (n=0; n<tnum; n++) {
@@ -465,17 +466,17 @@ void usage(void)
   printf("  -fast     : 1-min scan (2-min default)\n");
   printf(" -frang int : delay to first range (km) [180]\n");
   printf("  -rsep int : range separation (km) [45]\n");
-  printf(" -nrang int : number of range gates [100]\n");
-  printf("    -dt int : hour when day freq. is used [site.c]\n");
-  printf("    -nt int : hour when night freq. is used [site.c]\n");
-  printf("    -df int : daytime frequency (kHz) [site.c]\n");
-  printf("    -nf int : nighttime frequency (kHz) [site.c]\n");
-  printf("   -xcf     : set for computing XCFs [global.c]\n");
-  printf("    -sb int : starting beam [site.c]\n");
-  printf("    -eb int : ending beam [site.c]\n");
-  printf("    -ep int : error log port (must be set here for dual radars)\n");
-  printf("    -sp int : shell port (must be set here for dual radars)\n");
-  printf("    -bp int : base port (must be set here for dual radars)\n");
+  printf(" -nrang int : number of range gates\n");
+  printf("    -dt int : hour when day freq. is used\n");
+  printf("    -nt int : hour when night freq. is used\n");
+  printf("    -df int : daytime frequency (kHz)\n");
+  printf("    -nf int : nighttime frequency (kHz)\n");
+  printf("   -xcf     : set for computing XCFs\n");
+  printf("    -sb int : starting beam\n");
+  printf("    -eb int : ending beam\n");
+  printf("    -ep int : error log port\n");
+  printf("    -sp int : shell port\n");
+  printf("    -bp int : base port\n");
   printf("  -stid char: radar string (must be set here for dual radars)\n");
   printf("  -cpid int : set to override control program idx \n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");

@@ -92,13 +92,12 @@ int main(int argc,char *argv[]) {
   char *path;
 
   FILE *fp;
-  int tick=0;
 
   sigset_t set;
   struct sigaction act;
   struct sigaction oldact;
 
-  schedule.refresh=10*60;
+  schedule.refresh=24*3600;
 
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
@@ -210,7 +209,7 @@ int main(int argc,char *argv[]) {
       struct stat nstat1, nstat2;
       log_info(0, "Waiting for schedule file.");
       stat(schedule.name, &nstat1);
-      sleep(10);
+      /* sleep(10); */
       stat(schedule.name, &nstat2);
       while (nstat1.st_mtime != nstat2.st_mtime) {
         log_info(0, "File is being modified.");
@@ -242,8 +241,6 @@ int main(int argc,char *argv[]) {
       schedule.cnt=set_schedule(&schedule);
     }
     sleep(1);
-    tick++;
-    tick=tick % 10;
 
   } while(1);
 

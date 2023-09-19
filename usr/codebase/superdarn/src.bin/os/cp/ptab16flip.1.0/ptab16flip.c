@@ -53,7 +53,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"ptab16flip 2023/09/13"};
+char progid[80]={"ptab16flip 2023/09/18"};
 char progname[256];
 
 int arg=0;
@@ -275,6 +275,7 @@ int main(int argc,char *argv[])
     printf("Entering Site Start Scan Station ID: %s  %d\n",ststr,stid);
     if (SiteStartScan() !=0) continue;
 
+    TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
       ErrLog(errlog.sock,progname,"Opening new files.");
       for (n=0;n<tnum;n++) {
@@ -425,16 +426,16 @@ void usage(void)
     printf("\nptab16flip [command-line options]\n\n");
     printf("command-line options:\n");
     printf("    -di     : indicates running during discretionary time\n");
-    printf("    -dt int : hour when day freq. is used [site.c]\n");
-    printf("    -nt int : hour when night freq. is used [site.c]\n");
-    printf("    -df int : daytime frequency (kHz) [site.c]\n");
-    printf("    -nf int : nighttime frequency (kHz) [site.c]\n");
-    printf("   -xcf     : set for computing XCFs [global.c]\n");
-    printf("    -sb int : starting beam [site.c]\n");
-    printf("    -eb int : ending beam [site.c]\n");
-    printf("    -ep int : error log port (must be set here for dual radars)\n");
-    printf("    -sp int : shell port (must be set here for dual radars)\n");
-    printf("    -bp int : base port (must be set here for dual radars)\n");
+    printf("    -dt int : hour when day freq. is used\n");
+    printf("    -nt int : hour when night freq. is used\n");
+    printf("    -df int : daytime frequency (kHz)\n");
+    printf("    -nf int : nighttime frequency (kHz)\n");
+    printf("   -xcf     : set for computing XCFs\n");
+    printf("    -sb int : starting beam\n");
+    printf("    -eb int : ending beam\n");
+    printf("    -ep int : error log port\n");
+    printf("    -sp int : shell port\n");
+    printf("    -bp int : base port\n");
     printf(" -stid char : radar string (must be set here for dual radars)\n");
     printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
     printf("-frqrng int : set the clear frequency search window (kHz)\n");

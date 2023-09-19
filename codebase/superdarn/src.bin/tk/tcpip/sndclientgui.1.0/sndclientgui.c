@@ -675,9 +675,9 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
 
     if (fbuf->beam[j] == 0) continue;
 
-    if ((j==prm->bmnum) && plot->colorflg) attron(COLOR_PAIR(6));
+    if ((j==prm->bmnum) && !plot->snd && plot->colorflg) attron(COLOR_PAIR(6));
     printw("%02d: ",j);
-    if ((j==prm->bmnum) && plot->colorflg) attroff(COLOR_PAIR(6));
+    if ((j==prm->bmnum) && !plot->snd && plot->colorflg) attroff(COLOR_PAIR(6));
 
     for (i=0; i<plot->nrng; i++) {
       if (fbuf->qflg[j][i] == 1) {
