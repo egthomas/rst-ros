@@ -92,7 +92,6 @@ int main(int argc,char *argv[]) {
   char *path;
 
   FILE *fp;
-  int tick=0;
 
   sigset_t set;
   struct sigaction act;
@@ -242,8 +241,6 @@ int main(int argc,char *argv[]) {
       schedule.cnt=set_schedule(&schedule);
     }
     sleep(1);
-    tick++;
-    tick=tick % 10;
 
   } while(1);
 
