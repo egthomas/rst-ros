@@ -505,7 +505,7 @@ void usage(void)
   printf("    -df int : daytime frequency (kHz)\n");
   printf("    -nf int : nighttime frequency (kHz)\n");
   printf("   -xcf     : set for computing XCFs\n");
-  printf(" -nrang int : number or range gates\n");
+  printf(" -nrang int : number of range gates\n");
   printf("    -sb int : starting beam\n");
   printf("    -eb int : ending beam\n");
   printf("  -camp int : camping beam [7]\n");

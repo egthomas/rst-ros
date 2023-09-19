@@ -563,7 +563,7 @@ void usage(void)
   printf("    -df int : daytime frequency (kHz)\n");
   printf("    -nf int : nighttime frequency (kHz)\n");
   printf("   -xcf     : set for computing XCFs\n");
-  printf(" -nrang int : number or range gates\n");
+  printf(" -nrang int : number of range gates\n");
   printf("    -ep int : error log port\n");
   printf("    -sp int : shell port\n");
   printf("    -bp int : base port\n");
