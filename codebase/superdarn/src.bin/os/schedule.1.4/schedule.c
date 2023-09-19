@@ -210,7 +210,7 @@ int main(int argc,char *argv[]) {
       struct stat nstat1, nstat2;
       log_info(0, "Waiting for schedule file.");
       stat(schedule.name, &nstat1);
-      sleep(1);
+      /* sleep(10); */
       stat(schedule.name, &nstat2);
       while (nstat1.st_mtime != nstat2.st_mtime) {
         log_info(0, "File is being modified.");
