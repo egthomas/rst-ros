@@ -38,6 +38,7 @@
 #include "schedule.h"
 
 int then=-1;
+int tdy=-1;
 time_t tval=-1;
 
 
@@ -64,9 +65,10 @@ int test_refresh(struct scd_blk *ptr) {
   /* okay check whether we're on a refresh boundary */
 
   if (then==-1) then=now;
-  if (then !=now) {
+  if ((then != now) || (tdy != dy)) {
     tval=buf.st_mtime;
     then=now;
+    tdy=dy;
     return 1;
   }
 
