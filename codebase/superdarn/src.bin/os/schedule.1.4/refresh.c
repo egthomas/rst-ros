@@ -59,12 +59,14 @@ int test_refresh(struct scd_blk *ptr) {
   if (buf.st_mtime !=tval) {
     tval=buf.st_mtime;
     then=now;
+    tdy=dy;
     return 1;
   }
 
   /* okay check whether we're on a refresh boundary */
 
   if (then==-1) then=now;
+  if (tdy==-1) tdy=dy;
   if ((then != now) || (tdy != dy)) {
     tval=buf.st_mtime;
     then=now;
