@@ -723,7 +723,7 @@ int main(int argc,char *argv[]) {
 
     /* Set iBeam for scan loop  */ 
     if(nowait==0)
-       iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,0);
+       iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,nBeams_per_scan);
     else 
        iBeam = 0;
 

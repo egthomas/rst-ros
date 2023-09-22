@@ -543,7 +543,7 @@ int main(int argc,char *argv[]) {
     }
 
     /* Set iBeam for scan loop  */ 
-    iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,0);
+    iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,nBeams_per_scan);
 
     /* send scan data to usrp_sever */
     //if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list, scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times, scnsc, scnus, intsc, intus, iBeam) !=0){
