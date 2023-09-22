@@ -125,7 +125,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "nowait", 'x', &scannowait);
   OptionAdd(&opt, "sb",     'i', &sbm);
   OptionAdd(&opt, "eb",     'i', &ebm);
-  OptionAdd(&opt, "c"  ,    'i', &cnum);
+  OptionAdd(&opt, "c",      'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address */
   OptionAdd(&opt, "debug",  'x', &debug);
   OptionAdd(&opt, "-option",'x', &option);

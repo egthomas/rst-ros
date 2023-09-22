@@ -296,7 +296,7 @@ int main(int argc,char *argv[]) {
         strncat(progname,modestr,sizeof(progname)-strlen(progname)-1);
       } 
 
-      if (onesec) {    /* If onesec option selected , no longer wait for scan boundaries, activate clear frequency skip option*/
+      if (onesec) {    /* If onesec option selected, no longer wait for scan boundaries, activate clear frequency skip option*/
         cp    = 152;
         intsc = 1;
         intus = 0;
@@ -606,7 +606,7 @@ int main(int argc,char *argv[]) {
   /* Attempt to adjust mpinc to be a multiple of 10 and a muliple of txpl */
   if ((mpinc % txpl) || (mpinc % 10))  {
     ErrLog(errlog.sock,progname,"Error: mpinc not multiple of txpl... checking to see if it can be adjusted");
-    sprintf(logtxt,"Initial: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc , txpl, nbaud, rsep);
+    sprintf(logtxt,"Initial: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc, txpl, nbaud, rsep);
     ErrLog(errlog.sock,progname,logtxt);
     if((txpl % 10)==0) {
 
@@ -624,7 +624,7 @@ int main(int argc,char *argv[]) {
   }
   /* Check mpinc and if still invalid, exit with error */
   if ((mpinc % txpl) || (mpinc % 10) || (mpinc==0))  {
-     sprintf(logtxt,"Error: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc , txpl, nbaud, rsep);
+     sprintf(logtxt,"Error: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc, txpl, nbaud, rsep);
      ErrLog(errlog.sock,progname,logtxt);
      exitpoll = 1;
      SiteExit(0);

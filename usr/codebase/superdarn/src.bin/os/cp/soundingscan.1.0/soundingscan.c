@@ -167,7 +167,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "intus",  'i', &intus);
   OptionAdd(&opt, "setintt",'x', &setintt);
 
-  OptionAdd(&opt, "c"  ,    'i', &cnum);
+  OptionAdd(&opt, "c",      'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address  */
   OptionAdd(&opt, "debug"  ,'x', &debug);
   OptionAdd(&opt, "-help",  'x', &hlp);      /* just dump some parameters   */
