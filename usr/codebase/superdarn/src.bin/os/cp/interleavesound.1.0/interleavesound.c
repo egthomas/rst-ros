@@ -346,7 +346,7 @@ int main(int argc,char *argv[]) {
       } else xcf=0;
     } else xcf=0;
 
-    skip = OpsFindSkip(scnsc,scnus,intsc,intus,0);
+    skip = OpsFindSkip(scnsc,scnus,intsc,intus,nintgs);
 
     bmnum = bms[skip];      /* no longer need forward and backward arrays... */
 
