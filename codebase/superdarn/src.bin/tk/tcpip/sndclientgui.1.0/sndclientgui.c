@@ -501,7 +501,7 @@ void read_fit_data(struct RadarParm *prm, struct FitData *fit,
 
   plot->snd = 0;
 
-  fbuf->beam[prm->bmnum]=1;
+  fbuf->beam[prm->bmnum] = 1;
 
   if (prm->bmnum > plot->max_beam) plot->max_beam = prm->bmnum;
 
