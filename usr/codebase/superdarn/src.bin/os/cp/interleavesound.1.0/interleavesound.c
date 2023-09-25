@@ -163,7 +163,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);     /* fix the transmit frequency */
   OptionAdd(&opt,"frqrng",'i',&frqrng);     /* fix the FCLR window [kHz] */
   OptionAdd(&opt,"sfrqrng",'i',&snd_frqrng); /* sounding FCLR window [kHz] */
-  OptionAdd(&opt,"c"  ,   'i',&cnum);
+  OptionAdd(&opt,"c",     'i',&cnum);
   OptionAdd(&opt,"ros",   't',&roshost);    /* Set the roshost IP address */
   OptionAdd(&opt,"debug", 'x',&debug);
   OptionAdd(&opt,"-help", 'x',&hlp);        /* just dump some parameters */
@@ -346,7 +346,7 @@ int main(int argc,char *argv[]) {
       } else xcf=0;
     } else xcf=0;
 
-    skip = OpsFindSkip(scnsc,scnus,intsc,intus,0);
+    skip = OpsFindSkip(scnsc,scnus,intsc,intus,nintgs);
 
     bmnum = bms[skip];      /* no longer need forward and backward arrays... */
 

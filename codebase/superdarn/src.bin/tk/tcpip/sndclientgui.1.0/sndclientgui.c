@@ -81,6 +81,7 @@ struct SndBuffer {
 struct PlotOptions {
   int nrng;
   unsigned char colorflg;
+  unsigned char rngflg;
   unsigned char gflg;
   unsigned char menu;
   double nlevels;
@@ -157,7 +158,9 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
+
   OptionAdd(&opt,"nrange",'i',&plot.nrng);
+  OptionAdd(&opt,"r",'x',&plot.rngflg);
 
   OptionAdd(&opt,"gs",'x',&plot.gflg);
   OptionAdd(&opt,"p",'x',&plot.pwrflg);
@@ -324,6 +327,7 @@ void init_plot(struct PlotOptions *plot) {
 
   plot->nrng = 75;
   plot->colorflg = 1;
+  plot->rngflg = 0;
   plot->gflg = 0;
   plot->menu = 1;
 
@@ -391,6 +395,8 @@ int check_key(int c, struct PlotOptions *plot) {
       plot->smax = plot->emax;
     } else if (c == 'g') {
       plot->gflg = !plot->gflg;
+    } else if (c == 'r') {
+      plot->rngflg = !plot->rngflg;
     } else if (c == 's') {
       plot->sndflg = !plot->sndflg;
       plot->hold = 0;
@@ -495,7 +501,7 @@ void read_fit_data(struct RadarParm *prm, struct FitData *fit,
 
   plot->snd = 0;
 
-  fbuf->beam[prm->bmnum]=1;
+  fbuf->beam[prm->bmnum] = 1;
 
   if (prm->bmnum > plot->max_beam) plot->max_beam = prm->bmnum;
 
@@ -661,10 +667,17 @@ void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOpt
 
   /* Draw range gate labels */
   move(12, 0);
-  printw("B\\G 0         ");
-  for (i=1; i*10<plot->nrng; i++) {
-    if (i*10 < 100) printw("%d        ",i*10);
-    else            printw("%d       ",i*10);
+  if (plot->rngflg) {
+    printw("B\\R %d",prm->frang);
+    for (i=1; i*10<plot->nrng; i++) {
+      printw("%10d",prm->frang+prm->rsep*i*10);
+    }
+  } else {
+    printw("B\\G 0         ");
+    for (i=1; i*10<plot->nrng; i++) {
+      if (i*10 < 100) printw("%d        ",i*10);
+      else            printw("%d       ",i*10);
+    }
   }
   printw("\n");
 
@@ -722,10 +735,17 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
 
   /* Draw range gate labels */
   move(12, 0);
-  printw("F\\G 0         ");
-  for (i=1; i*10<SND_RANGE; i++) {
-    if (i*10 < 100) printw("%d        ",i*10);
-    else            printw("%d       ",i*10);
+  if (plot->rngflg) {
+    printw("F\\R %d",prm->frang);
+    for (i=1; i*10<SND_RANGE; i++) {
+      printw("%10d",prm->frang+prm->rsep*i*10);
+    }
+  } else {
+    printw("F\\G 0         ");
+    for (i=1; i*10<SND_RANGE; i++) {
+      if (i*10 < 100) printw("%d        ",i*10);
+      else            printw("%d       ",i*10);
+    }
   }
   printw("\n");
 

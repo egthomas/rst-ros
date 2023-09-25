@@ -296,7 +296,7 @@ int main(int argc,char *argv[]) {
         strncat(progname,modestr,sizeof(progname)-strlen(progname)-1);
       } 
 
-      if (onesec) {    /* If onesec option selected , no longer wait for scan boundaries, activate clear frequency skip option*/
+      if (onesec) {    /* If onesec option selected, no longer wait for scan boundaries, activate clear frequency skip option*/
         cp    = 152;
         intsc = 1;
         intus = 0;
@@ -352,13 +352,10 @@ int main(int argc,char *argv[]) {
      int bmse[16] = { 0,4,8,12, 2,6,10,14, 1,5,9,13, 3,7,11,15 };
      int bmsw[16] = { 15,11,7,3, 13,9,5,1, 14,10,6,2, 12,8,4,0 };
      int *beampattern2take;
-     if (strcmp(ststr,"mcm") == 0) {  /* TODO change back to kod */
-        beampattern2take = bmse;             /* 1-min sequence */
-     } else if (strcmp(ststr,"cvw") == 0) {
+     if (strcmp(ststr,"ksr") == 0) {
         beampattern2take = bmsw;             /* 1-min sequence */
      } else {
-       printf("Error: Not intended for station %s\n", ststr);
-       return (-1);
+        beampattern2take = bmse;             /* 1-min sequence */
      }
      sync_scan  = 1; 
      scan_times = malloc(nBeams_per_scan * sizeof(int));
@@ -609,7 +606,7 @@ int main(int argc,char *argv[]) {
   /* Attempt to adjust mpinc to be a multiple of 10 and a muliple of txpl */
   if ((mpinc % txpl) || (mpinc % 10))  {
     ErrLog(errlog.sock,progname,"Error: mpinc not multiple of txpl... checking to see if it can be adjusted");
-    sprintf(logtxt,"Initial: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc , txpl, nbaud, rsep);
+    sprintf(logtxt,"Initial: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc, txpl, nbaud, rsep);
     ErrLog(errlog.sock,progname,logtxt);
     if((txpl % 10)==0) {
 
@@ -627,7 +624,7 @@ int main(int argc,char *argv[]) {
   }
   /* Check mpinc and if still invalid, exit with error */
   if ((mpinc % txpl) || (mpinc % 10) || (mpinc==0))  {
-     sprintf(logtxt,"Error: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc , txpl, nbaud, rsep);
+     sprintf(logtxt,"Error: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc, txpl, nbaud, rsep);
      ErrLog(errlog.sock,progname,logtxt);
      exitpoll = 1;
      SiteExit(0);
@@ -726,7 +723,7 @@ int main(int argc,char *argv[]) {
 
     /* Set iBeam for scan loop  */ 
     if(nowait==0)
-       iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,0);
+       iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,nBeams_per_scan);
     else 
        iBeam = 0;
 

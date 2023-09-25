@@ -151,7 +151,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"stid",  't',&ststr);
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);     /* fix the transmit frequency */
   OptionAdd(&opt,"camp",  'i',&cbm);        /* camping beam number */
-  OptionAdd(&opt,"c"  ,   'i',&cnum);
+  OptionAdd(&opt,"c",     'i',&cnum);
   OptionAdd(&opt,"ros",   't',&roshost);    /* Set the roshost IP address */
   OptionAdd(&opt,"debug", 'x',&debug);
   OptionAdd(&opt,"-help", 'x',&hlp);        /* just dump some parameters */
@@ -357,25 +357,7 @@ int main(int argc,char *argv[]) {
       } else xcf=0;
     } else xcf=0;
 
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
-
-    /* is this C99? why is this a sequential control structure with variables
-     * being declared and not attached to anything? */
-    {
-      int tv;
-      int bv;
-      int iv;
-      TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
-      iv = intsc*1000000 + intus;   /* integration period in microseconds */
-      bv = scnsc*1000000 + scnus;   /* scan period in microseconds */
-      /* select the beam based on the current time.
-         centered on integration peroid (+iv/2)
-         minus a delay (-.1us) not sure how solid this number is */
-      tv = (mt* 60 + sc)* 1000000 + us + iv/2 - 100000;
-      skip = (tv % bv)/iv;
-      if (skip > nintgs-1) skip = 0;
-      else if (skip < 0)   skip = 0;
-    }
+    skip=OpsFindSkip(scnsc,scnus,intsc,intus,nintgs);
 
     bmnum = bms[skip];      /* no longer need forward and backward arrays... */
 

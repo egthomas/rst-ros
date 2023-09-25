@@ -79,6 +79,7 @@ int main(int argc,char *argv[]) {
   unsigned char version=0;
 
   unsigned char colorflg=1;
+  unsigned char rngflg=0;
   unsigned char gflg=0;
   unsigned char menu=1;
   double nlevels=5;
@@ -118,7 +119,9 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
+
   OptionAdd(&opt,"nrange",'i',&nrng);
+  OptionAdd(&opt,"r",'x',&rngflg);
 
   OptionAdd(&opt,"gs",'x',&gflg);
   OptionAdd(&opt,"p",'x',&pwrflg);
@@ -265,6 +268,8 @@ int main(int argc,char *argv[]) {
         smax=emax;
       } else if (c == 'g') {
         gflg = !gflg;
+      } else if (c == 'r') {
+        rngflg = !rngflg;
       } else if (c == 'n') {
         menu = !menu;
       } else if (c == KEY_UP) {
@@ -433,11 +438,12 @@ int main(int argc,char *argv[]) {
           move(3, 80); addch(ACS_VLINE);
           move(4, 50); addch(ACS_VLINE);
           move(4, 52); addch(ACS_UARROW);
-          printw(" : increase scale");
+          printw(" : increase scale r : show");
           move(4, 80); addch(ACS_VLINE);
           move(5, 50); addch(ACS_VLINE);
           move(5, 52); addch(ACS_DARROW);
-          printw(" : decrease scale");
+          if (rngflg) printw(" : decrease scale     gate");
+          else        printw(" : decrease scale     rng");
         }
         move(5, 80); addch(ACS_VLINE);
         move(6, 50); addch(ACS_VLINE);
@@ -455,10 +461,17 @@ int main(int argc,char *argv[]) {
 
       /* Draw range gate labels */
       move(12, 0);
-      printw("B\\G 0         ");
-      for (i=1; i*10<nrng; i++) {
-        if (i*10 < 100) printw("%d        ",i*10);
-        else            printw("%d       ",i*10);
+      if (rngflg) {
+        printw("B\\R %d",prm->frang);
+        for (i=1; i*10<nrng; i++) {
+          printw("%10d",prm->frang+prm->rsep*i*10);
+        }
+      } else {
+        printw("B\\G 0         ");
+        for (i=1; i*10<nrng; i++) {
+          if (i*10 < 100) printw("%d        ",i*10);
+          else            printw("%d       ",i*10);
+        }
       }
       printw("\n");
 

@@ -64,11 +64,10 @@ int OpsFindSkip(int scnsc, int scnus, int synsc, int synus, int nbm)
 {
   unsigned tv,bv,iv;
   int skip;
-  /*int nbm;*/
 
   /* option to pass in number of beams for camping mode */
-/*  if (nbm <= 0) nbm = fabs(ebm-sbm) + 1;*/  /* # of bms to get thru in scan */
-  if (nbm <= 0) nbm = abs(ebm-sbm); /* Evan doesn't like the +1 ... */
+  if (nbm <= 0) nbm = abs(ebm-sbm) + 1;
+
   TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
   /* all times converted to microseconds */
   iv   = synsc*1000000 + synus;  /* sync time for one beam */
@@ -77,19 +76,8 @@ int OpsFindSkip(int scnsc, int scnus, int synsc, int synus, int nbm)
                                                        add half a beam & some
                                                        rando buffer for FCLR? */
   skip = (tv % bv)/iv;
-  if (skip > nbm || skip < 0) skip = 0;
+  if (skip > nbm-1 || skip < 0) skip = 0;
 
   return skip;
-  /*
-  nbm=fabs(ebm-sbm);
-  TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
-  iv=intsc*1000000+intus;
-  bv=bsc*1000000+bus;
-  tv=(mt*60+sc)*1000000+us+iv/2-100000;
-  skip=(tv % bv)/iv;
-  if (skip>nbm) skip=0;
-  if (skip<0) skip=0;
-  return skip;
-  */
 }
 

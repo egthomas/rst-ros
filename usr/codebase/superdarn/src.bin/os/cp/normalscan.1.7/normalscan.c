@@ -168,7 +168,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "scnsc",  'i', &scnsc);     /* set the scan time */
   OptionAdd(&opt, "scnus",  'i', &scnus);
 
-  OptionAdd(&opt, "c"  ,    'i', &cnum);
+  OptionAdd(&opt, "c",      'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);  /* Set the roshost IP address  */
   OptionAdd(&opt, "debug",  'x', &debug);
 
