@@ -679,7 +679,7 @@ int SiteRosIntegrate(int (*lags)[2]) {
     tval = (tick.tv_sec+tick.tv_usec/1.0e6) - (tack.tv_sec+tack.tv_usec/1.0e6);
 
     if (nave > 0) tavg = tval/nave;
-     
+
     tick.tv_sec  += floor(tavg);
     tick.tv_usec += 1.0e6*(tavg-floor(tavg));
 
@@ -785,7 +785,7 @@ int SiteRosIntegrate(int (*lags)[2]) {
     if (debug) {
       fprintf(stderr,"%s GET_PARAMETERS:type=%c\n",station,rmsg.type);
       fprintf(stderr,"%s GET_PARAMETERS:status=%d\n",station,rmsg.status);
-      fprintf(stderr,"%s Number of samples: dprm.samples:%d tsprm.samples:%d "
+      fprintf(stderr,"%s Number of samples: dprm.samples:%d tsgprm.samples:%d "
                      "total_samples:%d\n",station,dprm.samples,tsgprm.samples,
                      total_samples);
       fprintf(stderr,"%s nave=%d\n",station,nave);
@@ -847,7 +847,7 @@ int SiteRosIntegrate(int (*lags)[2]) {
         }
       }
       if (dprm.samples < total_samples) {
-        fprintf(stderr,"Not enough  samples from the ROS in SiteIntegrate\n");
+        fprintf(stderr,"Not enough samples from the ROS in SiteIntegrate\n");
         fflush(stderr);
       }
 
