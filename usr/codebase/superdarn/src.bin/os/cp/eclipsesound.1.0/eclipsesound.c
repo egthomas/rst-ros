@@ -105,8 +105,8 @@ int main(int argc,char *argv[]) {
 
   /* ---------------- Variables for sounding --------------- */
   int *snd_bms;
-  int snd_bmse[]={0,12};   /* beam sequences for 24-beam MSI radars using only */
-  int snd_bmsw[]={22,12};  /*  2 selected beams */
+  int snd_bmse[]={22,12};  /* beam sequences for 24-beam MSI radars using only */
+  int snd_bmsw[]={0,12};   /*  2 selected beams */
   int snd_freq_cnt=0, snd_bm_cnt=0;
   int snd_bms_tot=2;
   int snd_freq;
