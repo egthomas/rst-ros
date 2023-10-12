@@ -53,7 +53,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"eclipsesound 2023/10/11"};
+char progid[80]={"eclipsesound 2023/10/12"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -89,22 +89,24 @@ int main(int argc,char *argv[]) {
   int def_txpl=0;
 
   /* new variables for dynamically creating beam sequences */
-  int *bms;           /* scanning beams                                     */
-  int nintgs=12;      /* number of integration periods per scan; SGS 1-min  */
+  int *bms;           /* scanning beams                         */
+  int nintgs=12;      /* number of integration periods per scan */
   unsigned char hlp=0;
   unsigned char option=0;
   unsigned char version=0;
 
   /*
-    beam sequences for 24-beam MSI radars but only using 12 even beams
+    beam sequences for 24-beam MSI radars but only using 12 beams
    */
   int bmse[12] =
-             { 0, 2, 4, 6, 8,10,12,14,16,18,20,22};
+             { 1, 3, 5, 7, 9,11,13,15,17,19,21,23};
   int bmsw[12] =
              {22,20,18,16,14,12,10, 8, 6, 4, 2, 0};
 
   /* ---------------- Variables for sounding --------------- */
-  int snd_bms[2]={0,12};
+  int *snd_bms;
+  int snd_bmse[]={7,23};
+  int snd_bmsw[]={0,16};
   int snd_freq_cnt=0, snd_bm_cnt=0;
   int snd_bms_tot=2;
   int snd_freq;
@@ -186,8 +188,10 @@ int main(int argc,char *argv[]) {
   /* Point to the beams here */
   if (strcmp(ststr,"cve") == 0) {
     bms = bmse;
+    snd_bms = snd_bmse;
   } else if (strcmp(ststr,"cvw") == 0) {
     bms = bmsw;
+    snd_bms = snd_bmsw;
   } else {
     printf("Error: Not intended for station %s\n", ststr);
     return (-1);
