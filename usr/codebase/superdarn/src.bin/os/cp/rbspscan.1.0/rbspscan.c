@@ -536,6 +536,7 @@ void usage(void)
 {
   printf("\nrbspscan [command-line options]\n\n");
   printf("command-line options:\n");
+  printf("  -stid char: radar string (required)\n");
   printf("    -di     : indicates running during discretionary time\n");
   printf("  -fast     : run beam sequence that can do full scans in 1-min\n");
   printf(" -frang int : delay to first range (km) [180]\n");
@@ -549,7 +550,6 @@ void usage(void)
   printf("    -ep int : error log port\n");
   printf("    -sp int : shell port\n");
   printf("    -bp int : base port\n");
-  printf("  -stid char: radar string (must be set here for dual radars)\n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
   printf("     -c int : channel number for multi-channel radars.\n");
   printf("   -ros char: change the roshost IP address\n");

@@ -480,6 +480,7 @@ void usage(void)
 {
   printf("\npcodescan [command-line options]\n\n");
   printf("command-line options:\n");
+  printf("  -stid char: radar string (required)\n");
   printf("    -di     : indicates running during discretionary time\n");
   printf("  -fast     : 1-min scan (2-min default)\n");
   printf(" -frang int : delay to first range (km) [180]\n");
@@ -495,7 +496,6 @@ void usage(void)
   printf("    -ep int : error log port\n");
   printf("    -sp int : shell port\n");
   printf("    -bp int : base port\n");
-  printf("  -stid char: radar string (must be set here for dual radars)\n");
   printf("  -cpid int : set to override control program idx \n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
   printf("-nowait     : do not wait at end of scan boundary.\n");
