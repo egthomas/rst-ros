@@ -436,7 +436,7 @@ void usage(void)
 {
     printf("\neveryotherbeam [command-line options]\n\n");
     printf("command-line options:\n");
-    printf("   -stid char: radar string (required)\n");
+    printf("  -stid char: radar string (required)\n");
     printf("    -di     : indicates running during discretionary time\n");
     printf(" -frang int : delay to first range (km) [180]\n");
     printf("  -rsep int : range separation (km) [45]\n");
