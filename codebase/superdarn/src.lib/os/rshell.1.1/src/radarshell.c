@@ -146,6 +146,7 @@ int RadarShell(int sock,struct RShellTable *ptr) {
       break;
     case var_STRING:
       strncpy(tmp,ptr->ptr[n].data,STR_MAX);
+      tmp[STR_MAX-1] = '\0';
       RShellBufferAlloc(buf,tmp,STR_MAX);
       break;
     default:

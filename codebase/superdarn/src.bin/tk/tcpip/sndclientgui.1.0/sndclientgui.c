@@ -276,15 +276,15 @@ int main(int argc,char *argv[]) {
 
   do {
 
-    /* Check for key press to change options or exit */
-    c = getch();
-    ret = check_key(c,&plot);
-    if (ret == -1) break;
-
     /* Read real-time data from radar */
     status=FitCnxRead(1,&sock,prm,fit,&flag,NULL);
 
     if (status==-1) break;
+
+    /* Check for key press to change options or exit */
+    c = getch();
+    ret = check_key(c,&plot);
+    if (ret == -1) break;
 
     if (flag !=-1) {
 

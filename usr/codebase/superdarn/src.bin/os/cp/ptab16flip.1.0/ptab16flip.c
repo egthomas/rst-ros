@@ -425,6 +425,7 @@ void usage(void)
 {
     printf("\nptab16flip [command-line options]\n\n");
     printf("command-line options:\n");
+    printf("  -stid char: radar string (required)\n");
     printf("    -di     : indicates running during discretionary time\n");
     printf("    -dt int : hour when day freq. is used\n");
     printf("    -nt int : hour when night freq. is used\n");
@@ -436,7 +437,6 @@ void usage(void)
     printf("    -ep int : error log port\n");
     printf("    -sp int : shell port\n");
     printf("    -bp int : base port\n");
-    printf(" -stid char : radar string (must be set here for dual radars)\n");
     printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
     printf("-frqrng int : set the clear frequency search window (kHz)\n");
     printf("     -c int : channel number for multi-channel radars.\n");

@@ -449,6 +449,7 @@ void usage(void)
 {
   printf("\ninterleavescan [command-line options]\n\n");
   printf("command-line options:\n");
+  printf("  -stid char: radar string (required)\n");
   printf("    -di     : indicates running during discretionary time\n");
   printf(" -frang int : delay to first range (km) [180]\n");
   printf("  -rsep int : range separation (km) [45]\n");
@@ -461,7 +462,6 @@ void usage(void)
   printf("    -ep int : error log port\n");
   printf("    -sp int : shell port\n");
   printf("    -bp int : base port\n");
-  printf("  -stid char: radar string (must be set here for dual radars)\n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
   printf("     -c int : channel number for multi-channel radars.\n");
   printf("   -ros char: change the roshost IP address.\n");

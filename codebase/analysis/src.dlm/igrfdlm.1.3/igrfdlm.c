@@ -67,27 +67,51 @@ union IDLIGRFPtr {
 };
 
 
-static IDL_VPTR IDLIGRF_GetDateTime(int argc,IDL_VPTR *argv) {
+static IDL_VPTR IDLIGRF_GetDateTime(int argc,IDL_VPTR *argv,char *argk) {
 
   int s=0;
   int yr,mo,dy,hr,mt,sc,dayno;
+  IDL_VPTR outargv[7];
+
+  static IDL_VPTR month;
+  static IDL_VPTR day;
+  static IDL_VPTR hour;
+  static IDL_VPTR minute;
+  static IDL_VPTR second;
+  static IDL_VPTR dyno;
+  static IDL_LONG silent;
+
+  static IDL_KW_PAR kw_pars[]={IDL_KW_FAST_SCAN,
+      {"DAY",IDL_TYP_UNDEF,1,IDL_KW_OUT|IDL_KW_ZERO,0,IDL_CHARA(day)},
+      {"DYNO",IDL_TYP_UNDEF,1,IDL_KW_OUT|IDL_KW_ZERO,0,IDL_CHARA(dyno)},
+      {"HOUR",IDL_TYP_UNDEF,1,IDL_KW_OUT|IDL_KW_ZERO,0,IDL_CHARA(hour)},
+      {"MINUTE",IDL_TYP_UNDEF,1,IDL_KW_OUT|IDL_KW_ZERO,0,IDL_CHARA(minute)},
+      {"MONTH",IDL_TYP_UNDEF,1,IDL_KW_OUT|IDL_KW_ZERO,0,IDL_CHARA(month)},
+      {"SECOND",IDL_TYP_UNDEF,1,IDL_KW_OUT|IDL_KW_ZERO,0,IDL_CHARA(second)},
+      {"SILENT",IDL_TYP_LONG,1,IDL_KW_ZERO,0,IDL_CHARA(silent)},
+      {NULL}};
+
+  IDL_KWCleanup(IDL_KW_MARK);
+  IDL_KWGetParams(argc,argv,argk,kw_pars,outargv,1);
 
   s=IGRF_GetDateTime(&yr,&mo,&dy,&hr,&mt,&sc,&dayno);
 
   if (yr==-1) {
-    IDL_MessageFromBlock(msg_block,IGRF_DATENOTSET,IDL_MSG_RET);
+    if (!silent) IDL_MessageFromBlock(msg_block,IGRF_DATENOTSET,IDL_MSG_RET);
     s=-1;
+    IDL_KWCleanup(IDL_KW_CLEAN);
     return (IDL_GettmpLong(s));
   }
 
-  IDL_StoreScalar(argv[0],IDL_TYP_LONG,(IDL_ALLTYPES *) &yr);
-  IDL_StoreScalar(argv[1],IDL_TYP_LONG,(IDL_ALLTYPES *) &mo);
-  IDL_StoreScalar(argv[2],IDL_TYP_LONG,(IDL_ALLTYPES *) &dy);
-  IDL_StoreScalar(argv[3],IDL_TYP_LONG,(IDL_ALLTYPES *) &hr);
-  IDL_StoreScalar(argv[4],IDL_TYP_LONG,(IDL_ALLTYPES *) &mt);
-  IDL_StoreScalar(argv[5],IDL_TYP_LONG,(IDL_ALLTYPES *) &sc);
-  IDL_StoreScalar(argv[6],IDL_TYP_LONG,(IDL_ALLTYPES *) &dayno);
+  IDL_StoreScalar(outargv[0],IDL_TYP_LONG,(IDL_ALLTYPES *) &yr);
+  if (month) IDL_StoreScalar(month,IDL_TYP_LONG,(IDL_ALLTYPES *) &mo);
+  if (day) IDL_StoreScalar(day,IDL_TYP_LONG,(IDL_ALLTYPES *) &dy);
+  if (hour) IDL_StoreScalar(hour,IDL_TYP_LONG,(IDL_ALLTYPES *) &hr);
+  if (minute) IDL_StoreScalar(minute,IDL_TYP_LONG,(IDL_ALLTYPES *) &mt);
+  if (second) IDL_StoreScalar(second,IDL_TYP_LONG,(IDL_ALLTYPES *) &sc);
+  if (dyno) IDL_StoreScalar(dyno,IDL_TYP_LONG,(IDL_ALLTYPES *) &dayno);
 
+  IDL_KWCleanup(IDL_KW_CLEAN);
   return (IDL_GettmpLong(s));
 }
 
@@ -992,7 +1016,7 @@ int IDL_Load(void) {
 
   static IDL_SYSFUN_DEF2 fnaddr[]={
     { {IDLIGRFModelCall},"IGRFMODELCALL",7,7,0,0},
-    { {IDLIGRF_GetDateTime},"IGRF_GETDATETIME",7,7,0,0},
+    { {IDLIGRF_GetDateTime},"IGRF_GETDATETIME",1,1,IDL_SYSFUN_DEF_F_KEYWORDS,0},
     { {IDLIGRF_SetDateTime},"IGRF_SETDATETIME",1,6,0,0},
     { {IDLIGRF_SetNow},"IGRF_SETNOW",0,0,0,0},
     { {IDLIGRF_Tilt},"IGRF_TILT",6,6,0,0},

@@ -1,15 +1,6 @@
-/* testscan.c
- ============
+/* eclipsesound.c
+ ================
  Author: E.G.Thomas
-         S.G.Shepherd
-
- A mode which slightly changes the beam sequence such that the scan no
-   longer starts on the overlapping meridional beams, to try to debug
-   the noise problem on those beams
-
- Updates:
-   20160531 - first version
-   20221123 - adapted from interleavescan to use beam arrays
 
  */
 
@@ -37,6 +28,7 @@
 #include "fitblk.h"
 #include "fitdata.h"
 #include "fitacf.h"
+#include "snddata.h"
 #include "errlog.h"
 #include "freq.h"
 #include "tcpipmsg.h"
@@ -48,17 +40,20 @@
 #include "reopen.h"
 #include "sequence.h"
 #include "setup.h"
+#include "snd.h"
 #include "sync.h"
 #include "site.h"
 #include "sitebuild.h"
 #include "siteglobal.h"
+
+#define RT_TASK 3
 
 char *ststr=NULL;
 char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"testscan"};
+char progid[80]={"eclipsesound 2023/10/12"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -70,7 +65,7 @@ void usage(void);
 
 int rst_opterr(char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
-  fprintf(stderr,"Please try: testscan --help\n");
+  fprintf(stderr,"Please try: eclipsesound --help\n");
   return(-1);
 }
 
@@ -79,39 +74,52 @@ int main(int argc,char *argv[]) {
   char logtxt[1024]="";
   char tempLog[40];
 
-  int scannowait=0;
-  /* these are set for a standard 1-min scan, any changes here will affect
-     the number of beams sampled, etc.
-   */
   int scnsc=60;
   int scnus=0;
 
   int skip;
-/*  int skipsc= 3;  serves same purpose as globals intsc and intus */
-/*  int skipus= 0;*/
   int cnt=0;
   int i,n;
   unsigned char discretion=0;
   int status=0;
   int fixfrq=0;
 
+  int def_nrang=0;
+  int def_rsep=0;
+  int def_txpl=0;
+
   /* new variables for dynamically creating beam sequences */
-  int *bms;           /* scanning beams                                     */
-  int intgt[20];      /* start times of each integration period             */
-  int nintgs=20;      /* number of integration periods per scan; SGS 1-min  */
+  int *bms;           /* scanning beams                         */
+  int nintgs=12;      /* number of integration periods per scan */
   unsigned char hlp=0;
   unsigned char option=0;
   unsigned char version=0;
 
   /*
-    beam sequences for 24-beam MSI radars but only using 20 most meridional
-      beams;
+    beam sequences for 24-beam MSI radars but only using 12 beams
    */
-  /* count     1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 */
-  int bmse[20] =
-             { 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19, 0};
-  int bmsw[20] =
-             {22,21,20,19,18,17,16,15,14,13,12,11,10, 9, 8, 7, 6, 5, 4,23};
+  int bmse[12] =
+             { 1, 3, 5, 7, 9,11,13,15,17,19,21,23};
+  int bmsw[12] =
+             {22,20,18,16,14,12,10, 8, 6, 4, 2, 0};
+
+  /* ---------------- Variables for sounding --------------- */
+  int *snd_bms;
+  int snd_bmse[]={7,23};
+  int snd_bmsw[]={0,16};
+  int snd_freq_cnt=0, snd_bm_cnt=0;
+  int snd_bms_tot=2;
+  int snd_freq;
+  int snd_frqrng=100;
+  int snd_nrang=100;
+  int snd_rsep=45;
+  int snd_txpl=300;
+  int fast_intt_sc=2;
+  int fast_intt_us=500000;
+  int snd_intt_sc=1;
+  int snd_intt_us=600000;
+  float snd_time, snd_intt, time_needed=0.1;
+  /* ------------------------------------------------------- */
 
   struct sequence *seq;
 
@@ -119,14 +127,12 @@ int main(int argc,char *argv[]) {
   OpsBuild8pulse(seq);
 
   /* standard radar defaults */
-  cp     = 131;         /* not using 151 normalscan to keep Simon happy */
-  intsc  = 3;           /* integration period; not sure how critical this is */
-  intus  = 0;           /*  but can be changed here */
+  cp     = 1103;
   mppul  = seq->mppul;
   mplgs  = seq->mplgs;
   mpinc  = seq->mpinc;
   rsep   = 45;
-  txpl   = 300;         /* note: recomputed below */
+  txpl   = 300;     /* note: recomputed below */
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
   OptionAdd(&opt,"di",    'x',&discretion);
@@ -143,6 +149,8 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"bp",    'i',&baseport);
   OptionAdd(&opt,"stid",  't',&ststr);
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);     /* fix the transmit frequency */
+  OptionAdd(&opt,"frqrng",'i',&frqrng);     /* fix the FCLR window [kHz] */
+  OptionAdd(&opt,"sfrqrng",'i',&snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt,"c",     'i',&cnum);
   OptionAdd(&opt,"ros",   't',&roshost);    /* Set the roshost IP address */
   OptionAdd(&opt,"debug", 'x',&debug);
@@ -151,7 +159,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-version",'x',&version);
 
   /* Process all of the command line options
-     Important: need to do this here because we need stid and ststr */
+      Important: need to do this here because we need stid and ststr */
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
   if (arg==-1) {
@@ -168,51 +176,38 @@ int main(int argc,char *argv[]) {
     exit(0);
   }
 
-  /* start time of each integration period */
-  for (i=0; i<nintgs; i++)
-    intgt[i] = i*(intsc + intus*1e-6);
-
-  if (ststr==NULL) ststr=dfststr;
-
-  /* Point to the beams here */
-  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
-    bms = bmse;     /* 1-min sequence */
-  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
-    bms = bmsw;     /* 1-min sequence */
-  } else {
-    if (hlp) usage();
-    else     printf("Error: Not intended for station %s\n", ststr);
-    return (-1);
-  }
-
   if (hlp) {
     usage();
-
-/*  printf("  start beam: %2d\n", sbm); */
-/*  printf("  end   beam: %2d\n", ebm); */
-    printf("\n");
-    printf("sqnc  stme  bmno\n");
-    for (i=0; i<nintgs; i++) {
-      printf(" %2d   %3d    %2d", i, intgt[i], bms[i]);
-      printf("\n");
-    }
-
     return (-1);
   }
-
-  /* end of main Dartmouth mods */
-  /* not sure if -nrang commandline option works */
 
   if (ststr==NULL) ststr=dfststr;
 
   channel = cnum;
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
+  /* Point to the beams here */
+  if (strcmp(ststr,"cve") == 0) {
+    bms = bmse;
+    snd_bms = snd_bmse;
+  } else if (strcmp(ststr,"cvw") == 0) {
+    bms = bmsw;
+    snd_bms = snd_bmsw;
+  } else {
+    printf("Error: Not intended for station %s\n", ststr);
+    return (-1);
+  }
+
+  intsc = fast_intt_sc;
+  intus = fast_intt_us;
+
+  snd_intt = snd_intt_sc + snd_intt_us*1e-6;
+
   OpsStart(ststr);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
-  status=SiteBuild(libstr);
+  /* Load the sounding frequencies */
+  OpsLoadSndFreqs(ststr);
 
+  status=SiteBuild(libstr);
   if (status==-1) {
     fprintf(stderr,"Could not load site library.\n");
     exit(1);
@@ -241,14 +236,13 @@ int main(int argc,char *argv[]) {
   for (n=0;n<tnum;n++) task[n].port+=baseport;
 
   /* dump beams to log file */
-  sprintf(progname,"testscan");
+  sprintf(progname,"eclipsesound");
   for (i=0; i<nintgs; i++){
     sprintf(tempLog, "%3d", bms[i]);
     strcat(logtxt, tempLog);
   }
   ErrLog(errlog.sock,progname,logtxt);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src */
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
@@ -271,21 +265,32 @@ int main(int argc,char *argv[]) {
 
   txpl=(rsep*20)/3;     /* computing TX pulse length */
 
+  def_nrang = nrang;
+  def_rsep = rsep;
+  def_txpl = txpl;
+
   OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
 
   for (n=0;n<tnum;n++) {
     RMsgSndReset(task[n].sock);
-    RMsgSndOpen(task[n].sock,strlen( (char *) command),command);
+    RMsgSndOpen(task[n].sock, strlen((char *)command), command);
   }
 
   OpsFitACFStart();
-
-  tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+  OpsSndStart();
 
   if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
+  if ((def_nrang == snd_nrang) && (def_rsep == snd_rsep)) {
+    tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+  }
+
   do {
+
+    if ((def_nrang != snd_nrang) || (def_rsep != snd_rsep)) {
+      tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
+    }
 
     if (SiteStartScan() !=0) continue;
 
@@ -298,7 +303,7 @@ int main(int argc,char *argv[]) {
       }
     }
 
-    scan=1;
+    scan = 1;
 
     ErrLog(errlog.sock,progname,"Starting scan.");
 
@@ -310,27 +315,11 @@ int main(int argc,char *argv[]) {
       } else xcf=0;
     } else xcf=0;
 
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,nintgs);
+    skip = OpsFindSkip(scnsc,scnus,intsc,intus,nintgs);
 
-    bmnum = bms[skip];  /* no longer need forward and backward arrays... */
+    bmnum = bms[skip];      /* no longer need forward and backward arrays... */
 
     do {
-
-      /* Synchronize to the desired start time */
-
-      /* This will only work, if the total time through the do loop is < 3s */
-      /* If this is not the case, decrease the Integration time */
-      /* MAX < or <=  3s ? */
-      /* once again, don't like this... */
-
-      {
-        int t_now;
-        int t_dly;
-        TimeReadClock( &yr, &mo, &dy, &hr, &mt, &sc, &us);
-        t_now = ( (mt*60 + sc)*1000 + us/1000 ) % (scnsc*1000 + scnus/1000);
-        t_dly = intgt[skip]*1000 - t_now;
-        if (t_dly > 0) usleep(t_dly);
-      }
 
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
@@ -404,15 +393,134 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      scan=0;
+      scan = 0;
       if (skip == (nintgs-1)) break;
       skip++;
       bmnum = bms[skip];
 
     } while (1);
 
+
+    /* In here comes the sounder code */
+    /* set the "sounder mode" scan variable */
+    scan = -2;
+
+    /* set the xcf variable to do cross-correlations (AOA) */
+    if (xcnt > 1) xcf = 1;
+
+    /* set the sounding mode integration time, number of ranges,
+     * and range separation */
+    intsc = snd_intt_sc;
+    intus = snd_intt_us;
+    nrang = snd_nrang;
+    rsep = snd_rsep;
+    txpl = snd_txpl;
+
+    /* make a new timing sequence for the sounding */
+    if ((def_nrang != snd_nrang) || (def_rsep != snd_rsep)) {
+      tsgid = SiteTimeSeq(seq->ptab);
+    }
+
+    /* we have time until the end of the minute to do sounding */
+    /* minus a safety factor given in time_needed */
+    TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
+    snd_time = 60.0 - (sc + us*1e-6);
+
+    while (snd_time-snd_intt > time_needed) {
+
+      /* set the beam */
+      bmnum = snd_bms[snd_bm_cnt];
+
+      /* snd_freq will be an array of frequencies to step through */
+      snd_freq = snd_freqs[snd_freq_cnt];
+
+      /* the scanning code is here */
+      sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,intsc,intus,hr,mt,sc,us);
+      ErrLog(errlog.sock,progname,logtxt);
+      ErrLog(errlog.sock,progname,"Starting SND Integration.");
+      SiteStartIntt(intsc,intus);
+
+      ErrLog(errlog.sock, progname, "Doing SND clear frequency search.");
+      sprintf(logtxt, "FRQ: %d %d", snd_freq, snd_frqrng);
+      ErrLog(errlog.sock,progname, logtxt);
+      tfreq = SiteFCLR(snd_freq, snd_freq + snd_frqrng);
+
+      sprintf(logtxt,"Transmitting SND on: %d (Noise=%g)",tfreq,noise);
+      ErrLog(errlog.sock, progname, logtxt);
+
+      nave = SiteIntegrate(seq->lags);
+      if (nave < 0) {
+        sprintf(logtxt, "SND integration error: %d", nave);
+        ErrLog(errlog.sock,progname, logtxt);
+        continue;
+      }
+      sprintf(logtxt,"Number of SND sequences: %d",nave);
+      ErrLog(errlog.sock,progname,logtxt);
+
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
+      OpsBuildRaw(raw);
+      FitACF(prm,raw,fblk,fit,site,tdiff,-999);
+
+      msg.num = 0;
+      msg.tsize = 0;
+
+      tmpbuf=RadarParmFlatten(prm,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,PRM_TYPE,0);
+
+      tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
+
+      RMsgSndSend(task[RT_TASK].sock,&msg);
+      for (n=0;n<msg.num;n++) {
+        if ( (msg.data[n].type == PRM_TYPE) ||
+             (msg.data[n].type == FIT_TYPE) )  free(msg.ptr[n]);
+      }
+
+      sprintf(logtxt, "SBC: %d  SFC: %d", snd_bm_cnt, snd_freq_cnt);
+      ErrLog(errlog.sock, progname, logtxt);
+
+      /* set the scan variable for the sounding mode data file only */
+      if ((bmnum == snd_bms[0]) && (snd_freq == snd_freqs[0])) {
+        prm->scan = 1;
+      } else {
+        prm->scan = 0;
+      }
+
+      OpsBuildSnd(snd,prm,fit);
+
+      /* save the sounding mode data */
+      OpsWriteSnd(errlog.sock, progname, snd, ststr);
+
+      ErrLog(errlog.sock, progname, "Polling SND for exit.");
+
+      /* check for the end of a beam loop */
+      snd_freq_cnt++;
+      if (snd_freq_cnt >= snd_freqs_tot) {
+        /* reset the freq counter and increment the beam counter */
+        snd_freq_cnt = 0;
+        snd_bm_cnt++;
+        if (snd_bm_cnt >= snd_bms_tot) {
+          snd_bm_cnt = 0;
+          break;
+        }
+      }
+
+      /* see if we have enough time for another go round */
+      TimeReadClock(&yr, &mo, &dy, &hr, &mt, &sc, &us);
+      snd_time = 60.0 - (sc + us*1e-6);
+    }
+
+    /* now wait for the next scan */
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-    if (scannowait==0) SiteEndScan(scnsc,scnus,5000);
+
+    intsc = fast_intt_sc;
+    intus = fast_intt_us;
+    nrang = def_nrang;
+    rsep = def_rsep;
+    txpl = def_txpl;
+
+    SiteEndScan(scnsc,scnus,5000);
+
   } while (1);
 
   for (n=0;n<tnum;n++) RMsgSndClose(task[n].sock);
@@ -427,25 +535,27 @@ int main(int argc,char *argv[]) {
 
 void usage(void)
 {
-  printf("\ntestscan [command-line options]\n\n");
-  printf("command-line options:\n");
-  printf("  -stid char: radar string (required)\n");
-  printf("    -di     : indicates running during discretionary time\n");
-  printf(" -frang int : delay to first range (km) [180]\n");
-  printf("  -rsep int : range separation (km) [45]\n");
-  printf("    -dt int : hour when day freq. is used\n");
-  printf("    -nt int : hour when night freq. is used\n");
-  printf("    -df int : daytime frequency (kHz)\n");
-  printf("    -nf int : nighttime frequency (kHz)\n");
-  printf("   -xcf     : set for computing XCFs\n");
-  printf(" -nrang int : number of range gates\n");
-  printf("    -ep int : error log port\n");
-  printf("    -sp int : shell port\n");
-  printf("    -bp int : base port\n");
-  printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
-  printf("     -c int : channel number for multi-channel radars.\n");
-  printf("   -ros char: change the roshost IP address.\n");
-  printf(" --help     : print this message and quit.\n");
-  printf("\n");
+    printf("\neclipsesound [command-line options]\n\n");
+    printf("command-line options:\n");
+    printf("   -stid char: radar string (required)\n");
+    printf("     -di     : indicates running during discretionary time\n");
+    printf("  -frang int : delay to first range (km) [180]\n");
+    printf("   -rsep int : range separation (km) [45]\n");
+    printf("     -dt int : hour when day freq. is used\n");
+    printf("     -nt int : hour when night freq. is used\n");
+    printf("     -df int : daytime frequency (kHz)\n");
+    printf("     -nf int : nighttime frequency (kHz)\n");
+    printf("    -xcf     : set for computing XCFs\n");
+    printf("  -nrang int : number of range gates\n");
+    printf("     -ep int : error log port\n");
+    printf("     -sp int : shell port\n");
+    printf("     -bp int : base port\n");
+    printf(" -fixfrq int : transmit on fixed frequency (kHz)\n");
+    printf(" -frqrng int : set the clear frequency search window (kHz)\n");
+    printf("-sfrqrng int : set the sounding FCLR search window (kHz)\n");
+    printf("      -c int : channel number for multi-channel radars.\n");
+    printf("    -ros char: change the roshost IP address\n");
+    printf("  --help     : print this message and quit.\n");
+    printf("\n");
 }
 
