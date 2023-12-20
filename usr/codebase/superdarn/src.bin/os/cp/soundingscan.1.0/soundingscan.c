@@ -478,7 +478,7 @@ void usage(void)
   printf("    -ep int : error log port\n");
   printf("    -sp int : shell port\n");
   printf("    -bp int : base port\n");
-  printf("  -cpid int : set to override control program idx \n");
+  printf("  -cpid int : set to override control program id\n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
   printf("-frqrng int : set the clear frequency search window (kHz)\n");
   printf("-nowait     : do not wait at end of scan boundary.\n");
