@@ -80,9 +80,12 @@ int operate(pid_t parent,int sock) {
 
   int AGC[16],LOPWR[16];
 
+  int usecs;
+  int yr,mo,dy,hr,mt,sc,us;
   int intsc,intus,nrang,mpinc,smsep,lagfr,mppul,nbaud;
   int *pcode=NULL;
 
+  uint32_t nave,tmp;
   int32_t periods_per_scan,fixFreq,sync_scan;
   int32_t scn_sc,scn_us,int_sc,int_us,start_period;
   int32_t sbeam_list[100];
@@ -248,22 +251,43 @@ int operate(pid_t parent,int sock) {
         badtrdat.start_usec= malloc(sizeof(unsigned int)*badtrdat.length);
         badtrdat.duration_usec= malloc(sizeof(unsigned int)*badtrdat.length);
 
-        TCPIPMsgSend(sock,&dprm,sizeof(struct DataPRM));
-        if(dprm.status==0) {
-          TCPIPMsgSend(sock, rdata.main, 4*dprm.samples);
-          TCPIPMsgSend(sock, rdata.back, 4*dprm.samples);
+        usecs = (int)dprm.samples/rprm.baseband_samplerate*1e6;
+        nave = (int)((int_sc*1e6+int_us)/usecs);
 
+        TCPIPMsgSend(sock, &dprm, sizeof(struct DataPRM));
+        TCPIPMsgSend(sock, &nave, sizeof(uint32_t));
+
+        if (dprm.status == 0) {
           TCPIPMsgSend(sock, &badtrdat.length, sizeof(badtrdat.length));
-
           TCPIPMsgSend(sock, badtrdat.start_usec,
                        sizeof(unsigned int)*badtrdat.length);
           TCPIPMsgSend(sock, badtrdat.duration_usec,
                        sizeof(unsigned int)*badtrdat.length);
 
-          TCPIPMsgSend(sock,&num_transmitters,sizeof(int));
+          TCPIPMsgSend(sock, &num_transmitters, sizeof(int));
+          TCPIPMsgSend(sock, AGC, sizeof(int)*num_transmitters);
+          TCPIPMsgSend(sock, LOPWR, sizeof(int)*num_transmitters);
 
-          TCPIPMsgSend(sock,AGC,sizeof(int)*num_transmitters);
-          TCPIPMsgSend(sock,LOPWR,sizeof(int)*num_transmitters);
+          TCPIPMsgSend(sock, &yr, sizeof(int));
+          TCPIPMsgSend(sock, &mo, sizeof(int));
+          TCPIPMsgSend(sock, &dy, sizeof(int));
+          TCPIPMsgSend(sock, &hr, sizeof(int));
+          TCPIPMsgSend(sock, &mt, sizeof(int));
+          TCPIPMsgSend(sock, &sc, sizeof(int));
+          TCPIPMsgSend(sock, &us, sizeof(int));
+        }
+
+        TCPIPMsgSend(sock, &rprm, sizeof(struct ControlPRM));
+
+        for (i=0; i<nave; i++) {
+          usleep((int)(usecs*0.9));
+
+          TCPIPMsgSend(sock, &dprm.event_secs, sizeof(uint32_t));
+          TCPIPMsgSend(sock, &dprm.event_nsecs, sizeof(uint32_t));
+
+          TCPIPMsgSend(sock, rdata.main, 4*dprm.samples);
+          TCPIPMsgSend(sock, rdata.back, 4*dprm.samples);
+          TCPIPMsgRecv(sock, &tmp, sizeof(uint32_t));
         }
         break;
 
