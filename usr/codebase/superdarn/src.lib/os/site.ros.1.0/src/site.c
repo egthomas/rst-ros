@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <errno.h>
@@ -665,14 +666,17 @@ int SiteRosIntegrate(int (*lags)[2]) {
   int atstp=0;
   int thr=0,lmt=0;
   int aflg=0,abflg=0;
-  void *dest; /*AJ*/
+  void *dest=NULL; /*AJ*/
   int total_samples=0; /*AJ*/
   int usecs;
   short I,Q;
 
+  uint32_t number_of_sequences_in_integration_period;
+
   /* phase code declarations */
   int n,nsamp, *code, Iout, Qout;
-  uint32 uQ32,uI32;
+  uint32 uI32,uQ32;
+  uint32 *maddr, *baddr;
 
   if (debug) fprintf(stderr,"%s SiteIntegrate: start\n",station);
 
@@ -683,15 +687,30 @@ int SiteRosIntegrate(int (*lags)[2]) {
 
   if (mplgexs == 0) {
     lagtable[0] = malloc(sizeof(int)*(mplgs+1));
+    if (lagtable[0] == NULL) {
+      fprintf(stderr,"Lagtable-0 is Null\n");
+      SiteRosExit(-1);
+    }
     lagtable[1] = malloc(sizeof(int)*(mplgs+1));
-
+    if (lagtable[1] == NULL) {
+      fprintf(stderr,"Lagtable-1 is Null\n");
+      SiteRosExit(-1);
+    }
     for (i=0; i<=mplgs; i++) {
       lagtable[0][i] = lags[i][0];
       lagtable[1][i] = lags[i][1];
     }
   } else {
     lagtable[0] = malloc(sizeof(int)*(mplgexs+1));
+    if (lagtable[0] == NULL) {
+      fprintf(stderr,"Lagtable-0 is Null\n");
+      SiteRosExit(-1);
+    }
     lagtable[1] = malloc(sizeof(int)*(mplgexs+1));
+    if (lagtable[1] == NULL) {
+      fprintf(stderr,"Lagtable-1 is Null\n");
+      SiteRosExit(-1);
+    }
 
     for (i=0; i<=mplgexs; i++) {
       lagtable[0][i] = lags[i][0];
@@ -721,133 +740,141 @@ int SiteRosIntegrate(int (*lags)[2]) {
     }
   }
 
-  while (1) {
-    SiteRosExit(0);
+  /* Start of SiteIntegration loop was located here */
+  SiteRosExit(0);
 
-    seqtval[nave].tv_sec  = tick.tv_sec;
-    seqtval[nave].tv_nsec = tick.tv_usec*1000;
-    seqatten[nave] = 0;
-    seqnoise[nave] = 0;
+  seqtval[nave].tv_sec  = tick.tv_sec;
+  seqtval[nave].tv_nsec = tick.tv_usec*1000;
+  seqatten[nave] = 0;
+  seqnoise[nave] = 0;
+  seqbadtr[nave].num = 0;
 
-    seqbadtr[nave].num = 0;
-    if (seqbadtr[nave].start != NULL)  free(seqbadtr[nave].start);
-    if (seqbadtr[nave].length != NULL) free(seqbadtr[nave].length);
-    seqbadtr[nave].start  = NULL;
-    seqbadtr[nave].length = NULL;
+  rprm.tbeam = bmnum;
+  rprm.tfreq = tfreq;
+  rprm.rfreq = tfreq;
+  rprm.trise = 5000;
+  rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
+  rprm.filter_bandwidth    = rprm.baseband_samplerate;
+  rprm.match_filter        = dmatch;
+  rprm.number_of_samples   = total_samples + nbaud + 10;
+  rprm.priority            = cnum;
+  rprm.buffer_index        = 0;
 
-    tval = (tick.tv_sec+tick.tv_usec/1.0e6) - (tack.tv_sec+tack.tv_usec/1.0e6);
+  usecs = (int)(rprm.number_of_samples/rprm.baseband_samplerate*1E6);
 
-    if (nave > 0) tavg = tval/nave;
+  smsg.type = SET_PARAMETERS;
+  TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
+  TCPIPMsgSend(ros.sock,&rprm,sizeof(struct ControlPRM));
+  TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
+  if (debug) {
+    fprintf(stderr,"SET_PARAMETERS:type=%c\n",rmsg.type);
+    fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
+  }
 
-    tick.tv_sec  += floor(tavg);
-    tick.tv_usec += 1.0e6*(tavg-floor(tavg));
+  smsg.type = SET_READY_FLAG;
+  TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
+  TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
+  if (debug) {
+    fprintf(stderr,"SET_READY_FLAG:type=%c\n",rmsg.type);
+    fprintf(stderr,"SET_READY_FLAG:status=%d\n",rmsg.status);
+  }
 
-    time_diff  = (tick.tv_sec-tock.tv_sec);
-    time_diff += (tick.tv_usec-tock.tv_usec)/1E6;
-    if (time_diff > 0.) break;
+  usleep(usecs);
 
-    rprm.tbeam = bmnum;
-    rprm.tfreq = tfreq;
-    rprm.rfreq = tfreq;
-    rprm.trise = 5000;
-    rprm.baseband_samplerate = ((double)nbaud/(double)txpl)*1E6;
-    rprm.filter_bandwidth    = rprm.baseband_samplerate;
-    rprm.match_filter        = dmatch;
-    rprm.number_of_samples   = total_samples + nbaud + 10;
-    rprm.priority            = cnum;
-    rprm.buffer_index        = 0;
+  smsg.type = GET_DATA;
+  if (rdata.main != NULL) free(rdata.main);
+  if (rdata.back != NULL) free(rdata.back);
+  rdata.main = NULL;
+  rdata.back = NULL;
+  TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
+  if (debug) fprintf(stderr,"%s GET_DATA: recv dprm\n",station);
 
-    usecs = (int)(rprm.number_of_samples/rprm.baseband_samplerate*1E6);
+  TCPIPMsgRecv(ros.sock,&dprm,sizeof(struct DataPRM));
+  if (rdata.main) free(rdata.main);
+  if (rdata.back) free(rdata.back);
+  if (debug) fprintf(stderr,"%s GET_DATA: samples %d status %d\n",
+                     station,dprm.samples,dprm.status);
 
-    smsg.type = SET_PARAMETERS;
-    TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
-    TCPIPMsgSend(ros.sock,&rprm,sizeof(struct ControlPRM));
-    TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
-    if (debug) {
-      fprintf(stderr,"SET_PARAMETERS:type=%c\n",rmsg.type);
-      fprintf(stderr,"SET_PARAMETERS:status=%d\n",rmsg.status);
-    }
+  TCPIPMsgRecv(ros.sock,&number_of_sequences_in_integration_period, sizeof(uint32_t));
 
-    smsg.type = SET_READY_FLAG;
-    TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
-    TCPIPMsgRecv(ros.sock,&rmsg,sizeof(struct ROSMsg));
-    if (debug) {
-      fprintf(stderr,"SET_READY_FLAG:type=%c\n",rmsg.type);
-      fprintf(stderr,"SET_READY_FLAG:status=%d\n",rmsg.status);
-    }
+  if (dprm.status == 0) {
+    if (debug)
+      fprintf(stderr,"%s GET_DATA: rdata.main: uint32: %ld array: %ld\n",
+              station,sizeof(uint32),sizeof(uint32)*dprm.samples);
 
-    usleep(usecs);
+    rdata.main = malloc(sizeof(uint32)*dprm.samples);
+    rdata.back = malloc(sizeof(uint32)*dprm.samples);
 
-    smsg.type = GET_DATA;
-    if (rdata.main != NULL) free(rdata.main);
-    if (rdata.back != NULL) free(rdata.back);
-    rdata.main = NULL;
-    rdata.back = NULL;
-    TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
-    if (debug) fprintf(stderr,"%s GET_DATA: recv dprm\n",station);
+    if (badtrdat.start_usec    != NULL) free(badtrdat.start_usec);
+    if (badtrdat.duration_usec != NULL) free(badtrdat.duration_usec);
+    badtrdat.start_usec = NULL;
+    badtrdat.duration_usec = NULL;
 
-    TCPIPMsgRecv(ros.sock,&dprm,sizeof(struct DataPRM));
-    if (rdata.main) free(rdata.main);
-    if (rdata.back) free(rdata.back);
-    if (debug) fprintf(stderr,"%s GET_DATA: samples %d status %d\n",
-                       station,dprm.samples,dprm.status);
+    if (debug)
+      fprintf(stderr,"%s GET_DATA: trtimes length %d\n",station,badtrdat.length);
 
-    if (dprm.status == 0) {
-      if (debug)
-        fprintf(stderr,"%s GET_DATA: rdata.main: uint32: %d array: %d\n",
-                station,(int)sizeof(uint32),(int)sizeof(uint32)*dprm.samples);
+    TCPIPMsgRecv(ros.sock, &badtrdat.length, sizeof(badtrdat.length));
+    if (debug)
+      fprintf(stderr,"%s GET_DATA: badtrdat.start_usec: uint32: %ld array: "
+              "%ld\n",station,sizeof(uint32),sizeof(uint32)*badtrdat.length);
+    badtrdat.start_usec    = malloc(sizeof(uint32)*badtrdat.length);
+    badtrdat.duration_usec = malloc(sizeof(uint32)*badtrdat.length);
+    if (debug) fprintf(stderr,"%s GET_DATA: start_usec\n",station);
 
-      rdata.main = malloc(sizeof(uint32)*dprm.samples);
-      rdata.back = malloc(sizeof(uint32)*dprm.samples);
-      if (debug) fprintf(stderr,"%s GET_DATA: recv main\n",station);
+    TCPIPMsgRecv(ros.sock, badtrdat.start_usec, sizeof(uint32)*badtrdat.length);
+    if (debug) fprintf(stderr,"%s GET_DATA: duration_usec\n",station);
 
-      TCPIPMsgRecv(ros.sock, rdata.main, sizeof(uint32)*dprm.samples);
-      if (debug) fprintf(stderr,"%s GET_DATA: recv back\n",station);
+    TCPIPMsgRecv(ros.sock, badtrdat.duration_usec, sizeof(uint32)*badtrdat.length);
+    TCPIPMsgRecv(ros.sock, &num_transmitters, sizeof(int));
+    TCPIPMsgRecv(ros.sock, &txstatus.AGC, sizeof(int)*num_transmitters);
+    TCPIPMsgRecv(ros.sock, &txstatus.LOWPWR, sizeof(int)*num_transmitters);
 
-      TCPIPMsgRecv(ros.sock, rdata.back, sizeof(uint32)*dprm.samples);
-      if (badtrdat.start_usec    != NULL) free(badtrdat.start_usec);
-      if (badtrdat.duration_usec != NULL) free(badtrdat.duration_usec);
-      if (debug)
-        fprintf(stderr,"%s GET_DATA: trtimes length %d\n",station,badtrdat.length);
+    /* receive trigger time of integration period */
+    TCPIPMsgRecv(ros.sock, &yr, sizeof(int));
+    TCPIPMsgRecv(ros.sock, &mo, sizeof(int));
+    TCPIPMsgRecv(ros.sock, &dy, sizeof(int));
+    TCPIPMsgRecv(ros.sock, &hr, sizeof(int));
+    TCPIPMsgRecv(ros.sock, &mt, sizeof(int));
+    TCPIPMsgRecv(ros.sock, &sc, sizeof(int));
+    TCPIPMsgRecv(ros.sock, &us, sizeof(int));
+  }
 
-      TCPIPMsgRecv(ros.sock, &badtrdat.length, sizeof(badtrdat.length));
-      if (debug) 
-        fprintf(stderr,"%s GET_DATA: badtrdat.start_usec: uint32: %d array: "
-                "%d\n",station,(int)sizeof(uint32),(int)sizeof(uint32)*badtrdat.length);
-      badtrdat.start_usec    = malloc(sizeof(uint32)*badtrdat.length);
-      badtrdat.duration_usec = malloc(sizeof(uint32)*badtrdat.length);
-      if (debug) fprintf(stderr,"%s GET_DATA: start_usec\n",station);
+  TCPIPMsgRecv(ros.sock, &rprm, sizeof(struct ControlPRM));
 
-      TCPIPMsgRecv(ros.sock, badtrdat.start_usec, sizeof(uint32)*badtrdat.length);
-      if (debug) fprintf(stderr,"%s GET_DATA: duration_usec\n",station);
+  if (debug) {
+    fprintf(stderr,"%s Number of samples: dprm.samples:%d tsgprm.samples:%d "
+            "total_samples:%d\n",station,dprm.samples,tsgprm.samples,
+            total_samples);
+    fprintf(stderr,"%s nave=%d\n",station,nave);
+    fprintf(stderr,"%s dprm.status=%d\n",station,dprm.status);
+    fprintf(stderr,"%s rprm.tbeam=%d\n",station,rprm.tbeam);
+    fprintf(stderr,"%s rprm.tfreq=%d\n",station,rprm.tfreq);
+  }
 
-      TCPIPMsgRecv(ros.sock, badtrdat.duration_usec,sizeof(uint32)*badtrdat.length);
-      TCPIPMsgRecv(ros.sock, &num_transmitters, sizeof(int));
-      TCPIPMsgRecv(ros.sock, &txstatus.AGC, sizeof(int)*num_transmitters);
-      TCPIPMsgRecv(ros.sock, &txstatus.LOWPWR, sizeof(int)*num_transmitters);
-    } else {
-      fprintf(stderr,"%s SiteIntegrate:: Bad pulse sequence status: %d (nave: %d)\n",station,dprm.status,nave);
-      fflush(stderr);
-      return -1;
-    }
+  /* loop for receiving data from each pulse sequence */
+  for (nave=0; nave<number_of_sequences_in_integration_period; nave++) {
 
-    TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
-    if (debug) {
-      fprintf(stderr,"%s GET_DATA:type=%c\n",station,rmsg.type);
-      fprintf(stderr,"%s GET_DATA:status=%d\n",station,rmsg.status);
-    }
+    TCPIPMsgRecv(ros.sock, &dprm.event_secs, sizeof(uint32_t));
+    TCPIPMsgRecv(ros.sock, &dprm.event_nsecs, sizeof(uint32_t));
 
-    smsg.type = GET_PARAMETERS;
-    TCPIPMsgSend(ros.sock, &smsg, sizeof(struct ROSMsg));
-    TCPIPMsgRecv(ros.sock, &rprm, sizeof(struct ControlPRM));
-    TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
-    if (debug) {
-      fprintf(stderr,"%s GET_PARAMETERS:type=%c\n",station,rmsg.type);
-      fprintf(stderr,"%s GET_PARAMETERS:status=%d\n",station,rmsg.status);
-      fprintf(stderr,"%s Number of samples: dprm.samples:%d tsgprm.samples:%d "
-                     "total_samples:%d\n",station,dprm.samples,tsgprm.samples,
-                     total_samples);
-      fprintf(stderr,"%s nave=%d\n",station,nave);
+    /* recieve samples from main and back array */
+    if (debug)
+      fprintf(stderr,"%s GET_DATA: recv main, expecting %d samples, %ld bytes\n",
+              station,dprm.samples,(sizeof(uint32_t)*dprm.samples));
+    TCPIPMsgRecv(ros.sock, rdata.main, sizeof(uint32)*dprm.samples);
+    if (debug)
+      fprintf(stderr,"%s GET_DATA: recv back\n",station);
+    TCPIPMsgRecv(ros.sock, rdata.back, sizeof(uint32)*dprm.samples);
+
+    /* instead of receving a full dprm for every pulse sequence,
+       now just update the fields which change between pulse sequences within an integration period
+       that would be uint32_t dprm.event_secs, and uint32_t dprm.event_nsecs
+       so, receive these from the usrp_server, use them to generate a new tstruct and update dprm
+     */
+
+    if (nave == 0) {
+      bmnum = rprm.tbeam;
+      tfreq = rprm.tfreq;
     }
 
     if (dprm.status == 0) {
@@ -855,9 +882,9 @@ int SiteRosIntegrate(int (*lags)[2]) {
 
       /* invert interf phase here if necessary */
       if (invert !=0) {
-        for(n=0; n<(nsamp); n++) {
-          Q = ((rdata.main)[n] & 0xffff0000) >> 16;
-          I = (rdata.main)[n] & 0x0000ffff;
+        for (n=0; n<nsamp; n++) {
+          Q = (short)((rdata.main[n] & 0xffff0000) >> 16);
+          I = (short)(rdata.main[n] & 0x0000ffff);
           Q = -Q;
           I = -I;
           uQ32 = ((uint32) Q) << 16;
@@ -905,14 +932,21 @@ int SiteRosIntegrate(int (*lags)[2]) {
           (rdata.back)[n] = uQ32|uI32;
         }
       }
-      if (dprm.samples < total_samples) {
-        fprintf(stderr,"Not enough samples from the ROS in SiteIntegrate\n");
-        fflush(stderr);
-      }
+      /*
+        if (dprm.samples < total_samples) {
+          fprintf(stderr,"Not enough samples from the ROS in SiteIntegrate\n");
+          fflush(stderr);
+        }
+       */
 
       /* copy samples here */
-      seqoff[nave] = iqsze/2;           /* Sequence offset in 16bit units */
-      seqsze[nave] = total_samples*2*2; /* Sequence length in 16bit units */
+      seqoff[nave] = iqsze/2;          /* Sequence offset in 16bit units */
+      seqsze[nave] = dprm.samples*2*2; /* Sequence length in 16bit units */ //total_samples vs dprm.samples?
+
+      if (seqbadtr[nave].start != NULL)  free(seqbadtr[nave].start);
+      if (seqbadtr[nave].length != NULL) free(seqbadtr[nave].length);
+      seqbadtr[nave].start  = NULL;
+      seqbadtr[nave].length = NULL;
 
       seqbadtr[nave].num    = badtrdat.length;
       seqbadtr[nave].start  = malloc(sizeof(uint32)*badtrdat.length);
@@ -931,39 +965,40 @@ int SiteRosIntegrate(int (*lags)[2]) {
 
       dest = (void *)(samples);  /* look iqoff bytes into samples area */
       dest += iqoff;
-      if ((iqoff+total_samples*2*sizeof(uint32)) < iqbufsize) {
-        memmove(dest,rdata.main,total_samples*sizeof(uint32));
+      if ((iqoff+dprm.samples*2*sizeof(uint32)) < iqbufsize) {
+        memmove(dest,rdata.main,dprm.samples*sizeof(uint32));
         /* skip ahead number of samples * 32 bit per sample to account for
            rdata.main */
-        dest += total_samples*sizeof(uint32);
-        memmove(dest,rdata.back,total_samples*sizeof(uint32));
+        dest += dprm.samples*sizeof(uint32);
+        memmove(dest,rdata.back,dprm.samples*sizeof(uint32));
       } else {
         fprintf(stderr,"IQ Buffer overrun in SiteIntegrate\n");
         fflush(stderr);
       }
       /* Total of number bytes so far copied into samples array */
-      iqsze += total_samples*sizeof(uint32)*2;
+      iqsze += dprm.samples*sizeof(uint32)*2;
       if (debug) {
         fprintf(stderr,"%s seq %d :: ioff: %8d\n",station,nave,iqoff);
-        fprintf(stderr,"%s seq %d :: rdata.main 16bit 8-11: "
-                "%8d %8d %8d %8d\n",station,nave,
-                ((int16 *)rdata.main)[8],((int16 *)rdata.main)[9],
-                ((int16 *)rdata.main)[10],((int16 *)rdata.main)[11]);
+        fprintf(stderr,"%s seq %d :: rdata.main 16bit :\n",station,nave);
+        fprintf(stderr," [  n  ] :: [  Im  ] [  Qm  ] :: [ Ii ] [ Qi ]\n");
+        nsamp = (int)dprm.samples;
+        maddr = (uint32 *)rdata.main;
+        baddr = (uint32 *)rdata.back;
+        for (n=0; n<(nsamp); n++) {
+          Q = (maddr[n] & 0xffff0000) >> 16;
+          I = maddr[n] & 0x0000ffff;
+          fprintf(stderr," %7d :: 0x%8x : %7d %7d " ,n,(uint32)maddr[n],(int)I,(int)Q);
+          Q = ((rdata.back)[n] & 0xffff0000) >> 16;
+          I = ((uint32)((rdata.back)[n])) & 0x0000ffff;
+          fprintf(stderr," :: 0x%8x : %7d %7d\n" ,(uint32)baddr[n],(int)I,(int)Q);
+        }
         dest = (void *)(samples);
         dest += iqoff;
-        fprintf(stderr,"%s seq %d :: samples    16bit 8-11: "
-                "%8d %8d %8d %8d\n",station,nave,
-                ((int16 *)dest)[8],((int16 *)dest)[9],
-                ((int16 *)dest)[10],((int16 *)dest)[11]);
-        fprintf(stderr,"%s seq %d :: rdata.back 16bit 8-11: "
-                "%8d %8d %8d %8d\n",station,nave,
-                ((int16 *)rdata.back)[8],((int16 *)rdata.back)[9],
-                ((int16 *)rdata.back)[10],((int16 *)rdata.back)[11]);
-        dest += total_samples*4;
-        fprintf(stderr,"%s seq %d :: samples    16bit 8-11: "
-                "%8d %8d %8d %8d\n",station,nave,
-                ((int16 *)dest)[8],((int16 *)dest)[9],
-                ((int16 *)dest)[10],((int16 *)dest)[11]);
+        fprintf(stderr,"%s seq %d :: rdata.back 16bit 30: %8d %8d\n",station,nave,
+                ((int16 *)rdata.back)[60],((int16 *)rdata.back)[61]);
+        dest += dprm.samples*sizeof(uint32);
+        fprintf(stderr,"%s seq %d :: samples    16bit 30: %8d %8d\n",station,nave,
+                ((int16 *)dest)[60],((int16 *)dest)[61]);
         fprintf(stderr,"%s seq %d :: iqsze: %8d\n",station,nave,iqsze);
       }
 
@@ -975,21 +1010,21 @@ int SiteRosIntegrate(int (*lags)[2]) {
         if (debug) fprintf(stderr,"%s seq %d :: rngoff %d rxchn %d\n"
                                   "%s seq %d :: ACFSumPower\n",
                            station,nave,rngoff,rxchn,station,nave);
-        aflg = ACFSumPower(&tsgprm,mplgs,lagtable,pwr0, (int16 *)dest,
-                           rngoff,skpnum!=0, roff,ioff,badrng, noise,mxpwr,
-                           seqatten[nave]*atstp, thr,lmt,&abflg);
+        aflg = ACFSumPower(&tsgprm,mplgs,lagtable,pwr0,(int16 *)dest,
+                           rngoff,skpnum!=0,roff,ioff,badrng,noise,mxpwr,
+                           seqatten[nave]*atstp,thr,lmt,&abflg);
         if (debug) fprintf(stderr,"%s seq %d :: rngoff %d rxchn %d\n"
                                   "%s seq %d :: ACFCalculate acf\n",
                            station,nave,rngoff,rxchn,station,nave);
-        ACFCalculate(&tsgprm, (int16 *)dest,rngoff,skpnum!=0, roff,ioff,mplgs,
-                     lagtable,acfd,ACF_PART,2*total_samples,badrng,
+        ACFCalculate(&tsgprm,(int16 *)dest,rngoff,skpnum!=0,roff,ioff,mplgs,
+                     lagtable,acfd,ACF_PART,2*dprm.samples,badrng,
                      seqatten[nave]*atstp,NULL);
-        if (xcf == 1 ) {
+        if (xcf == 1) {
           if (debug) fprintf(stderr,"%s seq %d :: rngoff %d rxchn %d\n"
                                     "%s seq %d :: ACFCalculate xcf\n",
                              station,nave,rngoff,rxchn,station,nave);
-          ACFCalculate(&tsgprm, (int16 *)dest,rngoff,skpnum!=0, roff,ioff,
-                       mplgs,lagtable,xcfd,XCF_PART,2*total_samples,badrng,
+          ACFCalculate(&tsgprm,(int16 *)dest,rngoff,skpnum!=0,roff,ioff,mplgs,
+                       lagtable,xcfd,XCF_PART,2*dprm.samples,badrng,
                        seqatten[nave]*atstp,NULL);
         }
         if ((nave > 0) && (seqatten[nave] != seqatten[nave-1])) {
@@ -1001,14 +1036,18 @@ int SiteRosIntegrate(int (*lags)[2]) {
         if (debug) fprintf(stderr,"%s seq %d :: rngoff %d rxchn %d\n",
                            station,nave,rngoff,rxchn);
       }
-      nave++;
-      iqoff = iqsze;  /* set the offset bytes for the next sequence */
-    } else {
-      fprintf(stderr,"%s SiteIntegrate:: Bad pulse sequence status: %d\n",
-                     station,dprm.status);
-      fflush(stderr);
+      gettimeofday(&tick,NULL);
+      if (debug) fprintf(stderr,"Sending ACK for seq %d\n", nave);
+
+      TCPIPMsgSend(ros.sock, &nave, sizeof(int32_t));
     }
-    gettimeofday(&tick,NULL);
+  } /* end of while loop */
+
+  /* recv GET_DATA command status */
+  TCPIPMsgRecv(ros.sock, &rmsg, sizeof(struct ROSMsg));
+  if (debug) {
+    fprintf(stderr,"%s GET_DATA:type=%c\n",station,rmsg.type);
+    fprintf(stderr,"%s GET_DATA:status=%d\n",station,rmsg.status);
   }
 
   /* Now divide by nave to get the average pwr0 and acfd values for the
@@ -1018,13 +1057,13 @@ int SiteRosIntegrate(int (*lags)[2]) {
     if (nave > 0) {
       ACFAverage(pwr0,acfd,xcfd,nave,tsgprm.nrang,mplgs);
 /*
-      for(range=0; range < nrang;range++) {
-        pwr0[range]=(double)pwr0[range]/(double)nave;
+      for (range=0; range < nrang;range++) {
+        pwr0[range] = (double)pwr0[range]/(double)nave;
 
-        for(lag=0;lag < mplgs; lag++) {
-          acfd[range*(2*mplgs)+2*lag]= (double) acfd[range*(2*mplgs)+2*lag]/
+        for (lag=0;lag < mplgs; lag++) {
+          acfd[range*(2*mplgs)+2*lag] = (double) acfd[range*(2*mplgs)+2*lag]/
                                       (double) nave;
-          acfd[range*(2*mplgs)+2*lag+1]= (double) acfd[range*(2*mplgs)+2*lag+1]/
+          acfd[range*(2*mplgs)+2*lag+1] = (double) acfd[range*(2*mplgs)+2*lag+1]/
                                       (double) nave;
         }
       }
@@ -1032,17 +1071,17 @@ int SiteRosIntegrate(int (*lags)[2]) {
     }
   } else if (nave > 0) {
     /* ACFEX calculation */
-    ACFexCalculate(&tsgprm, (int16 *)samples,nave*smpnum,nave,smpnum,
-                   roff,ioff, mplgs,mplgexs,lagtable,lagsum, pwr0,acfd,&noise);
+    ACFexCalculate(&tsgprm,(int16 *)samples,nave*smpnum,nave,smpnum,
+                   roff,ioff,mplgs,mplgexs,lagtable,lagsum,pwr0,acfd,&noise);
   }
   free(lagtable[0]);
   free(lagtable[1]);
   if (debug) {
-    fprintf(stderr,"%s SiteIntegrate: iqsize in bytes: %d in 16bit samples:"
-                   "  %d in 32bit samples: %d\n",station,iqsze,iqsze/2,iqsze/4);
-    fprintf(stderr,"%s SiteIntegrate: end\n",station);
+    fprintf(stderr,"%s SiteIntegrate: iqsize in bytes: %ld in 16bit samples:"
+                   "  %ld in 32bit samples: %ld\n",
+                   station,(long int)iqsze,(long int)iqsze/2,(long int)iqsze/4);
+    fprintf(stderr,"%s SiteIntegrate: end: nave: %d\n",station,nave);
   }
-
   SiteRosExit(0);
 
   return nave;
