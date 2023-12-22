@@ -653,8 +653,6 @@ int SiteRosIntegrate(int (*lags)[2]) {
 
   struct timeval tick;
   struct timeval tack;
-  double tval=0,tavg=0;
-  double time_diff=0;
   struct ROSMsg smsg,rmsg;
 
   int iqoff=0; /* Sequence offset in bytes for current sequence relative to *
@@ -743,8 +741,6 @@ int SiteRosIntegrate(int (*lags)[2]) {
   /* Start of SiteIntegration loop was located here */
   SiteRosExit(0);
 
-  seqtval[nave].tv_sec  = tick.tv_sec;
-  seqtval[nave].tv_nsec = tick.tv_usec*1000;
   seqatten[nave] = 0;
   seqnoise[nave] = 0;
   seqbadtr[nave].num = 0;
@@ -942,6 +938,9 @@ int SiteRosIntegrate(int (*lags)[2]) {
       /* copy samples here */
       seqoff[nave] = iqsze/2;          /* Sequence offset in 16bit units */
       seqsze[nave] = dprm.samples*2*2; /* Sequence length in 16bit units */ //total_samples vs dprm.samples?
+
+      seqtval[nave].tv_sec  = tick.tv_sec;
+      seqtval[nave].tv_nsec = tick.tv_usec*1000;
 
       if (seqbadtr[nave].start != NULL)  free(seqbadtr[nave].start);
       if (seqbadtr[nave].length != NULL) free(seqbadtr[nave].length);
