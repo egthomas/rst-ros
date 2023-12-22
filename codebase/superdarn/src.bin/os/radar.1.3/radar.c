@@ -37,6 +37,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include "rtime.h"
 #include "option.h"
 #include "tsg.h"
 #include "maketsg.h"
@@ -268,6 +269,8 @@ int operate(pid_t parent,int sock) {
           TCPIPMsgSend(sock, AGC, sizeof(int)*num_transmitters);
           TCPIPMsgSend(sock, LOPWR, sizeof(int)*num_transmitters);
 
+          TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
+
           TCPIPMsgSend(sock, &yr, sizeof(int));
           TCPIPMsgSend(sock, &mo, sizeof(int));
           TCPIPMsgSend(sock, &dy, sizeof(int));
@@ -280,7 +283,7 @@ int operate(pid_t parent,int sock) {
         TCPIPMsgSend(sock, &rprm, sizeof(struct ControlPRM));
 
         for (i=0; i<nave; i++) {
-          usleep((int)(usecs*0.9));
+          usleep((int)(usecs*0.5));
 
           TCPIPMsgSend(sock, &dprm.event_secs, sizeof(uint32_t));
           TCPIPMsgSend(sock, &dprm.event_nsecs, sizeof(uint32_t));
