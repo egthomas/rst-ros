@@ -8,29 +8,36 @@ radar -name $west &
 # critical tasks
 
 echo "Waiting for errlog to start"
-errlog -name $west -lp 54000 &
+errlog -name ${west}.a -lp 51000 &
+errlog -name ${west}.b -lp 52000 &
 sleep 1
 
 echo "Waiting for shellserver to start"
-shellserver -sh RadarShellB -cp 54001 -sp 55001 -ep 54000 &
+shellserver -sh RadarShellBa -cp 51001 -sp 55001 -ep 51000 &
+shellserver -sh RadarShellBb -cp 52001 -sp 56001 -ep 52000 &
 sleep 1
 
 # support tasks
 
 echo "Waiting for iqwrite to start"
-iqwrite -lp 54101 -ep 54000 &
+iqwrite -lp 51101 -ep 51000 -c a &
+iqwrite -lp 52101 -ep 52000 -c b &
 
 echo "Waiting for rawacfwrite to start"
-rawacfwrite -lp 54102 -ep 54000 &
+rawacfwrite -lp 51102 -ep 51000 -c a &
+rawacfwrite -lp 52102 -ep 52000 -c b &
 
 echo "Waiting for fitacfwrite to start"
-fitacfwrite -lp 54103 -ep 54000 &
+fitacfwrite -lp 51103 -ep 51000 -c a &
+fitacfwrite -lp 52103 -ep 52000 -c b &
 
 sleep 2
 
 echo "Waiting for rtserver to start"
-rtserver -rp 54104 -ep 54000 -tp 1025 &
+rtserver -rp 51104 -ep 51000 -tp 1026 &
+rtserver -rp 52104 -ep 52000 -tp 1027 &
 sleep 2
 
-echo "Ready for Control Programs"
-schedule -name $west /data/ros/scd/${west}.scd &
+echo "Starting scheduler"
+schedule -name ${west}.a /data/ros/scd/${west}.a.scd &
+schedule -name ${west}.b /data/ros/scd/${west}.b.scd &
