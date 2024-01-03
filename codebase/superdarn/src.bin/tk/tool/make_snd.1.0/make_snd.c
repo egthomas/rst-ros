@@ -71,6 +71,7 @@ int main(int argc,char *argv[]) {
 
   int cpid=-1;
   int channel=-1;
+  int skip_freq=-1;
   char *cpstr=NULL;
   char *chnstr=NULL;
 
@@ -91,6 +92,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"vb",'x',&vb);
   OptionAdd(&opt,"cp",'t',&cpstr);
   OptionAdd(&opt,"cn",'t',&chnstr);
+  OptionAdd(&opt,"skip_freq",'i',&skip_freq);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -141,6 +143,7 @@ int main(int argc,char *argv[]) {
 
     if ((cpid !=-1) && (abs(prm->cp) !=abs(cpid))) continue;
     if ((channel !=-1) && (prm->channel !=channel)) continue;
+    if ((skip_freq !=-1) && (prm->tfreq == skip_freq)) continue;
 
     snd->origin.code=1;
     ctime = time((time_t) 0);

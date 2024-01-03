@@ -446,6 +446,7 @@ void usage(void)
     printf("command-line options:\n");
     printf("  -stid char: radar string (required)\n");
     printf("    -di     : indicates running during discretionary time\n");
+    printf("  -baud int : baud to use for Barker phase coded sequence (1,2,3,4,5,7,11,13) [1]\n");
     printf(" -frang int : delay to first range (km) [180]\n");
     printf("  -rsep int : range separation (km) [15]\n");
     printf(" -nrang int : number of range gates [225]\n");

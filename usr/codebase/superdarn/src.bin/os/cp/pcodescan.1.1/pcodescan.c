@@ -158,7 +158,6 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-version",'x', &version);
 
   OptionAdd(&opt, "baud",   'i', &nbaud);
-  OptionAdd(&opt, "sf",     'i', &stfrq);
   OptionAdd(&opt, "tau",    'i', &mpinc);
 
   arg = OptionProcess(1,argc,argv,&opt,rst_opterr);
@@ -389,8 +388,6 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
       ErrLog(errlog.sock,progname, logtxt);
       tfreq = SiteFCLR(stfrq,stfrq+frqrng);
-      /*printf("FRQ: %d %d", stfrq, frqrng);*/
-      /*tfreq=SiteFCLR(stfrq-frqrng/2,stfrq+frqrng/2);*/
 
       if (fixfrq > 0) tfreq = fixfrq;
 
@@ -483,6 +480,8 @@ void usage(void)
   printf("  -stid char: radar string (required)\n");
   printf("    -di     : indicates running during discretionary time\n");
   printf("  -fast     : 1-min scan (2-min default)\n");
+  printf("  -baud int : baud to use for Barker phase coded sequence (1,2,3,4,5,7,11,13) [3]\n");
+  printf("   -tau int : lag spacing (usecs) [1500]\n");
   printf(" -frang int : delay to first range (km) [180]\n");
   printf("  -rsep int : range separation (km) [15]\n");
   printf(" -nrang int : number of range gates [300]\n");
@@ -496,7 +495,7 @@ void usage(void)
   printf("    -ep int : error log port\n");
   printf("    -sp int : shell port\n");
   printf("    -bp int : base port\n");
-  printf("  -cpid int : set to override control program idx \n");
+  printf("  -cpid int : set to override control program id\n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
   printf("-nowait     : do not wait at end of scan boundary.\n");
   printf("-rxonly     : bistatic RX only mode.\n");
