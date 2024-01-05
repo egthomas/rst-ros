@@ -936,8 +936,8 @@ int SiteRosIntegrate(int (*lags)[2]) {
        */
 
       /* copy samples here */
-      seqoff[nave] = iqsze/2;          /* Sequence offset in 16bit units */
-      seqsze[nave] = dprm.samples*2*2; /* Sequence length in 16bit units */ //total_samples vs dprm.samples?
+      seqoff[nave] = iqsze/2;           /* Sequence offset in 16bit units */
+      seqsze[nave] = total_samples*2*2; /* Sequence length in 16bit units */
 
       seqtval[nave].tv_sec  = tick.tv_sec;
       seqtval[nave].tv_nsec = tick.tv_usec*1000;
@@ -964,18 +964,18 @@ int SiteRosIntegrate(int (*lags)[2]) {
 
       dest = (void *)(samples);  /* look iqoff bytes into samples area */
       dest += iqoff;
-      if ((iqoff+dprm.samples*2*sizeof(uint32)) < iqbufsize) {
-        memmove(dest,rdata.main,dprm.samples*sizeof(uint32));
+      if ((iqoff+total_samples*2*sizeof(uint32)) < iqbufsize) {
+        memmove(dest,rdata.main,total_samples*sizeof(uint32));
         /* skip ahead number of samples * 32 bit per sample to account for
            rdata.main */
-        dest += dprm.samples*sizeof(uint32);
-        memmove(dest,rdata.back,dprm.samples*sizeof(uint32));
+        dest += total_samples*sizeof(uint32);
+        memmove(dest,rdata.back,total_samples*sizeof(uint32));
       } else {
         fprintf(stderr,"IQ Buffer overrun in SiteIntegrate\n");
         fflush(stderr);
       }
       /* Total of number bytes so far copied into samples array */
-      iqsze += dprm.samples*sizeof(uint32)*2;
+      iqsze += total_samples*sizeof(uint32)*2;
       if (debug) {
         fprintf(stderr,"%s seq %d :: ioff: %8d\n",station,nave,iqoff);
         fprintf(stderr,"%s seq %d :: rdata.main 16bit :\n",station,nave);
@@ -995,7 +995,7 @@ int SiteRosIntegrate(int (*lags)[2]) {
         dest += iqoff;
         fprintf(stderr,"%s seq %d :: rdata.back 16bit 30: %8d %8d\n",station,nave,
                 ((int16 *)rdata.back)[60],((int16 *)rdata.back)[61]);
-        dest += dprm.samples*sizeof(uint32);
+        dest += total_samples*sizeof(uint32);
         fprintf(stderr,"%s seq %d :: samples    16bit 30: %8d %8d\n",station,nave,
                 ((int16 *)dest)[60],((int16 *)dest)[61]);
         fprintf(stderr,"%s seq %d :: iqsze: %8d\n",station,nave,iqsze);
@@ -1016,14 +1016,14 @@ int SiteRosIntegrate(int (*lags)[2]) {
                                   "%s seq %d :: ACFCalculate acf\n",
                            station,nave,rngoff,rxchn,station,nave);
         ACFCalculate(&tsgprm,(int16 *)dest,rngoff,skpnum!=0,roff,ioff,mplgs,
-                     lagtable,acfd,ACF_PART,2*dprm.samples,badrng,
+                     lagtable,acfd,ACF_PART,2*total_samples,badrng,
                      seqatten[nave]*atstp,NULL);
         if (xcf == 1) {
           if (debug) fprintf(stderr,"%s seq %d :: rngoff %d rxchn %d\n"
                                     "%s seq %d :: ACFCalculate xcf\n",
                              station,nave,rngoff,rxchn,station,nave);
           ACFCalculate(&tsgprm,(int16 *)dest,rngoff,skpnum!=0,roff,ioff,mplgs,
-                       lagtable,xcfd,XCF_PART,2*dprm.samples,badrng,
+                       lagtable,xcfd,XCF_PART,2*total_samples,badrng,
                        seqatten[nave]*atstp,NULL);
         }
         if ((nave > 0) && (seqatten[nave] != seqatten[nave-1])) {
