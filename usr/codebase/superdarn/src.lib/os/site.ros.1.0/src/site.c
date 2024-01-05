@@ -258,7 +258,7 @@ int SiteRosStart(char *host,char *ststr) {
   if (config_lookup_int(&cfg, "smsep", &ltemp)) {
     smsep = ltemp;
   } else {
-    smsep = 0;
+    smsep = 300;
     fprintf(stderr,"Site Cfg Warning:: 'smsep' setting undefined in site cfg file, using: %d\n",smsep);
   }
 
