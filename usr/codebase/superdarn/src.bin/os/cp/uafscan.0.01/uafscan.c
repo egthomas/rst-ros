@@ -90,7 +90,7 @@ int main(int argc,char *argv[]) {
   char *dfststr="tst";
 
   char *libstr="ros";
-  char *beampattern="normal";
+  char *beampattern=NULL;
 
   unsigned char help=0;
   unsigned char option=0;
@@ -266,6 +266,10 @@ int main(int argc,char *argv[]) {
   arg = OptionProcess(1,argc,argv,&opt,NULL);
 
  /* ========= SET PARAMETER TO EMULATE OTHER CONTROL PROGRAMS ============= */
+
+  if (beampattern == NULL) {
+    beampattern = "normal";
+  }
 
   /* NORMAL beam order  or CAMPING one one beam */
   if (strcmp(beampattern, "normal") == 0) {
