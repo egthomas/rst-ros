@@ -109,7 +109,7 @@ int tfreq=DEFAULT_TFREQ;
 int scan=DEFAULT_SCAN;
 int mxpwr=DEFAULT_MXPWR;
 int lvmax=DEFAULT_LVMAX;
-int cp=50;
+int cp=150;
 int channel=0;
 
 int *pcode=NULL;

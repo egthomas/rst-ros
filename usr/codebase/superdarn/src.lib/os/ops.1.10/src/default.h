@@ -27,9 +27,7 @@
 
 
 #define DEFAULT_TXPOW       9000    /* default TXPOW */
-#define DEFAULT_ATTEN       0       /* default ATTEN */
-#define DEFAULT_ERCOD       0       /* default ERCOD */
-#define DEFAULT_INTSC       7       /* default INTT */
+#define DEFAULT_INTSC       3       /* default INTT */
 #define DEFAULT_INTUS       0
 #define DEFAULT_TXPL        300
 #define DEFAULT_MPINC       1500
@@ -38,14 +36,11 @@
 #define DEFAULT_NRANG       75
 #define DEFAULT_FRANG       180
 #define DEFAULT_RSEP        45
-#define DEFAULT_LAGFR       0
-#define DEFAULT_SMSEP       0
-#define DEFAULT_BMNUM       0
+#define DEFAULT_LAGFR       1200
+#define DEFAULT_SMSEP       300
 #define DEFAULT_MXPWR       (32768.0*32768.0)
 #define DEFAULT_LVMAX       20000L
 #define DEFAULT_TFREQ       13000
 #define DEFAULT_SCAN        0       /* default scan */
-#define DEFAULT_XCF         0
-#define DEFAULT_CP          0
 #define DEFAULT_RXRISE      0
 
