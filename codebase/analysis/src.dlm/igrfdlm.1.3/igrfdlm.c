@@ -169,7 +169,7 @@ static IDL_VPTR IDLIGRF_SetNow(int argc,IDL_VPTR *argv) {
 }
 
 
-static IDL_VPTR IDLIGRF_Tilt(int argc,IDL_VPTR *argv) {   
+static IDL_VPTR IDLIGRF_Tilt(int argc,IDL_VPTR *argv) {
 
     int n;
 
@@ -204,7 +204,7 @@ static IDL_VPTR IDLIGRF_Tilt(int argc,IDL_VPTR *argv) {
         }
 
         for (n=0;n<argc;n++) {
-            if (argv[n]->value.arr->n_elts !=nval) 
+            if (argv[n]->value.arr->n_elts !=nval)
                 IDL_MessageFromBlock(msg_block,IGRF_MISMATCHELMS,IDL_MSG_LONGJMP,
                                         "in IGRF_Tilt()");
         }
@@ -249,7 +249,6 @@ static IDL_VPTR IDLIGRF_Tilt(int argc,IDL_VPTR *argv) {
                 default:
                     yrtmp=1970;
             }
-            //should this default year be changed??
 
             switch (motyp) {
                 case IDL_TYP_INT:
@@ -500,7 +499,7 @@ static IDL_VPTR IDLECDIP_Convert(int argc,IDL_VPTR *argv,char *argk) {
 
 
 
-static IDL_VPTR IDLECDIP_MLT(int argc,IDL_VPTR *argv,char *argk) {   
+static IDL_VPTR IDLECDIP_MLT(int argc,IDL_VPTR *argv,char *argk) {
 
     int n;
 
@@ -546,7 +545,7 @@ static IDL_VPTR IDLECDIP_MLT(int argc,IDL_VPTR *argv,char *argk) {
         }
 
         for (n=0;n<argc;n++) {
-            if (argv[n]->value.arr->n_elts !=nval) 
+            if (argv[n]->value.arr->n_elts !=nval)
                 IDL_MessageFromBlock(msg_block,IGRF_MISMATCHELMS,IDL_MSG_LONGJMP,
                                         "in ECDIP_MLT()");
         }
@@ -570,7 +569,7 @@ static IDL_VPTR IDLECDIP_MLT(int argc,IDL_VPTR *argv,char *argk) {
         sctyp=argv[5]->type;
 
         if (argv[6]->flags & IDL_V_ARR) {
-            if (argv[6]->value.arr->n_elts !=nval) 
+            if (argv[6]->value.arr->n_elts !=nval)
                 IDL_MessageFromBlock(msg_block,IGRF_MISMATCHELMS,IDL_MSG_LONGJMP,
                                         "in ECDIP_MLT()");
 

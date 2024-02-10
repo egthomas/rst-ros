@@ -1255,15 +1255,15 @@ int mag2geo(const double xyzm[], double xyzg[]) {
 ; PURPOSE:
 ;       Convert from geodetic coordinates (as specified by WGS84) to
 ;       eccentric dipole coordinates.
-; 
+;
 ; CALLING SEQUENCE:
 ;       err = geod2ecdip(lat,lon,alt, out);
-;     
-;     Input Arguments:  
+;
+;     Input Arguments:
 ;       lat,lon       - geodetic latitude and longitude [degrees N and E]
 ;       alt           - distance above sea level [km]
 ;
-;     Output Argument:  
+;     Output Argument:
 ;       out[3]        - eccentric dipole coordinates
 ;
 ;     Return Value:
@@ -1348,15 +1348,15 @@ int geod2ecdip(double lat, double lon, double alt, double out[])
 ; PURPOSE:
 ;       Convert from eccentric diople coordinates to geodetic coordinates
 ;       (as specified by WGS84).
-; 
+;
 ; CALLING SEQUENCE:
 ;       err = ecdip2geod(lat,lon,r, out);
-;     
-;     Input Arguments:  
+;
+;     Input Arguments:
 ;       lat,lon       - eccentric dipole latitude and longitude [degrees N & E]
 ;       r             - radial distance [km]
 ;
-;     Output Argument:  
+;     Output Argument:
 ;       out[3]        - geodetic latitude, longitude [deg] and altitude [km]
 ;
 ;     Return Value:
@@ -1420,11 +1420,11 @@ int ecdip2geod(double elat, double elon, double r, double out[])
 ;
 ; PURPOSE:
 ;       Determine MLT for given date/time and eccentric dipole longitude.
-; 
+;
 ; CALLING SEQUENCE:
 ;       mlt = ecdip_mlt(yr,mo,dy, hr,mt,sc, elon);
-;     
-;     Input Arguments:  
+;
+;     Input Arguments:
 ;       yr,mo,dy      - date as integers
 ;       hr,mt,sc      - time as integers
 ;       elon          - eccentric dipole longitude [degrees N]
@@ -1451,11 +1451,11 @@ double ecdip_mlt(int yr, int mo, int dy, int hr, int mt, int sc, double elon)
 ;
 ; PURPOSE:
 ;       Determine eccentric dipole longitude for given date/time and MLT (ecdip)
-; 
+;
 ; CALLING SEQUENCE:
 ;       elon = inv_ecdip_mlt(yr,mo,dy, hr,mt,sc, mlt);
-;     
-;     Input Arguments:  
+;
+;     Input Arguments:
 ;       yr,mo,dy      - date as integers
 ;       hr,mt,sc      - time as integers
 ;       mlt           - eccentric dipole MLT
@@ -1849,11 +1849,11 @@ int AACGM_v2_RK45(double xyz[], int idir, double *ds, double eps, int code) {
 ; PURPOSE:
 ;       Determine reference MLT location for given date/time. Used for
 ;       eccentric dipole coordinates.
-; 
+;
 ; CALLING SEQUENCE:
 ;       mlt_ref = ecdip_mlt_ref(yr,mo,dy,hr,mt,sc);
-;     
-;     Input Arguments:  
+;
+;     Input Arguments:
 ;       yr,mo,dy      - Date
 ;       hr,mt,sc      - Time
 ;
