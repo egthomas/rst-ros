@@ -189,9 +189,11 @@ int main(int argc,char *argv[]) {
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
     bms = bmse;
     snd_bms = snd_bmse;
+    if (strcmp(ststr,"ice") == 0) snd_intt_us = 800000;
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0) || (strcmp(ststr,"bks") == 0)) {
     bms = bmsw;
     snd_bms = snd_bmsw;
+    if (strcmp(ststr,"icw") == 0) snd_intt_us = 800000;
   } else if (strcmp(ststr,"fhe") == 0) {
     nintgs = 11;
     fast_intt_us = 700000;
