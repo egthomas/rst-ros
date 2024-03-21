@@ -17,6 +17,8 @@
 </option>
 <option><on>-cn <ar>channel</ar></on><od>extract only those records from channel <ar>channel</ar>.</od>
 </option>
+<option><on>-skip_freq <ar>freq</ar></on><od>skip records with the frequency <ar>freq</ar> [kHz].</od>
+</option>
 <option><on><ar>fitacfname</ar></on><od>filename of the <code>fitacf</code> format file.</od>
 </option>
 <synopsis><p>Creates a <code>snd</code> format file from a <code>fitacf</code> format file.</p></synopsis>
