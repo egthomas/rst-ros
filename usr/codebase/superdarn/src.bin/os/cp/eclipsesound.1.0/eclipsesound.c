@@ -53,7 +53,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"eclipsesound 2024/02/28"};
+char progid[80]={"eclipsesound 2024/03/29"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -189,11 +189,18 @@ int main(int argc,char *argv[]) {
   if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
     bms = bmse;
     snd_bms = snd_bmse;
-    if (strcmp(ststr,"ice") == 0) snd_intt_us = 800000;
+    if (strcmp(ststr,"ice") == 0) {
+      snd_intt_us = 800000;
+      snd_bms[0] = 11;
+      snd_bms[1] = 21;
+    }
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0) || (strcmp(ststr,"bks") == 0)) {
     bms = bmsw;
     snd_bms = snd_bmsw;
-    if (strcmp(ststr,"icw") == 0) snd_intt_us = 800000;
+    if (strcmp(ststr,"icw") == 0) {
+      snd_intt_us = 800000;
+      snd_bms[1] = 10;
+    }
   } else if (strcmp(ststr,"fhe") == 0) {
     nintgs = 11;
     fast_intt_us = 700000;
