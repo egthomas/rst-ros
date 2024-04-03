@@ -814,10 +814,7 @@ void draw_colorbar(struct PlotOptions *plot) {
 
   int i,j;
   int start=12;
-  int rng;
-
-  if (plot->sndflg) rng = SND_RANGE;
-  else              rng = plot->nrng;
+  int rng=plot->nrng;
 
   move(11, rng+4);
   if (plot->pwrflg)      printw("Pow [dB]");
