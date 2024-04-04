@@ -307,7 +307,7 @@ int main(int argc,char *argv[]) {
 
   status=SiteSetupRadar();
 
-  fprintf(stderr,"Status:%d\n",status);
+  fprintf(stderr,"Status: %d\n",status);
 
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
@@ -405,7 +405,7 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
       nave=SiteIntegrate(seq->lags);
       if (nave<0) {
-        sprintf(logtxt,"Integration error:%d",nave);
+        sprintf(logtxt,"Integration error: %d",nave);
         ErrLog(errlog.sock,progname,logtxt);
         continue;
       }

@@ -326,7 +326,7 @@ int main(int argc,char *argv[]) {
       /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
       nave=SiteIntegrate(seq->lags);
       if (nave<0) {
-        sprintf(logtxt,"Integration error:%d",nave);
+        sprintf(logtxt,"Integration error: %d",nave);
         ErrLog(errlog.sock,progname,logtxt);
         continue;
       }
