@@ -97,7 +97,7 @@ int main(int argc,char *argv[]) {
   OpsBuildTauscan11(seq);
 
   /* standard radar parameters */
-  cp=502;
+  cp=504;
   intsc=5;
   intus=500000;
   mppul=seq->mppul;
@@ -207,7 +207,7 @@ int main(int argc,char *argv[]) {
 
   beams=abs(ebm-sbm)+1;
   if (fast) {
-    cp=503;
+    cp=505;
     scnsc=60;
     scnus=0;
   } else {
