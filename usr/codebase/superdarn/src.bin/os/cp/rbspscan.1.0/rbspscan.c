@@ -313,10 +313,8 @@ int main(int argc,char *argv[]) {
 
   channel = cnum;
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
   status=SiteBuild(libstr);
 
   if (status==-1) {
@@ -354,7 +352,6 @@ int main(int argc,char *argv[]) {
   }
   ErrLog(errlog.sock,progname,logtxt);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src */
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
