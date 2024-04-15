@@ -18,7 +18,7 @@ rsep: 45 km
 Description:
 ===========
 testsound is a variant on the normalsound radar control
-program which performs a 1- or 2-min scan in a sequential manner.
+program that performs a 1- or 2-min scan in a sequential manner.
 In the remaining time until the end of the minute it performs
 scans through a set of up to 12 frequencies and through all
 beams [even/odd]. Note that unlike normalsound, this control

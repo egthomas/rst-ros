@@ -18,7 +18,7 @@ rsep: 15 km
 Description:
 ===========
 normalscan_16pulse is a variant on the normalscan radar control
-program which performs a 1- or 2-min scan in a sequential manner.
+program that performs a 1- or 2-min scan in a sequential manner.
 Rather than the standard 8-pulse katscan sequence, an extended
 16-pulse asymmetric sequence (originally designed by Mrinal Balaji,
 UAF MS student) is used. This means the multipulse increment (mpinc),
