@@ -49,7 +49,7 @@ void OpsLoadSndFreqs(char *ststr) {
     fprintf(stderr,"Environment variable 'SD_SITE_PATH' not defined.\n");
   }
 
-  sprintf(snd_filename,"%s/site.%s/sounder_%s.dat", path, ststr, ststr);
+  sprintf(snd_filename,"%s/site.%s/sounder.dat.%s", path, ststr, ststr);
   fprintf(stderr,"Checking Sounder File: %s\n",snd_filename);
   snd_dat = fopen(snd_filename, "r");
   if (snd_dat != NULL) {

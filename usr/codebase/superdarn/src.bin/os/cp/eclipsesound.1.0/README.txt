@@ -25,7 +25,7 @@ on 2 selected beams. This control program was originally
 designed for the Oct 2023 annular and Apr 2024 total eclipses.
 
 The control program requires a radar-specific sounding file called
-"sounder_[rad].dat", where "[rad]" should be replaced by
+"sounder.dat.[rad]", where "[rad]" should be replaced by
 the three-letter radar station string. By default, the control
 program will look for this file in the SD_SITE_PATH directory.
 This file should contain the following values (one per line):
