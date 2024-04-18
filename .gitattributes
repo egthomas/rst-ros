@@ -2,6 +2,8 @@
 *.h linguist-language=C
 
 hdw.dat.* -linguist-detectable
+restrict.dat.* -linguist-detectable
+sounder.dat.* -linguist-detectable
 tdiff.dat.* -linguist-detectable
 *.asc -linguist-detectable
 *.cfg -linguist-detectable
