@@ -58,7 +58,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"testscan"};
+char progid[80]={"testscan 2024/04/15"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -175,10 +175,14 @@ int main(int argc,char *argv[]) {
   if (ststr==NULL) ststr=dfststr;
 
   /* Point to the beams here */
-  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
+  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0) || (strcmp(ststr,"fhe") == 0)) {
     bms = bmse;     /* 1-min sequence */
   } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0)) {
     bms = bmsw;     /* 1-min sequence */
+  } else if (strcmp(ststr,"fhw") == 0) {
+    bms = bmsw;     /* 1-min sequence */
+    for (i=0; i<nintgs; i++)
+      bms[i] -= 2;
   } else {
     if (hlp) usage();
     else     printf("Error: Not intended for station %s\n", ststr);
@@ -207,10 +211,8 @@ int main(int argc,char *argv[]) {
 
   channel = cnum;
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
   status=SiteBuild(libstr);
 
   if (status==-1) {
@@ -248,7 +250,6 @@ int main(int argc,char *argv[]) {
   }
   ErrLog(errlog.sock,progname,logtxt);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src */
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
@@ -260,7 +261,7 @@ int main(int argc,char *argv[]) {
 
   status=SiteSetupRadar();
 
-  fprintf(stderr,"Status:%d\n",status);
+  fprintf(stderr,"Status: %d\n",status);
 
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
@@ -358,7 +359,7 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
       nave=SiteIntegrate(seq->lags);
       if (nave<0) {
-        sprintf(logtxt,"Integration error:%d",nave);
+        sprintf(logtxt,"Integration error: %d",nave);
         ErrLog(errlog.sock,progname,logtxt);
         continue;
       }

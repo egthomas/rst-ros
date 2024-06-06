@@ -1,6 +1,6 @@
 Radar Control Program Name:
 ==========================
-normalsound
+uafsound
 
 Control Program ID (CPID):
 =========================
@@ -17,8 +17,8 @@ rsep: 45 km
 
 Description:
 ===========
-normalsound is a variant on the normalscan radar control
-program that performs a 1- or 2-min scan in a sequential manner.
+uafsound is a variant on the uafscan and normalsound radar control
+programs that performs a 1- or 2-min scan in a sequential manner.
 In the remaining time until the end of the minute it performs
 scans through a set of up to 12 frequencies and through all
 beams [even/odd]. Note that unlike previous versions of normalsound,
@@ -48,4 +48,4 @@ power, spectral width, phi0) in dmap-format.
 
 Source:
 ======
-E.G. Thomas (20221025)
+E.G. Thomas (20230918)

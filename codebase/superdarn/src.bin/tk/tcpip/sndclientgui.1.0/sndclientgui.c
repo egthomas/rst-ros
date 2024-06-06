@@ -54,7 +54,7 @@ Modifications:
 #define MAX_RANGE 300
 
 #define SND_BEAMS 24
-#define SND_RANGE 75
+#define SND_RANGE 100
 #define SND_FREQS 22
 
 struct FitBuffer {
@@ -737,12 +737,12 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
   move(12, 0);
   if (plot->rngflg) {
     printw("F\\R %d",prm->frang);
-    for (i=1; i*10<SND_RANGE; i++) {
+    for (i=1; i*10<plot->nrng; i++) {
       printw("%10d",prm->frang+prm->rsep*i*10);
     }
   } else {
     printw("F\\G 0         ");
-    for (i=1; i*10<SND_RANGE; i++) {
+    for (i=1; i*10<plot->nrng; i++) {
       if (i*10 < 100) printw("%d        ",i*10);
       else            printw("%d       ",i*10);
     }
@@ -760,7 +760,7 @@ void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOpt
 
     if (sbuf->beam[plot->b][j] == 0) continue;
 
-    for (i=0; i<SND_RANGE; i++) {
+    for (i=0; i<plot->nrng; i++) {
       if (sbuf->qflg[plot->b][i][j] == 1) {
         if (plot->colorflg) {
           if (plot->pwrflg)      val = (int)((sbuf->pow[plot->b][i][j]-plot->smin)/(plot->smax-plot->smin)*plot->nlevels)+1;
@@ -814,10 +814,7 @@ void draw_colorbar(struct PlotOptions *plot) {
 
   int i,j;
   int start=12;
-  int rng;
-
-  if (plot->sndflg) rng = SND_RANGE;
-  else              rng = plot->nrng;
+  int rng=plot->nrng;
 
   move(11, rng+4);
   if (plot->pwrflg)      printw("Pow [dB]");

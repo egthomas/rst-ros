@@ -126,13 +126,16 @@ int OpsStart(char *ststr) {
 
   envstr=getenv("SD_SITE_PATH");
   if (envstr !=NULL) {
-    sprintf(freq_filepath,"%s/site.%s/restrict.dat",envstr,ststr);
+    sprintf(freq_filepath,"%s/site.%s/restrict.dat.%s",envstr,ststr,ststr);
     fp=fopen(freq_filepath,"r");
   } else fp=NULL;
   if (fp !=NULL) {
     ftable=FreqLoadTable(fp);
     fclose(fp);
-    fprintf(stderr,"Frequency table %s loaded\n",freq_filepath);
+    if (ftable !=NULL) fprintf(stderr,"Frequency table %s loaded\n",freq_filepath);
+    else               fprintf(stderr,"Error loading frequency table %s\n",freq_filepath);
+  } else {
+    fprintf(stderr,"Error loading frequency table for site %s\n",ststr);
   }
 
   prm=RadarParmMake();

@@ -1,15 +1,15 @@
 Radar Control Program Name:
 ==========================
-normalsound
+eclipsesound
 
 Control Program ID (CPID):
 =========================
-155 / 157
+1103
 
 Parameters:
 ==========
-nbeams: 16+
-intt: 6 s / 3 s
+nbeams: 10+
+intt: 2.5 s
 scan: 1 min
 ngates: 75+
 frang: 180 km
@@ -17,13 +17,12 @@ rsep: 45 km
 
 Description:
 ===========
-normalsound is a variant on the normalscan radar control
-program that performs a 1- or 2-min scan in a sequential manner.
-In the remaining time until the end of the minute it performs
-scans through a set of up to 12 frequencies and through all
-beams [even/odd]. Note that unlike previous versions of normalsound,
-this information is not used to adjust the radar operating
-frequency in real-time.
+eclipsesound is a variant on the normalsound radar control
+program that samples every other beam during the first 30 sec
+of each 1-min scan. In the remaining time until the end of the
+minute it performs scans through a set of up to 9 frequencies
+on 2 selected beams. This control program was originally
+designed for the Oct 2023 annular and Apr 2024 total eclipses.
 
 The control program requires a radar-specific sounding file called
 "sounder.dat.[rad]", where "[rad]" should be replaced by
@@ -44,8 +43,8 @@ program will attempt to write the sounding data to the "/data/ros/snd"
 directory. If this directory does not exist, no sounding data will
 be written. The 2-hr sounding files contain a reduced set of
 radar operating parameters and fitted values (e.g., velocity,
-power, spectral width, phi0) in dmap-format.
+power, spectral width, phi0, elevation) in dmap-format.
 
 Source:
 ======
-E.G. Thomas (20221025)
+E.G. Thomas (20240408)

@@ -342,7 +342,7 @@ int main(int argc,char *argv[])
         nave=SiteIntegrate(seq_long->lags);
       }
       if (nave < 0) {
-        sprintf(logtxt,"Integration error:%d",nave);
+        sprintf(logtxt,"Integration error: %d",nave);
         ErrLog(errlog.sock,progname,logtxt);
         continue;
       }

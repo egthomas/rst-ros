@@ -227,10 +227,8 @@ int main(int argc,char *argv[]) {
 
   channel = cnum;
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
   status=SiteBuild(libstr);
 
   if (status==-1) {
@@ -268,7 +266,6 @@ int main(int argc,char *argv[]) {
   }
   ErrLog(errlog.sock,progname,logtxt);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src */
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
@@ -280,7 +277,7 @@ int main(int argc,char *argv[]) {
 
   status=SiteSetupRadar();
 
-  fprintf(stderr,"Status:%d\n",status);
+  fprintf(stderr,"Status: %d\n",status);
 
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
@@ -378,7 +375,7 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
       nave=SiteIntegrate(seq->lags);
       if (nave<0) {
-        sprintf(logtxt,"Integration error:%d",nave);
+        sprintf(logtxt,"Integration error: %d",nave);
         ErrLog(errlog.sock,progname,logtxt);
         continue;
       }

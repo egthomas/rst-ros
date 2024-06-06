@@ -53,7 +53,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"eclipsesound 2023/10/12"};
+char progid[80]={"eclipsesound 2024/03/29"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -186,12 +186,35 @@ int main(int argc,char *argv[]) {
   channel = cnum;
 
   /* Point to the beams here */
-  if (strcmp(ststr,"cve") == 0) {
+  if ((strcmp(ststr,"cve") == 0) || (strcmp(ststr,"ice") == 0)) {
     bms = bmse;
     snd_bms = snd_bmse;
-  } else if (strcmp(ststr,"cvw") == 0) {
+    if (strcmp(ststr,"ice") == 0) {
+      snd_intt_us = 800000;
+      snd_bms[0] = 11;
+      snd_bms[1] = 21;
+    }
+  } else if ((strcmp(ststr,"cvw") == 0) || (strcmp(ststr,"icw") == 0) || (strcmp(ststr,"bks") == 0)) {
     bms = bmsw;
     snd_bms = snd_bmsw;
+    if (strcmp(ststr,"icw") == 0) {
+      snd_intt_us = 800000;
+      snd_bms[1] = 10;
+    }
+  } else if (strcmp(ststr,"fhe") == 0) {
+    nintgs = 11;
+    fast_intt_us = 700000;
+    bms = bmse;
+    snd_bms = snd_bmse;
+    snd_bms[1] = 21;
+  } else if (strcmp(ststr,"fhw") == 0) {
+    nintgs = 11;
+    fast_intt_us = 700000;
+    bms = bmsw;
+    snd_bms = snd_bmsw;
+    snd_bms[1] = 14;
+    for (i=0; i<nintgs; i++)
+      bms[i] -= 2;
   } else {
     printf("Error: Not intended for station %s\n", ststr);
     return (-1);
@@ -254,7 +277,7 @@ int main(int argc,char *argv[]) {
 
   status=SiteSetupRadar();
 
-  fprintf(stderr,"Status:%d\n",status);
+  fprintf(stderr,"Status: %d\n",status);
 
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
@@ -347,7 +370,7 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,logtxt);
       nave=SiteIntegrate(seq->lags);
       if (nave<0) {
-        sprintf(logtxt,"Integration error:%d",nave);
+        sprintf(logtxt,"Integration error: %d",nave);
         ErrLog(errlog.sock,progname,logtxt);
         continue;
       }

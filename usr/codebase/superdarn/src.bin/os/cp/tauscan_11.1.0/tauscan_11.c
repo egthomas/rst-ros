@@ -97,7 +97,7 @@ int main(int argc,char *argv[]) {
   OpsBuildTauscan11(seq);
 
   /* standard radar parameters */
-  cp=502;
+  cp=504;
   intsc=5;
   intus=500000;
   mppul=seq->mppul;
@@ -154,10 +154,8 @@ int main(int argc,char *argv[]) {
 
   channel = cnum;
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsStart(ststr);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.1.5/src/build.c */
   /* NOTE: the function just assigns the remaing functions starting with
    *       'Site' to the appropriate site specific functions, i.e.,
    *       SiteStart() is SiteRosStart(), etc. */
@@ -169,7 +167,6 @@ int main(int argc,char *argv[]) {
   }
 
   /* IMPORTANT: sbm and ebm are reset by this function */
-  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
   status = SiteStart(roshost,ststr);
   if (status==-1) {
     fprintf(stderr,"Error reading site configuration file.\n");
@@ -196,7 +193,6 @@ int main(int argc,char *argv[]) {
 
   for (n=0;n<tnum;n++) task[n].port+=baseport;
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src */
   OpsSetupCommand(argc,argv);
   OpsSetupShell();
 
@@ -207,7 +203,7 @@ int main(int argc,char *argv[]) {
 
   beams=abs(ebm-sbm)+1;
   if (fast) {
-    cp=503;
+    cp=505;
     scnsc=60;
     scnus=0;
   } else {
@@ -223,7 +219,6 @@ int main(int argc,char *argv[]) {
 
   OpsSetupIQBuf(intsc,intus,mppul,mpinc,nbaud);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
   status=SiteSetupRadar();
   if (status !=0) {
     ErrLog(errlog.sock,progname,"Error locating hardware.");
@@ -245,14 +240,11 @@ int main(int argc,char *argv[]) {
   }
 
   printf("Preparing OpsFitACFStart Station ID: %s %d\n", ststr, stid);
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/setup.c */
   OpsFitACFStart();
 
   printf("Preparing SiteTimeSeq Station ID: %s %d\n",ststr,stid);
-  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
   tsgid=SiteTimeSeq(seq->ptab);
 
-  /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/sync.c */
   skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
 
   if (backward) {
@@ -267,7 +259,6 @@ int main(int argc,char *argv[]) {
   do {
 
     printf("Entering Site Start Scan Station ID: %s %d\n",ststr,stid);
-    /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
     if (SiteStartScan() !=0) continue;
 
     TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
@@ -307,7 +298,6 @@ int main(int argc,char *argv[]) {
 
       ErrLog(errlog.sock,progname,"Starting Integration.");
       printf("Entering Site Start Intt Station ID: %s %d\n",ststr,stid);
-      /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
       SiteStartIntt(intsc,intus);
 
       printf("Entering Site FCLR Station ID: %s %d\n", ststr, stid);
@@ -316,29 +306,25 @@ int main(int argc,char *argv[]) {
       sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
       ErrLog(errlog.sock,progname, logtxt);
 
-      /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
       tfreq=SiteFCLR(stfrq,stfrq+frqrng);
 
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
       printf("Entering Site Integrate Station ID: %s %d \n", ststr, stid);
-      /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
       nave=SiteIntegrate(seq->lags);
       if (nave<0) {
-        sprintf(logtxt,"Integration error:%d",nave);
+        sprintf(logtxt,"Integration error: %d",nave);
         ErrLog(errlog.sock,progname,logtxt);
         continue;
       }
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      /* rst/usr/codebase/superdarn/src.lib/os/ops.1.10/src/build.c */
       OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
 
-      /* rst/codebase/superdarn/src.lib/tk/fitacf.2.5/src/fitacf.c */
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
       FitSetAlgorithm(fit,"fitacf2");
 
@@ -383,7 +369,6 @@ int main(int argc,char *argv[]) {
 
     bmnum = sbm;
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-    /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
     if (scannowait==0) SiteEndScan(scnsc,scnus,5000);
   } while (1);
 
@@ -391,7 +376,6 @@ int main(int argc,char *argv[]) {
 
   ErrLog(errlog.sock,progname,"Ending program.");
 
-  /* rst/usr/codebase/superdarn/src.lib/os/site.xxx.1.0/src/site.c */
   SiteExit(0);
 
   return 0;

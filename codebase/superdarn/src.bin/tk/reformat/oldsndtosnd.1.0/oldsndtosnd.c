@@ -299,7 +299,7 @@ int main (int argc,char *argv[]) {
       snd->noise.mean = header_old.noise;
       snd->bmnum = header_old.beam_no;
       snd->bmazm = site->boresite + site->bmsep*(header_old.beam_no-offset) + site->bmoff;
-      snd->intt.sc = 2;
+      snd->intt.sc = 1;
       snd->intt.us = 0;
       snd->nrang = SND_NRANG;
       snd->frang = header_old.frange;

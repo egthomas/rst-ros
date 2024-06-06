@@ -384,7 +384,7 @@ int main(int argc,char *argv[]) {
     char *tmp;
     tmp=strtok(ststr,",");
     do {
-      sprintf(freq_filepath,"%s/site.%s/restrict.dat",envstr,tmp);
+      sprintf(freq_filepath,"%s/site.%s/restrict.dat.%s",envstr,tmp,tmp);
       fp=fopen(freq_filepath,"r");
       if (fp !=NULL) {
         table=FreqLoadTable(fp);
