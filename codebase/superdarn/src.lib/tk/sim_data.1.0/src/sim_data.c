@@ -493,7 +493,7 @@ void sim_data(double *t_d, double *t_g, double *t_c, double *v_dop, int *qflg,
 
       /* sample the irregularities with each pulse of the sequence */
       for (p=0; p<n_pul; p++) {
-        for(r=0; r<nrang; r++) {
+        for (r=0; r<nrang; r++) {
           if (!qflg[r]) continue;
 
           /* sample number in the pulse sequence */
