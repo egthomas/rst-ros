@@ -151,6 +151,7 @@ int operate(pid_t parent,int sock) {
 
         TCPIPMsgRecv(sock, &start_period, sizeof(int32_t));
         if (sync_scan == 1) {
+          if (beam_times !=NULL) free(beam_times);
           beam_times = malloc(periods_per_scan*sizeof(int));
           TCPIPMsgRecv(sock, &beam_times, periods_per_scan*sizeof(int32_t));
         }
@@ -215,11 +216,13 @@ int operate(pid_t parent,int sock) {
         TCPIPMsgRecv(sock, &lagfr, sizeof(int));
         TCPIPMsgRecv(sock, &mppul, sizeof(int));
 
+        if (tsgprm.pat !=NULL) free(tsgprm.pat);
         tsgprm.pat = malloc(sizeof(int)*mppul);
         for (i=0; i<mppul; i++)
           TCPIPMsgRecv(sock, &tsgprm.pat[i], sizeof(int));
 
         TCPIPMsgRecv(sock, &nbaud, sizeof(int));
+        if (pcode !=NULL) free(pcode);
         pcode = (int *)malloc((size_t)sizeof(int)*mppul*nbaud);
         for (i=0; i<nbaud; i++)
           TCPIPMsgRecv(sock, &pcode[i], sizeof(int));
