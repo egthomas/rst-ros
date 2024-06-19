@@ -63,77 +63,75 @@ calculated from these raw samples*/
 #define NDIV (1+(IM-1)/NTAB)
 #define EPS 1.2e-7
 #define RNMX (1.0-EPS)
-float ran1(long *idum)
-{
+
+float ran1(long *idum) {
+
   int j;
   long k;
   static long iy=0;
   static long iv[NTAB];
   float temp;
 
-  if(*idum <= 0 || !iy)
-  {
-    if(-(*idum) < 1)
-      *idum = 1;
-    else
-      *idum = -(*idum);
-    for(j=NTAB+7; j>=0; j--)
-    {
+  if (*idum <= 0 || !iy) {
+    if (-(*idum) < 1) *idum = 1;
+    else              *idum = -(*idum);
+    for (j=NTAB+7; j>=0; j--) {
       k = (*idum)/IQ;
       *idum = IA*(*idum-k*IQ)-IR*k;
-      if(*idum < 0)
-        *idum += IM;
-      if(j < NTAB)
-        iv[j] = *idum;
+      if (*idum < 0) *idum += IM;
+      if (j < NTAB) iv[j] = *idum;
     }
     iy = iv[0];
   }
+
   k = (*idum)/IQ;
   *idum = IA*(*idum-k*IQ)-IR*k;
-  if(*idum < 0)
-    *idum += IM;
+
+  if (*idum < 0) *idum += IM;
+
   j = iy/NDIV;
   iy = iv[j];
   iv[j] = *idum;
-  if((temp=AM*iy) > RNMX)
+
+  if ((temp=AM*iy) > RNMX) {
     return RNMX;
-  else
+  } else {
     return temp;
+  }
 }
 
-/*gaussian random number generator from numerical recipes*/
-float gasdev(long *idum)
-{
+
+/* gaussian random number generator from numerical recipes */
+float gasdev(long *idum) {
+
   float ran1(long *idum);
   static int iset=0;
   static float gset;
   float fac, rsq, v1, v2;
 
-  if(*idum < 0)
-    iset = 0;
-  if(iset == 0)
-  {
-    do
-    {
+  if (*idum < 0) iset = 0;
+
+  if (iset == 0) {
+    do {
       v1 = 2.0*ran1(idum)-1.;
       v2 = 2.0*ran1(idum)-1.;
       rsq = v1*v1+v2*v2;
     } while(rsq >= 1. || rsq == 0.);
+
     fac = sqrt(-2.0*log(rsq)/rsq);
     gset  = v1*fac;
     iset = 1;
+
     return v2*fac;
-  }
-  else
-  {
+  } else {
     iset = 0;
     return gset;
   }
 }
 
 
-void acf_27(double complex * aa, double complex * rr, int cpid)
-{
+void acf_27(double complex *aa, double complex *rr, int cpid) {
+
   if (cpid == 1) {
     rr[0]=aa[0]*conj(aa[0]);
     rr[1]=aa[5]*conj(aa[6]);
@@ -154,6 +152,7 @@ void acf_27(double complex * aa, double complex * rr, int cpid)
     rr[16]=aa[1]*conj(aa[5]);
     rr[17]=aa[1]*conj(aa[6]);
   }
+
   if (cpid == 150) {
     rr[0]=aa[0]*conj(aa[0]);
     rr[1]=aa[6]*conj(aa[7]);
@@ -179,6 +178,7 @@ void acf_27(double complex * aa, double complex * rr, int cpid)
     rr[21]=aa[0]*conj(aa[2]);
     rr[22]=aa[0]*conj(aa[3]);
   }
+
   if (cpid == 503) {
     double complex * temp = malloc(17*sizeof(double complex));
     int i;
@@ -218,11 +218,13 @@ void acf_27(double complex * aa, double complex * rr, int cpid)
     temp[15]=aa[7]*conj(aa[11]);
     temp[16]=aa[7]*conj(aa[12]);
 
-    for(i=0;i<17;i++)
+    for (i=0; i<17; i++) {
       rr[i] = (rr[i]+temp[i])/2.;
+    }
 
     free(temp);
   }
+
   if (cpid == 9100) {
     rr[0]=aa[15]*conj(aa[15]);
     rr[1]=aa[0]*conj(aa[1]);
@@ -346,14 +348,16 @@ void acf_27(double complex * aa, double complex * rr, int cpid)
     rr[119]=aa[0]*conj(aa[15]);
     rr[120]=aa[15]*conj(aa[15]);
   }
+
   return;
 }
 
+
   /********************************************************
-  ** input variables**
+  ** input variables **
   *********************************************************
 
-  *********arrays (1 value per range gate)*********
+  ********* arrays (1 value per range gate) *********
   t_d                         Irregualrity decay time s
   t_g                         irregularity growth time
   t_c                         precipitation time constant
@@ -361,10 +365,10 @@ void acf_27(double complex * aa, double complex * rr, int cpid)
   v_dop                       Background velocity (m/s)
   amp0                        amplitude scaling factor
   qflg                        array indicating which range gates contain scatter
-  ********other arrays**********
+  ******** other arrays **********
   pulse_t                     array containing pulse table
   tau                         array containing the lags of the pulse sequence
-  ********scalars*************
+  ******** scalars *************
   freq                        transmit frequency
   noise_flg                   flag to indicate whether white noise is included
   noise_lev                   white noise level (ratio)
@@ -379,280 +383,290 @@ void acf_27(double complex * aa, double complex * rr, int cpid)
   n_lags                      number of lags in the pulse sequence
   dt                          basic lag time for the pulse sequence
   cri_flg                     cross-range interference flag
-  ********outputs***********
+  ******** outputs ***********
   out_samples                 the raw voltage samples (only valid if cri_flg=0)
   out_acfs                    the calculated ACFs, always valid
-
 */
-void sim_data(double *t_d, double *t_g, double *t_c, double *v_dop, int * qflg,
+
+void sim_data(double *t_d, double *t_g, double *t_c, double *v_dop, int *qflg,
               double *velo, double *amp0, double freq, double noise_lev,
               int noise_flg, int nave, int nrang, int lagfr,
               double smsep, int cpid, int life_dist,
-              int n_pul, int cri_flg, int n_lags, int * pulse_t, int * tau,
-              double dt, double complex * out_samples, double complex ** out_acfs,int decayflg)
-{
+              int n_pul, int cri_flg, int n_lags, int *pulse_t, int *tau,
+              double dt, double complex *out_samples,
+              double complex **out_acfs, int decayflg) {
 
   /********************************************************
   ** definitions of variables needed for data generation **
   ********************************************************/
-  int n = 2000;                             /*Number of scatterers (per range gate per integration period)*/
-  double t_n = dt*1.e-2;                    /*Irregularity decay time for white noise*/
-  double pwrtot = 0.;                       /*total power, used to normalize ACFs*/
-  long numtot = 0;                          /*number of good ACFs*/
-  double npwrtot = 0.;                      /*total noise power, used to normalize noise ACFs*/
-  long nnumtot = 0;                         /*number of good noise ACFs*/
-  long offset = 3300;                       /*time offset (in samples, ~1s) to allow irregularity*/
-                                            /*generation/decay to reach steady state*/
-  double rngsep = smsep*C/2.;               /*range gate spearation*/
-  double smptime;                           /*time a raw sample is recorded*/
-  long n_samples = (long)(pulse_t[n_pul-1]*dt/smsep+nrang+lagfr);      /*number of samples in 1 pulse sequence*/
+  int n = 2000;                       /* Number of scatterers (per range gate per integration period) */
+  double t_n = dt*1.e-2;              /* Irregularity decay time for white noise */
+  double pwrtot = 0.;                 /* total power, used to normalize ACFs */
+  long numtot = 0;                    /* number of good ACFs */
+  double npwrtot = 0.;                /* total noise power, used to normalize noise ACFs */
+  long nnumtot = 0;                   /* number of good noise ACFs */
+  long offset = 3300;                 /* time offset (in samples, ~1s) to allow irregularity */
+                                      /* generation/decay to reach steady state */
+  double rngsep = smsep*C/2.;         /* range gate spearation */
+  double smptime;                     /* time a raw sample is recorded */
+  long n_samples = (long)(pulse_t[n_pul-1]*dt/smsep+nrang+lagfr);   /* number of samples in 1 pulse sequence */
 
-  /*other variables*/
+  /* other variables */
   long i,j,kk,p,r,smpnum,temp;
   double rng = 0,taus,amplitude,phase;
-  long seed = time(NULL)*time(NULL);        /*a seed for random number generation*/
+  long seed = time(NULL)*time(NULL);        /* a seed for random number generation */
 
   double lambda = C/freq;
 
-  /*control program dependent variables*/
-  taus = dt/smsep;                                      /*lag time in samples*/
+  /* control program dependent variables */
+  taus = dt/smsep;                          /* lag time in samples */
 
   double complex * aa = malloc(n_pul*sizeof(double complex));
   double complex * rr = malloc(n_lags*sizeof(double complex));
 
-  /*Creating the output array for ACFs*/
+  /* Creating the output array for ACFs */
   double complex ** acfs = malloc(nrang*sizeof(double complex *));
-  for(i=0;i<nrang;i++)
-  {
+  for (i=0; i<nrang; i++) {
     acfs[i] = malloc(n_lags*sizeof(double complex));
-    for(j=0;j<n_lags;j++)
+    for (j=0; j<n_lags; j++)
       acfs[i][j] = 0.+I*0.;
   }
 
-  /*Creating the output array for ACFs*/
+  /* Creating the output array for noise ACFs */
   double complex ** noise_acfs = malloc(nrang*sizeof(double complex *));
-  for(i=0;i<nrang;i++)
-  {
+  for (i=0; i<nrang; i++) {
     noise_acfs[i] = malloc(n_lags*sizeof(double complex));
-    for(j=0;j<n_lags;j++)
+    for (j=0; j<n_lags; j++)
       noise_acfs[i][j] = 0.+I*0.;
   }
 
-
-  /*loop that populates the range gates with irregularities,
-   *each with a random location and generation time*/
+  /* loop that populates the range gates with irregularities,
+   * each with a random location and generation time */
   struct irreg ** range_gates = malloc(nrang*sizeof(struct irreg *));
-  for(i=0;i<nrang;i++)
+  for (i=0; i<nrang; i++) {
     range_gates[i] = malloc(n*sizeof(struct irreg));
+  }
 
-
-
-  /*create a structure to store the raw samples from each pulse sequence*/
+  /* create a structure to store the raw samples from each pulse sequence */
   double complex * raw_samples = malloc(n_samples*sizeof(double complex));
-  /*create a structure to store the raw noise samples from each pulse sequence*/
+  /* create a structure to store the raw noise samples from each pulse sequence */
   double complex * noise_samples = malloc(n_samples*sizeof(double complex));
 
-
-  /*assign properties to the irregularities in each range gate*/
-  for(i=0;i<nrang;i++)
-  {
+  /* assign properties to the irregularities in each range gate */
+  for (i=0; i<nrang; i++) {
     rng = (lagfr+i)*rngsep;
-    for(j=0;j<n;j++)
-    {
+    for (j=0; j<n; j++) {
       srand(seed--);
-      /*Uniform distribution of irregularities across 45 km range bin at distance rng*/
-      range_gates[i][j].space =  ((double)rand()/(double)RAND_MAX)*rngsep+rng;
-      /*random generation time for irregularities*/
+
+      /* Uniform distribution of irregularities across 45 km range bin at distance rng */
+      range_gates[i][j].space = ((double)rand()/(double)RAND_MAX)*rngsep+rng;
+
+      /* random generation time for irregularities */
       range_gates[i][j].time = ((double)rand()/(double)RAND_MAX)*(n_samples*nave+offset-1)*smsep;
-      /*exponential*/
-      if(!life_dist)
-        range_gates[i][j].width = -1.*log((double)rand()/(double)RAND_MAX);       /*Exponential distribution around the average*/
-      /*constant*/
-      else
+
+      if (!life_dist) {
+        /* Exponential distribution around the average */
+        range_gates[i][j].width = -1.*log((double)rand()/(double)RAND_MAX);
+      } else {
+        /* constant */
         range_gates[i][j].width = 1.;
+      }
       range_gates[i][j].start_time = -1.;
       temp = rand();
-      /*random velocity component (gaussian)*/
+
+      /* random velocity component (gaussian) */
       range_gates[i][j].velo = velo[i]*gasdev(&temp);
     }
   }
 
-  /***********************************
-  ***Perform the actual simulation****
-  ***********************************/
-  /*if cross-range interference is to be included in the simulation*/
-  if(cri_flg)
-  {
-    for(kk=0;kk<nave;kk++)
-    {
-      /*initialize the samples*/
-      for(i=0;i<n_samples;i++)
+  /*************************************
+  *** Perform the actual simulation ****
+  *************************************/
+
+  /* if cross-range interference is to be included in the simulation */
+  if (cri_flg) {
+    for (kk=0; kk<nave; kk++) {
+      /* initialize the samples */
+      for (i=0; i<n_samples; i++) {
         raw_samples[i] = 0.+I*0.;
+      }
 
-      /*sample the irregularities with each pulse of the sequence*/
-      for(p=0;p<n_pul;p++)
-        for(r=0;r<nrang;r++)
-        {
-          if(!qflg[r]) continue;
-          /*sample number in the pulse sequence*/
+      /* sample the irregularities with each pulse of the sequence */
+      for (p=0; p<n_pul; p++) {
+        for(r=0; r<nrang; r++) {
+          if (!qflg[r]) continue;
+
+          /* sample number in the pulse sequence */
           smpnum = pulse_t[p]*taus+r+lagfr;
-          /*time that the sample is recorded*/
+
+          /* time that the sample is recorded */
           smptime = (smpnum+kk*pulse_t[n_pul-1]*taus+nrang+lagfr+offset)*smsep;
-          /*calculate how much signal is generated by
-          each scatterer in this range gate*/
-          for(i=0;i<n;i++)
-          {
-            /*check if the irregularity exists at the sample time,
-              and hasnt surpassed its maximum lifetime*/
-            if(range_gates[r][i].time <= smptime  &&
-                smptime <= range_gates[r][i].time+t_c[r]*range_gates[r][i].width)
-            {
-              /*calculate the amplitude of the signal generated by the scatterer*/
+
+          /* calculate how much signal is generated by
+             each scatterer in this range gate */
+          for (i=0; i<n; i++) {
+            /* check if the irregularity exists at the sample time,
+               and hasnt surpassed its maximum lifetime*/
+            if (range_gates[r][i].time <= smptime &&
+                smptime <= range_gates[r][i].time+t_c[r]*range_gates[r][i].width) {
+              /* calculate the amplitude of the signal generated by the scatterer */
               amplitude = (1.-exp(-(smptime-range_gates[r][i].time)/t_g[r]))*exp(-((smptime-range_gates[r][i].time)/t_d[r]));
-            }
-            else
+            } else {
               amplitude=0.;
-            /*calculate phase of scattered signal depending on its location*/
+            }
+
+            /* calculate phase of scattered signal depending on its location */
             phase = -4.*PI*(smptime*(v_dop[r]+range_gates[r][i].velo)+range_gates[r][i].space)/lambda;
-            /*record scattered signal as a raw sample*/
+
+            /* record scattered signal as a raw sample */
             /* raw_samples[smpnum] += amplitude*(cos(phase) + I*sin(phase)); */
             raw_samples[smpnum] += amp0[r]*amplitude*(cos(phase) + I*sin(phase));
           }
         }
+      }
 
-      /*calculate an ACF from the raw samples*/
-      for(r=0;r<nrang;r++)
-      {
-        /*calculate the ACF*/
-        for(p=0;p<n_pul;p++)
-        {
+      /* calculate an ACF from the raw samples */
+      for (r=0; r<nrang; r++) {
+        /* calculate the ACF*/
+        for (p=0; p<n_pul; p++) {
           smpnum = pulse_t[p]*taus+r+lagfr;
           aa[p] = raw_samples[smpnum];
         }
         acf_27(aa,rr,cpid);
-        /*add this ACF to the total ACF*/
-        for(i=0;i<n_lags;i++)
+
+        /* add this ACF to the total ACF */
+        for (i=0; i<n_lags; i++) {
           acfs[r][i] += rr[i];
-        if(r < pulse_t[1]*taus+lagfr && qflg[r])
-        {
+        }
+
+        if (r < pulse_t[1]*taus+lagfr && qflg[r]) {
           pwrtot += creal(rr[0]);
           numtot++;
         }
       }
-      /*save raw samples for output*/
-      for(r=kk*n_samples;r<(kk+1)*n_samples-1;r++)
+
+      /* save raw samples for output */
+      for (r=kk*n_samples; r<(kk+1)*n_samples-1; r++) {
         out_samples[r] = raw_samples[(r%n_samples)];
+      }
     }
-  }
-  /*if no cross-range interference is to be included in the simulation*/
-  else
-  {
-    for(r=0;r<nrang;r++)
-    {
-      for(kk=0;kk<nave;kk++)
-      {
-        /*initialize the samples*/
-        for(i=0;i<n_samples;i++)
-          raw_samples[i] = 0.+I*0.;
 
-        /*sample the irregularities with each pulse of the sequence*/
-        for(p=0;p<n_pul;p++)
-        {
-          if(!qflg[r]) continue;
-          /*sample number in the pulse sequence*/
+  } else {
+
+    /* if no cross-range interference is to be included in the simulation */
+    for (r=0; r<nrang; r++) {
+      for (kk=0; kk<nave; kk++) {
+        /* initialize the samples */
+        for (i=0; i<n_samples; i++) {
+          raw_samples[i] = 0.+I*0.;
+        }
+
+        /* sample the irregularities with each pulse of the sequence */
+        for (p=0; p<n_pul; p++) {
+          if (!qflg[r]) continue;
+
+          /* sample number in the pulse sequence */
           smpnum = pulse_t[p]*taus+r+lagfr;
-          /*time that the sample is recorded*/
+
+          /* time that the sample is recorded */
           smptime = (smpnum+kk*pulse_t[n_pul-1]*taus+nrang+lagfr+offset)*smsep;
-          /*calculate how much signal is generated by
-          each scatterer in this range gate*/
-          for(i=0;i<n;i++)
-          {
-            /*check if the irregularity exists at the sample time,
-              and hasnt surpassed its maximum lifetime*/
-            if(range_gates[r][i].time <= smptime  &&
-                smptime <= range_gates[r][i].time+t_c[r]*range_gates[r][i].width)
-            {
-              /*calculate the amplitude of the signal generated by the scatterer*/
+
+          /* calculate how much signal is generated by
+             each scatterer in this range gate */
+          for (i=0; i<n; i++) {
+            /* check if the irregularity exists at the sample time,
+               and hasnt surpassed its maximum lifetime */
+            if (range_gates[r][i].time <= smptime &&
+                smptime <= range_gates[r][i].time+t_c[r]*range_gates[r][i].width) {
+              /* calculate the amplitude of the signal generated by the scatterer */
               amplitude = (1.-exp(-(smptime-range_gates[r][i].time)/t_g[r]))*exp(-((smptime-range_gates[r][i].time)/t_d[r]));
-            }
-            else
+            } else {
               amplitude=0.;
-            /*calculate phase of scattered signal depending on its location*/
+            }
+
+            /* calculate phase of scattered signal depending on its location */
             phase = -4.*PI*(smptime*(v_dop[r]+range_gates[r][i].velo)+range_gates[r][i].space)/lambda;
-            /*record scattered signal as a raw sample*/
+
+            /* record scattered signal as a raw sample */
             /* raw_samples[smpnum] += amplitude*(cos(phase) + I*sin(phase)); */
             raw_samples[smpnum] += amp0[r]*amplitude*(cos(phase) + I*sin(phase));
           }
         }
-        /*calculate an ACF from the raw samples*/
-        for(p=0;p<n_pul;p++)
-        {
+
+        /* calculate an ACF from the raw samples */
+        for (p=0; p<n_pul; p++) {
           smpnum = pulse_t[p]*taus+r+lagfr;
           aa[p] = raw_samples[smpnum];
         }
         acf_27(aa,rr,cpid);
-        /*add this ACF to the total ACF*/
-        for(i=0;i<n_lags;i++)
+
+        /* add this ACF to the total ACF */
+        for (i=0; i<n_lags; i++) {
           acfs[r][i] += rr[i];
-        if(/*r < pulse_t[1]*taus+lagfr &&*/ qflg[r])
-        {
+        }
+
+        if (/*r < pulse_t[1]*taus+lagfr &&*/ qflg[r]) {
           pwrtot += creal(rr[0]);
           numtot++;
         }
       }
     }
   }
-  /*if noise is to be included in the simulation*/
-  if(noise_flg)
-  {
-    for(r=0;r<nrang;r++)
-    {
-      for(kk=0;kk<nave;kk++)
-      {
-        /*initialize the samples*/
-        for(i=0;i<n_samples;i++)
-          noise_samples[i] = 0.+I*0.;
 
-        /*sample the irregularities with each pulse of the sequence*/
-        for(p=0;p<n_pul;p++)
-        {
-          /*sample number in the pulse sequence*/
+  /* if noise is to be included in the simulation */
+  if (noise_flg) {
+    for (r=0; r<nrang; r++) {
+      for (kk=0; kk<nave; kk++) {
+        /* initialize the samples */
+        for (i=0; i<n_samples; i++) {
+          noise_samples[i] = 0.+I*0.;
+        }
+
+        /* sample the irregularities with each pulse of the sequence */
+        for (p=0; p<n_pul; p++) {
+          /* sample number in the pulse sequence */
           smpnum = pulse_t[p]*taus+r+lagfr;
-          /*time that the sample is recorded*/
+
+          /* time that the sample is recorded */
           smptime = (smpnum+kk*pulse_t[n_pul-1]*taus+nrang+lagfr+offset)*smsep;
-          /*calculate how much signal is generated by
-          each scatterer in this range gate*/
-          for(i=0;i<n;i++)
-          {
-            /*check if the irregularity exists at the sample time,
-              and hasnt surpassed its maximum lifetime*/
-            if(range_gates[r][i].time <= smptime)
-            {
-              if(range_gates[r][i].start_time == -1.)
+
+          /* calculate how much signal is generated by
+             each scatterer in this range gate */
+          for (i=0; i<n; i++) {
+            /* check if the irregularity exists at the sample time,
+               and hasnt surpassed its maximum lifetime */
+            if (range_gates[r][i].time <= smptime) {
+              if (range_gates[r][i].start_time == -1.) {
                 range_gates[r][i].start_time = smptime;
-              /*calculate the amplitude of the signal generated by the scatterer*/
+              }
+
+              /* calculate the amplitude of the signal generated by the scatterer */
               amplitude = exp(-((smptime-range_gates[r][i].start_time)/t_n));
-            }
-            else
+            } else {
               amplitude=0.;
-            /*calculate phase of scattered signal depending on its location*/
+            }
+
+            /* calculate phase of scattered signal depending on its location */
             phase = -4.*PI*(range_gates[r][i].space)/lambda;
-            /*record scattered signal as a raw sample*/
+
+            /* record scattered signal as a raw sample */
             noise_samples[smpnum] += amplitude*(cos(phase) + I*sin(phase));
           }
         }
-        /*calculate an ACF from the raw samples*/
-        for(p=0;p<n_pul;p++)
-        {
+
+        /* calculate an ACF from the raw samples */
+        for (p=0; p<n_pul; p++) {
           smpnum = pulse_t[p]*taus+r+lagfr;
           aa[p] = noise_samples[smpnum];
         }
         acf_27(aa,rr,cpid);
-        /*add this ACF to the total ACF*/
-        for(i=0;i<n_lags;i++)
+
+        /* add this ACF to the total ACF */
+        for (i=0; i<n_lags; i++) {
           noise_acfs[r][i] += rr[i];
-        if(r < pulse_t[1]*taus+lagfr)
-        {
+        }
+
+        if (r < pulse_t[1]*taus+lagfr) {
           npwrtot += creal(rr[0]);
           nnumtot++;
         }
@@ -660,17 +674,18 @@ void sim_data(double *t_d, double *t_g, double *t_c, double *v_dop, int * qflg,
     }
   }
 
-  /*average and normalize ACFs*/
-  for(r=0;r<nrang;r++)
-	{
-    for(i=0;i<n_lags;i++)
-    {
-      /* if(decayflg) out_acfs[r][i] = 1./(pow(r+1,2))*acfs[r][i]*amp0[r]/(nave*pwrtot/numtot);
-			else out_acfs[r][i] = acfs[r][i]*amp0[r]/(nave*pwrtot/numtot); */
-	if(decayflg) out_acfs[r][i] = 1./(pow(r+1,2))*acfs[r][i];
-		else out_acfs[r][i] = acfs[r][i];
-      if(noise_flg)
-      {
+  /* average and normalize ACFs */
+  for (r=0; r<nrang; r++) {
+    for (i=0; i<n_lags; i++) {
+      /* if (decayflg) out_acfs[r][i] = 1./(pow(r+1,2))*acfs[r][i]*amp0[r]/(nave*pwrtot/numtot);
+			else             out_acfs[r][i] = acfs[r][i]*amp0[r]/(nave*pwrtot/numtot); */
+	    if (decayflg) {
+        out_acfs[r][i] = 1./(pow(r+1,2))*acfs[r][i];
+      } else {
+        out_acfs[r][i] = acfs[r][i];
+      }
+
+      if (noise_flg) {
         /* noise_acfs[r][i] *= noise_lev/(nave*npwrtot/nnumtot); */
         noise_acfs[r][i] *= noise_lev;
         out_acfs[r][i] += noise_acfs[r][i];
@@ -678,16 +693,13 @@ void sim_data(double *t_d, double *t_g, double *t_c, double *v_dop, int * qflg,
     }
 	}
 
-  /*free dynamically allocated memory*/
-  for(i=0;i<nrang;i++)
-    free(acfs[i]);
+  /* free dynamically allocated memory */
+  for (i=0; i<nrang; i++) free(acfs[i]);
   free(acfs);
-  for(i=0;i<nrang;i++)
-    free(noise_acfs[i]);
+  for (i=0; i<nrang; i++) free(noise_acfs[i]);
   free(noise_acfs);
   free(aa);
-  for(i=0;i<nrang;i++)
-    free(range_gates[i]);
+  for (i=0; i<nrang; i++) free(range_gates[i]);
   free(range_gates);
   free(rr);
   free(raw_samples);
