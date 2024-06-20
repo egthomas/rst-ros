@@ -333,8 +333,8 @@ int main(int argc,char *argv[]) {
                   sizeof(sc_reuseaddr));
 
   if (temp != 0) {
-      perror("error setting socket options");
-      exit(-1);
+    perror("error setting socket options");
+    exit(-1);
   }
 
   /* name and bind socket to an address and port number */
