@@ -189,7 +189,7 @@ ID code can be assigned to the "east" variable and lines corresponding
 to the "west" radar should be commented out or removed.
 
 Note that when using the "dummy" radar simulator with the above test
-scripts, the "rost.host" value in the site configuration file should
+scripts, the "ros.host" value in the site configuration file should
 be set to the localhost IP address (127.0.0.1 by default). Alternatively,
 the ROS hostname can be set to the localhost IP address using the
 "-ros" command line option with the appropriate control program in the
