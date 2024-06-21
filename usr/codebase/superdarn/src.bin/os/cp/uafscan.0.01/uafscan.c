@@ -584,7 +584,8 @@ int main(int argc,char *argv[]) {
 
   if(nBeams_per_scan > 16) {  /* if number of beams in scan greater than legacy 16, recalculate beam dwell time to avoid over running scan boundary if scan boundary wait is active. */ 
       if (nowait==0 && onesec==0) {
-        total_scan_usecs = (scnsc-3)*1E6+scnus;
+        //total_scan_usecs = (scnsc-3)*1E6+scnus;
+        total_scan_usecs = (scnsc-1)*1E6+scnus;
         total_integration_usecs = total_scan_usecs/nBeams_per_scan;
         intsc = total_integration_usecs/1E6;
         intus = total_integration_usecs -(intsc*1E6);
