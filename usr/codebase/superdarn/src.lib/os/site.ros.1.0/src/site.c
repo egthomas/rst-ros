@@ -630,7 +630,7 @@ int SiteRosTimeSeq(int *ptab) {
     fprintf(stderr,"REGISTER_SEQ:status=%d\n",rmsg.status);
   }
 
-  if (rmsg.status != 1) return -2;
+  if (rmsg.status != 0) return -2;
 
   lagfr = tsgprm.lagfr;
   smsep = tsgprm.smsep;
