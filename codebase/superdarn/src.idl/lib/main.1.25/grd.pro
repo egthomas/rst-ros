@@ -138,6 +138,7 @@ pro GridMakeGVec,gvec
    gvec={GridGVec, mlat:0.0, $
                    mlon:0.0, $
                    azm: 0.0, $
+                   srng: 0.0, $
                    vel: {GridValue,median:0.0,sd:0.0}, $
                    pwr: {GridValue,median:0.0,sd:0.0}, $
                    wdt: {GridValue,median:0.0,sd:0.0}, $
@@ -277,19 +278,20 @@ function GridRead,unit,prm,stvec,gvec
     gvec[*].mlat=(*(arrvec[arrid[18]].ptr))[*]
     gvec[*].mlon=(*(arrvec[arrid[19]].ptr))[*]
     gvec[*].azm=(*(arrvec[arrid[20]].ptr))[*]
-    gvec[*].st_id=(*(arrvec[arrid[21]].ptr))[*]
-    gvec[*].chn=(*(arrvec[arrid[22]].ptr))[*]
-    gvec[*].index=(*(arrvec[arrid[23]].ptr))[*]
+    gvec[*].srng=(*(arrvec[arrid[21]].ptr))[*]
+    gvec[*].st_id=(*(arrvec[arrid[22]].ptr))[*]
+    gvec[*].chn=(*(arrvec[arrid[23]].ptr))[*]
+    gvec[*].index=(*(arrvec[arrid[24]].ptr))[*]
  
-    gvec[*].vel.median=(*(arrvec[arrid[24]].ptr))[*]
-    gvec[*].vel.sd=(*(arrvec[arrid[25]].ptr))[*]
+    gvec[*].vel.median=(*(arrvec[arrid[25]].ptr))[*]
+    gvec[*].vel.sd=(*(arrvec[arrid[26]].ptr))[*]
 
-    if arrid[26] ne -1 then begin
+    if arrid[27] ne -1 then begin
       prm.xtd=1
-      gvec[*].pwr.median=(*(arrvec[arrid[26]].ptr))[*]
-      gvec[*].pwr.sd=(*(arrvec[arrid[27]].ptr))[*]
-      gvec[*].wdt.median=(*(arrvec[arrid[28]].ptr))[*]
-      gvec[*].wdt.sd=(*(arrvec[arrid[29]].ptr))[*]
+      gvec[*].pwr.median=(*(arrvec[arrid[27]].ptr))[*]
+      gvec[*].pwr.sd=(*(arrvec[arrid[28]].ptr))[*]
+      gvec[*].wdt.median=(*(arrvec[arrid[29]].ptr))[*]
+      gvec[*].wdt.sd=(*(arrvec[arrid[30]].ptr))[*]
     endif
   endif
 
@@ -365,6 +367,7 @@ function GridWrite,unit,prm,stvec,gvec
     s=DataMapMakeArray('vector.mlat',gvec[0:vcnum-1].mlat,arrvec)
     s=DataMapMakeArray('vector.mlon',gvec[0:vcnum-1].mlon,arrvec)
     s=DataMapMakeArray('vector.kvect',gvec[0:vcnum-1].azm,arrvec)
+    s=DataMapMakeArray('vector.srng',gvec[0:vcnum-1].srng,arrvec)
     s=DataMapMakeArray('vector.stid',gvec[0:vcnum-1].st_id,arrvec)
     s=DataMapMakeArray('vector.channel',gvec[0:vcnum-1].chn,arrvec)
     s=DataMapMakeArray('vector.index',gvec[0:vcnum-1].index,arrvec)

@@ -206,7 +206,7 @@ int GridRead(int fid,struct GridData *gp) {
 
   gp->xtd=0;
 
-  for (n=26;n<30;n++) if (adata[n] !=NULL) {
+  for (n=27;n<31;n++) if (adata[n] !=NULL) {
     gp->xtd=1;
     break;
   }
@@ -214,21 +214,22 @@ int GridRead(int fid,struct GridData *gp) {
     gp->data[n].mlat=adata[18]->data.fptr[n];
     gp->data[n].mlon=adata[19]->data.fptr[n];
     gp->data[n].azm=adata[20]->data.fptr[n];
+    gp->data[n].srng=adata[21]->data.fptr[n];
     
-    gp->data[n].st_id=adata[21]->data.sptr[n];
-    gp->data[n].chn=adata[22]->data.sptr[n];
-    gp->data[n].index=adata[23]->data.iptr[n];
-    gp->data[n].vel.median=adata[24]->data.fptr[n];
-    gp->data[n].vel.sd=adata[25]->data.fptr[n];
+    gp->data[n].st_id=adata[22]->data.sptr[n];
+    gp->data[n].chn=adata[23]->data.sptr[n];
+    gp->data[n].index=adata[24]->data.iptr[n];
+    gp->data[n].vel.median=adata[25]->data.fptr[n];
+    gp->data[n].vel.sd=adata[26]->data.fptr[n];
     gp->data[n].pwr.median=0;
     gp->data[n].pwr.sd=0;
     gp->data[n].wdt.median=0;
     gp->data[n].wdt.sd=0;
 
-    if (adata[26] !=NULL) gp->data[n].pwr.median=adata[26]->data.fptr[n];
-    if (adata[27] !=NULL) gp->data[n].pwr.sd=adata[27]->data.fptr[n];
-    if (adata[28] !=NULL) gp->data[n].wdt.median=adata[28]->data.fptr[n];
-    if (adata[29] !=NULL) gp->data[n].wdt.sd=adata[29]->data.fptr[n];
+    if (adata[27] !=NULL) gp->data[n].pwr.median=adata[27]->data.fptr[n];
+    if (adata[28] !=NULL) gp->data[n].pwr.sd=adata[28]->data.fptr[n];
+    if (adata[29] !=NULL) gp->data[n].wdt.median=adata[29]->data.fptr[n];
+    if (adata[30] !=NULL) gp->data[n].wdt.sd=adata[30]->data.fptr[n];
     
   }
    
