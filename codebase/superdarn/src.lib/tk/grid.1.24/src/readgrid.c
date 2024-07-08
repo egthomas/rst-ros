@@ -62,7 +62,7 @@ int GridRead(int fid,struct GridData *gp) {
                  "program.id","noise.mean","noise.sd","gsct",
                  "v.min","v.max","p.min","p.max","w.min","w.max","ve.min",
                  "ve.max",
-                 "vector.mlat","vector.mlon","vector.kvect",
+                 "vector.mlat","vector.mlon","vector.kvect","vector.srng",
                  "vector.stid","vector.channel","vector.index",
                  "vector.vel.median","vector.vel.sd",
                  "vector.pwr.median","vector.pwr.sd",
@@ -73,13 +73,13 @@ int GridRead(int fid,struct GridData *gp) {
                DATASHORT,DATAFLOAT,DATAFLOAT,DATASHORT,
                DATAFLOAT,DATAFLOAT,DATAFLOAT,DATAFLOAT,DATAFLOAT,DATAFLOAT,
                DATAFLOAT,DATAFLOAT,
-               DATAFLOAT,DATAFLOAT,DATAFLOAT,
+               DATAFLOAT,DATAFLOAT,DATAFLOAT,DATAFLOAT,
                DATASHORT,DATASHORT,DATAINT,
                DATAFLOAT,DATAFLOAT,
                DATAFLOAT,DATAFLOAT,
                DATAFLOAT,DATAFLOAT};
 
-  struct DataMapArray *adata[40];
+  struct DataMapArray *adata[31];
 
   ptr=DataMapReadBlock(fid,&size);
   if (ptr==NULL) return -1;
@@ -214,7 +214,8 @@ int GridRead(int fid,struct GridData *gp) {
     gp->data[n].mlat=adata[18]->data.fptr[n];
     gp->data[n].mlon=adata[19]->data.fptr[n];
     gp->data[n].azm=adata[20]->data.fptr[n];
-    gp->data[n].srng=adata[21]->data.fptr[n];
+    if (adata[21] !=NULL) gp->data[n].srng=adata[21]->data.fptr[n];
+    else gp->data[n].srng=0;
     
     gp->data[n].st_id=adata[22]->data.sptr[n];
     gp->data[n].chn=adata[23]->data.sptr[n];
