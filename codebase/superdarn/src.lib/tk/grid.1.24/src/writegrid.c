@@ -98,7 +98,7 @@ int GridWrite(int fid,struct GridData *ptr) {
 
   for (n=0;n<ptr->vcnum;n++) if (ptr->data[n].st_id !=-1) npnt++;
 
-  size+=npnt*(3*sizeof(float)+sizeof(int32)+
+  size+=npnt*(4*sizeof(float)+sizeof(int32)+
               2*sizeof(int16)+(2+4*xtd)*sizeof(float));
   if (size==0) return 0;
   buf=malloc(size);

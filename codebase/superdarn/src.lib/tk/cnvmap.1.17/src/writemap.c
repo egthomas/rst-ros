@@ -138,7 +138,7 @@ int CnvMapWrite(int fid,struct CnvMapData *map,struct GridData *grd) {
 
   for (n=0;n<grd->vcnum;n++) if (grd->data[n].st_id !=-1) npnt++;
 
-  size+=npnt*(3*sizeof(float)+sizeof(int32)*2*sizeof(int16)+
+  size+=npnt*(4*sizeof(float)+sizeof(int32)*2*sizeof(int16)+
                       (2+4*xtd)*sizeof(float));
 
   size+=map->num_coef*4*sizeof(double);

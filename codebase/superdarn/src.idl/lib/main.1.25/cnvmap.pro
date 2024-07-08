@@ -217,7 +217,7 @@ function CnvMapRead,unit,prm,stvec,gvec,mvec,coef,bvec
            'program.id','noise.mean','noise.sd','gsct', $
            'v.min','v.max','p.min','p.max','w.min','w.max','ve.min', $
            've.max', $
-           'vector.mlat','vector.mlon','vector.kvect', $
+           'vector.mlat','vector.mlon','vector.kvect','vector.srng', $
            'vector.stid','vector.channel','vector.index', $
            'vector.vel.median','vector.vel.sd', $
            'vector.pwr.median','vector.pwr.sd', $
@@ -228,7 +228,7 @@ function CnvMapRead,unit,prm,stvec,gvec,mvec,coef,bvec
            
 
   arrtype=[2,2,2,4,2,2,2,4,4,2,4,4,4,4,4,4,4,4, $
-           4,4,4,2,2,3,4,4,4,4,4,4,8,8,8,8,4,4,4,4,4,4]
+           4,4,4,4,2,2,3,4,4,4,4,4,4,8,8,8,8,4,4,4,4,4,4]
 
   arrid=intarr(n_elements(arrname))  
   arrid[*]=-1
