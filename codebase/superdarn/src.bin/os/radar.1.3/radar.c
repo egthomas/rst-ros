@@ -226,6 +226,8 @@ int operate(pid_t parent,int sock) {
         pcode = (int *)malloc((size_t)sizeof(int)*mppul*nbaud);
         for (i=0; i<nbaud; i++)
           TCPIPMsgRecv(sock, &pcode[i], sizeof(int));
+
+        rmsg.status=0;
         break;
 
       case PING:
