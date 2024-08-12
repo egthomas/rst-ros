@@ -103,7 +103,7 @@ int main(int argc,char *argv[])
   int snd_freqse[] = {9500,10500,11500,12400,13500,14500,15500,16470,17400};
   int snd_freqsw[] = {9600,10600,11600,12600,13600,14600,15600,16570,17500};
   int nfreqs=9;
-  int snd_bmse[]={9,10,11,12};
+  int snd_bmse[]={10,11,12,13};
   int snd_bmsw[]={20,19,18,17};
   int snd_freq_cnt=0, snd_bm_cnt=0;
   int nbeams=4;
