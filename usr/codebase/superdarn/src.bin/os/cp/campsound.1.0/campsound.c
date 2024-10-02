@@ -57,7 +57,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"campsound 2024/08/09"};
+char progid[80]={"campsound 2024/10/01"};
 char progname[256];
 
 int arg=0;
@@ -96,6 +96,8 @@ int main(int argc,char *argv[])
   unsigned char option=0;
   unsigned char version=0;
 
+  unsigned char ext_flg=0;
+
   int *freqs;
   int *bms;
 
@@ -103,8 +105,10 @@ int main(int argc,char *argv[])
   int snd_freqse[] = {9500,10500,11500,12400,13500,14500,15500,16470,17400};
   int snd_freqsw[] = {9600,10600,11600,12600,13600,14600,15600,16570,17500};
   int nfreqs=9;
-  int snd_bmse[]={10,11,12,13};
-  int snd_bmsw[]={20,19,18,17};
+  int snd_bmse_4[]={10,11,12,13};
+  int snd_bmsw_4[]={20,19,18,17};
+  int snd_bmse_12[]={ 6, 7, 8, 9,10,11,12,13,14,15,16,17};
+  int snd_bmsw_12[]={23,22,21,20,19,18,17,16,15,14,13,12};
   int snd_freq_cnt=0, snd_bm_cnt=0;
   int nbeams=4;
   int snd_freq;
@@ -136,6 +140,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "sp",     'i', &shell.port);
   OptionAdd(&opt, "bp",     'i', &baseport);
   OptionAdd(&opt, "stid",   't', &ststr);
+  OptionAdd(&opt, "12beam", 'x', &ext_flg);    /* use 12 beams instead of 4 */
   OptionAdd(&opt, "fixfrq", 'x', &fixfrq);     /* fix the transmit frequency */
   OptionAdd(&opt, "frqrng", 'i', &snd_frqrng); /* fix the FCLR window [kHz] */
   OptionAdd(&opt, "c",      'i', &cnum);
@@ -171,13 +176,21 @@ int main(int argc,char *argv[])
 
   channel = cnum;
 
+  if (ext_flg) {
+    cp = 1106;
+    nbeams = 12;
+    scnsc = 180;
+  }
+
   /* Point to the beams here */
   if (strcmp(ststr,"ice") == 0) {
     freqs = snd_freqse;
-    bms = snd_bmse;
+    if (ext_flg) bms = snd_bmse_12;
+    else         bms = snd_bmse_4;
   } else if (strcmp(ststr,"icw") == 0) {
     freqs = snd_freqsw;
-    bms = snd_bmsw;
+    if (ext_flg) bms = snd_bmsw_12;
+    else         bms = snd_bmsw_4;
   } else {
     return (-1);
   }
@@ -408,6 +421,7 @@ void usage(void)
     printf("    -ep int : error log port\n");
     printf("    -sp int : shell port\n");
     printf("    -bp int : base port\n");
+    printf("-12beam     : use 12 beams instead of 4\n");
     printf("-fixfrq     : transmit on fixed frequencies\n");
     printf("-frqrng int : set the clear frequency search window (kHz)\n");
     printf("     -c int : channel number for multi-channel radars.\n");

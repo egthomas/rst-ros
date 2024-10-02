@@ -4,11 +4,11 @@ campsound
 
 Control Program ID (CPID):
 =========================
-1105
+1105 / 1106
 
 Parameters:
 ==========
-nbeams: 4
+nbeams: 4 / 12
 intt: 1.6 s
 scan: 1 min
 ngates: 75+
@@ -18,8 +18,8 @@ rsep: 45 km
 Description:
 ===========
 campsound is a variant on the normalsound radar control program
-that steps through a set of 9 frequencies along 4 selected beams
-during each 1-min scan. This control program was originally
+that steps through a set of 9 frequencies along 4 (or 12) selected
+beams during each 1-min scan. This control program was originally
 designed for a downrange HF receiver experiment with the Iceland
 radars.
 
@@ -33,4 +33,4 @@ power, spectral width, phi0, elevation) in dmap-format.
 
 Source:
 ======
-E.G. Thomas (20240809)
+E.G. Thomas (20241001)
