@@ -102,13 +102,22 @@ int main(int argc,char *argv[])
   int *bms;
 
   /* ---------------- Variables for sounding --------------- */
-  int snd_freqse[] = {9500,10500,11500,12400,13500,14500,15500,16470,17400};
-  int snd_freqsw[] = {9600,10600,11600,12600,13600,14600,15600,16570,17500};
+  int cve_freqs[] = {9500,10500,11500,12500,13500,14500,15500,16400,17400};
+  int cvw_freqs[] = {9700,10700,11700,12700,13700,14700,15700,16700,17600};
+  int ice_freqs[] = {9500,10500,11500,12400,13500,14500,15500,16470,17400};
+  int icw_freqs[] = {9600,10600,11600,12600,13600,14600,15600,16570,17500};
   int nfreqs=9;
-  int snd_bmse_4[]={10,11,12,13};
-  int snd_bmsw_4[]={20,19,18,17};
-  int snd_bmse_12[]={ 6, 7, 8, 9,10,11,12,13,14,15,16,17};
-  int snd_bmsw_12[]={23,22,21,20,19,18,17,16,15,14,13,12};
+
+  int cve_bms_4[]={ 0, 1, 2, 3};
+  int cvw_bms_4[]={13,12,11,10};
+  int cve_bms_12[]={ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11};
+  int cvw_bms_12[]={23,22,21,20,15,14,13,12,11,10, 9, 8};
+
+  int ice_bms_4[]={10,11,12,13};
+  int icw_bms_4[]={20,19,18,17};
+  int ice_bms_12[]={ 6, 7, 8, 9,10,11,12,13,14,15,16,17};
+  int icw_bms_12[]={23,22,21,20,19,18,17,16,15,14,13,12};
+
   int snd_freq_cnt=0, snd_bm_cnt=0;
   int nbeams=4;
   int snd_freq;
@@ -183,14 +192,22 @@ int main(int argc,char *argv[])
   }
 
   /* Point to the beams here */
-  if (strcmp(ststr,"ice") == 0) {
-    freqs = snd_freqse;
-    if (ext_flg) bms = snd_bmse_12;
-    else         bms = snd_bmse_4;
+  if (strcmp(ststr,"cve") == 0) {
+    freqs = cve_freqs;
+    if (ext_flg) bms = cve_bms_12;
+    else         bms = cve_bms_4;
+  } else if (strcmp(ststr,"cvw") == 0) {
+    freqs = cvw_freqs;
+    if (ext_flg) bms = cvw_bms_12;
+    else         bms = cvw_bms_4;
+  } else if (strcmp(ststr,"ice") == 0) {
+    freqs = ice_freqs;
+    if (ext_flg) bms = ice_bms_12;
+    else         bms = ice_bms_4;
   } else if (strcmp(ststr,"icw") == 0) {
-    freqs = snd_freqsw;
-    if (ext_flg) bms = snd_bmsw_12;
-    else         bms = snd_bmsw_4;
+    freqs = icw_freqs;
+    if (ext_flg) bms = icw_bms_12;
+    else         bms = icw_bms_4;
   } else {
     return (-1);
   }
