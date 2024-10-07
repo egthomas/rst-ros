@@ -139,7 +139,7 @@ void makeRadarParm2(struct RadarParm *prm2, char *argv[], int argc, int cpid,
   prm2->rxrise = in_prm->rxrise;
   prm2->intt.sc = (int16)(smsep*n_samples*nave);
   prm2->intt.us = (int)(((smsep*n_samples*nave)-(int)(smsep*n_samples*nave))*1e6);
-  prm2->txpl = 300;
+  prm2->txpl = (int16)((rngsep*20)/3*1e-3);
   prm2->mpinc = (int16)(dt*1e6);
   prm2->mppul = (int16)n_pul;
   prm2->mplgs = (int16)n_lags;
@@ -337,6 +337,117 @@ int main(int argc,char *argv[])
   /*Creating the output array for ACFs*/
   complex double **acfs = malloc(nrang*sizeof(complex double *));
 
+  /*oldscan*/
+  if (oldscan) {
+    cpid = 1;
+    n_pul = 7;                            /*number of pulses*/
+    n_lags = 18;                          /*number of lags in the ACFs*/
+
+    /*fill the pulse table*/
+    pulse_t = malloc(n_pul*sizeof(int));
+    pulse_t[0] = 0;
+    pulse_t[1] = 9;
+    pulse_t[2] = 12;
+    pulse_t[3] = 20;
+    pulse_t[4] = 22;
+    pulse_t[5] = 26;
+    pulse_t[6] = 27;
+
+    /*Creating lag array*/
+    tau = malloc(n_lags*sizeof(int));
+    for (i=0;i<n_lags;i++)
+      tau[i] = i;
+    /*no lag 16*/
+    tau[16] += 1;
+    tau[17] += 1;
+  }
+  /*tauscan*/
+  else if (tauscan) {
+    cpid = 503;
+    n_pul = 13;                           /*number of pulses*/
+    n_lags = 17;                          /*number of lags in the ACFs*/
+
+    /*fill the pulse table*/
+    pulse_t = malloc(n_pul*sizeof(int));
+    pulse_t[0] = 0;
+    pulse_t[1] = 15;
+    pulse_t[2] = 16;
+    pulse_t[3] = 23;
+    pulse_t[4] = 27;
+    pulse_t[5] = 29;
+    pulse_t[6] = 32;
+    pulse_t[7] = 47;
+    pulse_t[8] = 50;
+    pulse_t[9] = 52;
+    pulse_t[10] = 56;
+    pulse_t[11] = 63;
+    pulse_t[12] = 64;
+
+    /*Creating lag array*/
+    tau = malloc(n_lags*sizeof(int));
+    for (i=0;i<10;i++)
+      tau[i] = i;
+    /*no lag 10*/
+    for (i=10;i<n_lags;i++)
+      tau[i] = (i+1);
+  }
+  /*spaletascan*/
+  else if (spaletascan) {
+    cpid = 9100;
+    n_pul = 16;                           /*number of pulses*/
+    n_lags = 121;                         /*number of lags in the ACFs*/
+
+    /*fill the pulse table*/
+    pulse_t = malloc(n_pul*sizeof(int));
+    pulse_t[0] = 0;
+    pulse_t[1] = 4;
+    pulse_t[2] = 19;
+    pulse_t[3] = 42;
+    pulse_t[4] = 78;
+    pulse_t[5] = 127;
+    pulse_t[6] = 191;
+    pulse_t[7] = 270;
+    pulse_t[8] = 364;
+    pulse_t[9] = 474;
+    pulse_t[10] = 600;
+    pulse_t[11] = 745;
+    pulse_t[12] = 905;
+    pulse_t[13] = 1083;
+    pulse_t[14] = 1280;
+    pulse_t[15] = 1495;
+
+    /*Creating lag array*/
+    tau = malloc(n_lags*sizeof(int));
+    for (i=0;i<n_lags;i++)
+      tau[i] = i;
+  }
+  /*katscan (default)*/
+  else {
+    cpid = 150;
+    n_pul = 8;                            /*number of pulses*/
+    n_lags = 23;                          /*number of lags in the ACFs*/
+
+    /*fill the pulse table*/
+    pulse_t = malloc(n_pul*sizeof(int));
+    pulse_t[0] = 0;
+    pulse_t[1] = 14;
+    pulse_t[2] = 22;
+    pulse_t[3] = 24;
+    pulse_t[4] = 27;
+    pulse_t[5] = 31;
+    pulse_t[6] = 42;
+    pulse_t[7] = 43;
+    /*Creating lag array*/
+    tau = malloc(n_lags*sizeof(int));
+    for (i=0;i<6;i++)
+      tau[i] = i;
+    /*no lag 6*/
+    for (i=6;i<22;i++)
+      tau[i] = (i+1);
+    /*no lag 23*/
+    tau[22] = 24;
+  }
+
 
   while (FitFread(fp,prm,fit) !=-1) {
 
@@ -359,118 +470,6 @@ int main(int argc,char *argv[])
     } else {
       xcf = 0;
     }
-
-    /*oldscan*/
-    if (oldscan) {
-      cpid = 1;
-      n_pul = 7;                            /*number of pulses*/
-      n_lags = 18;                          /*number of lags in the ACFs*/
-
-      /*fill the pulse table*/
-      pulse_t = malloc(n_pul*sizeof(int));
-      pulse_t[0] = 0;
-      pulse_t[1] = 9;
-      pulse_t[2] = 12;
-      pulse_t[3] = 20;
-      pulse_t[4] = 22;
-      pulse_t[5] = 26;
-      pulse_t[6] = 27;
-
-      /*Creating lag array*/
-      tau = malloc(n_lags*sizeof(int));
-      for (i=0;i<n_lags;i++)
-        tau[i] = i;
-      /*no lag 16*/
-      tau[16] += 1;
-      tau[17] += 1;
-    }
-    /*tauscan*/
-    else if (tauscan) {
-      cpid = 503;
-      n_pul = 13;                           /*number of pulses*/
-      n_lags = 17;                          /*number of lags in the ACFs*/
-
-      /*fill the pulse table*/
-      pulse_t = malloc(n_pul*sizeof(int));
-      pulse_t[0] = 0;
-      pulse_t[1] = 15;
-      pulse_t[2] = 16;
-      pulse_t[3] = 23;
-      pulse_t[4] = 27;
-      pulse_t[5] = 29;
-      pulse_t[6] = 32;
-      pulse_t[7] = 47;
-      pulse_t[8] = 50;
-      pulse_t[9] = 52;
-      pulse_t[10] = 56;
-      pulse_t[11] = 63;
-      pulse_t[12] = 64;
-
-      /*Creating lag array*/
-      tau = malloc(n_lags*sizeof(int));
-      for (i=0;i<10;i++)
-        tau[i] = i;
-      /*no lag 10*/
-      for (i=10;i<n_lags;i++)
-        tau[i] = (i+1);
-    }
-    /*spaletascan*/
-    else if (spaletascan) {
-      cpid = 9100;
-      n_pul = 16;                           /*number of pulses*/
-      n_lags = 121;                         /*number of lags in the ACFs*/
-
-      /*fill the pulse table*/
-      pulse_t = malloc(n_pul*sizeof(int));
-      pulse_t[0] = 0;
-      pulse_t[1] = 4;
-      pulse_t[2] = 19;
-      pulse_t[3] = 42;
-      pulse_t[4] = 78;
-      pulse_t[5] = 127;
-      pulse_t[6] = 191;
-      pulse_t[7] = 270;
-      pulse_t[8] = 364;
-      pulse_t[9] = 474;
-      pulse_t[10] = 600;
-      pulse_t[11] = 745;
-      pulse_t[12] = 905;
-      pulse_t[13] = 1083;
-      pulse_t[14] = 1280;
-      pulse_t[15] = 1495;
-
-      /*Creating lag array*/
-      tau = malloc(n_lags*sizeof(int));
-      for (i=0;i<n_lags;i++)
-        tau[i] = i;
-    }
-    /*katscan (default)*/
-    else {
-      cpid = 150;
-      n_pul = 8;                            /*number of pulses*/
-      n_lags = 23;                          /*number of lags in the ACFs*/
-
-      /*fill the pulse table*/
-      pulse_t = malloc(n_pul*sizeof(int));
-      pulse_t[0] = 0;
-      pulse_t[1] = 14;
-      pulse_t[2] = 22;
-      pulse_t[3] = 24;
-      pulse_t[4] = 27;
-      pulse_t[5] = 31;
-      pulse_t[6] = 42;
-      pulse_t[7] = 43;
-      /*Creating lag array*/
-      tau = malloc(n_lags*sizeof(int));
-      for (i=0;i<6;i++)
-        tau[i] = i;
-      /*no lag 6*/
-      for (i=6;i<22;i++)
-        tau[i] = (i+1);
-      /*no lag 23*/
-      tau[22] = 24;
-    }
-
 
     /*control program dependent variables*/
     taus = dt/smsep;                                      /*lag time in samples*/
@@ -497,7 +496,9 @@ int main(int argc,char *argv[])
       amp0 = noise_lev*pow(10.,(fit->rng[i].p_0/10.));
       amp0_arr[i] = amp0;
 
-      if (xcf) psi_obs[i] = fit->xrng[i].phi0;
+      if (xcf) {
+        if (fit->xrng != NULL) psi_obs[i] = fit->xrng[i].phi0;
+      }
 
       acfs[i] = malloc(n_lags*sizeof(complex double));
       for (j=0;j<n_lags;j++)
@@ -591,8 +592,6 @@ int main(int argc,char *argv[])
       free(badtr);
     }
 
-    free(pulse_t);
-    free(tau);
     free(raw_samples);
     for (i=0;i<nrang;i++)
       free(acfs[i]);
@@ -600,6 +599,8 @@ int main(int argc,char *argv[])
 
   /*free dynamically allocated memory*/
   free(acfs);
+  free(pulse_t);
+  free(tau);
   free(qflg);
   free(t_d_arr);
   free(t_g_arr);
