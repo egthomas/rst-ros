@@ -80,6 +80,8 @@ int main (int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
+  int chnnum=0;
+
   FILE *fp=NULL;
 
   time_t ctime;
@@ -101,6 +103,7 @@ int main (int argc,char *argv[]) {
   OptionAdd(&opt,"-option",'x',&option);
   OptionAdd(&opt,"-version",'x',&version);
   OptionAdd(&opt,"vb",'x',&vb);
+  OptionAdd(&opt,"chnnum",'i',&chnnum);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -166,7 +169,8 @@ int main (int argc,char *argv[]) {
       prm->nave -= 1;
       oiq->revision.major = iq->revision.major;
       oiq->revision.minor = iq->revision.minor;
-      oiq->chnnum = iq->chnnum;
+      if (chnnum > 0) oiq->chnnum = chnnum;
+      else            oiq->chnnum = iq->chnnum;
       oiq->smpnum = iq->smpnum;
       oiq->skpnum = iq->skpnum;
       oiq->seqnum = iq->seqnum - 1;
@@ -214,6 +218,7 @@ int main (int argc,char *argv[]) {
 
       IQFwrite(stdout,prm,oiq,obadtr,osamples);
     } else {
+      if (chnnum > 0) iq->chnnum=chnnum;
       IQFwrite(stdout,prm,iq,badtr,samples);
     }
 
