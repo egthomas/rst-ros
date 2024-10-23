@@ -661,17 +661,17 @@ void write_raw_snd_record(char *progname, struct RadarParm *prm, struct RawData 
 
   /* make up the filename */
   /* YYYYMMDD.HH.rad.snd */
-  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/ 2)* 2, ststr);
+  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/2)*2, ststr);
 
   /* finally make the filename */
   sprintf(filename, "%s%s.snd.rawacf", data_path, data_filename);
 
   /* open the output file */
-  fprintf(stderr,"Sounding Data File: %s\n",filename);
+  fprintf(stderr,"Sounding Rawacf Data File: %s\n",filename);
   out = fopen(filename,"a");
   if (out == NULL) {
     /* crap. might as well go home */
-    sprintf(logtxt,"Unable to open sounding file:%s",filename);
+    sprintf(logtxt,"Unable to open sounding rawacf file: %s",filename);
     ErrLog(errlog.sock,progname,logtxt);
     return;
   }
@@ -679,9 +679,9 @@ void write_raw_snd_record(char *progname, struct RadarParm *prm, struct RawData 
   /* write the sounding record */
   status = RawFwrite(out, prm, raw);
   if (status == -1) {
-    ErrLog(errlog.sock,progname,"Error writing rawacf sounding record.");
+    ErrLog(errlog.sock,progname,"Error writing sounding rawacf record.");
   } else {
-    ErrLog(errlog.sock,progname,"Rawacf sounding record successfully written.");
+    ErrLog(errlog.sock,progname,"Sounding rawacf record successfully written.");
   }
 
   fclose(out);
@@ -718,17 +718,17 @@ void write_iq_snd_record(char *progname, struct RadarParm *prm, struct IQ *iq,
 
   /* make up the filename */
   /* YYYYMMDD.HH.rad.snd */
-  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/ 2)* 2, ststr);
+  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/2)*2, ststr);
 
   /* finally make the filename */
   sprintf(filename, "%s%s.snd.iqdat", data_path, data_filename);
 
   /* open the output file */
-  fprintf(stderr,"Sounding Data File: %s\n",filename);
+  fprintf(stderr,"Sounding Iqdat Data File: %s\n",filename);
   out = fopen(filename,"a");
   if (out == NULL) {
     /* crap. might as well go home */
-    sprintf(logtxt,"Unable to open sounding file:%s",filename);
+    sprintf(logtxt,"Unable to open sounding iqdat file: %s",filename);
     ErrLog(errlog.sock,progname,logtxt);
     return;
   }
@@ -739,9 +739,9 @@ void write_iq_snd_record(char *progname, struct RadarParm *prm, struct IQ *iq,
   /* write the sounding record */
   status = IQFwrite(out, prm, iq, badtr, (int16 *)p);
   if (status == -1) {
-    ErrLog(errlog.sock,progname,"Error writing iqdat sounding record.");
+    ErrLog(errlog.sock,progname,"Error writing sounding iqdat record.");
   } else {
-    ErrLog(errlog.sock,progname,"Rawacf sounding record successfully written.");
+    ErrLog(errlog.sock,progname,"Sounding iqdat record successfully written.");
   }
   ShMemFree(p,sharedmemory,iqbufsize,0,fd);
 
