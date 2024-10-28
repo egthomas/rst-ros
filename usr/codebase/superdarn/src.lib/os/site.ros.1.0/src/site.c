@@ -474,6 +474,7 @@ int SiteRosStartIntt(int sec,int usec) {
   rprm.number_of_samples   = total_samples + nbaud + 10;
   rprm.priority            = cnum;
   rprm.buffer_index        = 0;
+  strncpy(rprm.name,station,10);
 
   smsg.type = SET_PARAMETERS;
   TCPIPMsgSend(ros.sock,&smsg,sizeof(struct ROSMsg));
@@ -515,6 +516,7 @@ int SiteRosFCLR(int stfreq,int edfreq) {
   rprm.number_of_samples   = total_samples + nbaud + 10;
   rprm.priority            = cnum;
   rprm.buffer_index        = 0;
+  strncpy(rprm.name,station,10);
 
 /* Not needed with SwingBuffer
   smsg.type = SET_PARAMETERS;
@@ -755,6 +757,7 @@ int SiteRosIntegrate(int (*lags)[2]) {
   rprm.number_of_samples   = total_samples + nbaud + 10;
   rprm.priority            = cnum;
   rprm.buffer_index        = 0;
+  strncpy(rprm.name,station,10);
 
   usecs = (int)(rprm.number_of_samples/rprm.baseband_samplerate*1E6);
 
