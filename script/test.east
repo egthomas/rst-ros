@@ -3,7 +3,7 @@
 east='cve'
 
 # dummy radar server
-radar -name $east &
+radar &
 
 # critical tasks
 

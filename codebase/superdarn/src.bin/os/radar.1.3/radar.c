@@ -55,8 +55,6 @@ struct OptionData opt;
 unsigned char vb;
 time_t t;
 
-struct FreqTable *ftable[2];
-
 
 int operate(pid_t parent,int sock) {
 
@@ -70,10 +68,16 @@ int operate(pid_t parent,int sock) {
   struct DataPRM dprm;
   struct TRTimes badtrdat;
 
-  int tfreq,dfreq,rnum,cnum,s,i;
+  FILE *fp;
+  char *envstr=NULL;
+  char freq_filepath[100];
+  struct FreqTable *ftable=NULL;
+
+  int stid,tfreq,dfreq,rnum,cnum,s,i;
   float noise=0.5;
 
   int32 temp_int32,data_length;
+  char ststr[10];
   char entry_name[80];
   char entry_type,return_type;
 
@@ -112,8 +116,21 @@ int operate(pid_t parent,int sock) {
     switch (smsg.type) {
       case SET_RADAR_CHAN:
         if (vb) fprintf(stderr,"SET_RADAR_CHAN\n");
+        TCPIPMsgRecv(sock, &stid, sizeof(int));
+        TCPIPMsgRecv(sock, &data_length, sizeof(int32));
+        TCPIPMsgRecv(sock, &ststr, data_length*sizeof(char));
         TCPIPMsgRecv(sock, &rnum, sizeof(int));
         TCPIPMsgRecv(sock, &cnum, sizeof(int));
+
+        envstr=getenv("SD_SITE_PATH");
+        if ((ststr !=NULL) && (envstr !=NULL)) {
+          sprintf(freq_filepath,"%s/site.%s/restrict.dat.%s",envstr,ststr,ststr);
+          fp=fopen(freq_filepath,"r");
+          if (fp !=NULL) {
+            ftable=FreqLoadTable(fp);
+            fclose(fp);
+          }
+        }
         break;
 
       case QUERY_INI_SETTINGS:
@@ -170,9 +187,9 @@ int operate(pid_t parent,int sock) {
         dfreq=fprm.end-fprm.start;
         if (dfreq > 0) {
           tfreq=fprm.start + (rand() % dfreq);
-          if (ftable[rnum-1] !=NULL) {
+          if (ftable !=NULL) {
             s=0;
-            while ((FreqTest(ftable[rnum-1],tfreq) == 1) && (s < 10)) {
+            while ((FreqTest(ftable,tfreq) == 1) && (s < 10)) {
               tfreq=fprm.start + (rand() % dfreq);
               s++;
             }
@@ -180,8 +197,8 @@ int operate(pid_t parent,int sock) {
         } else {
           tfreq=fprm.start;
         }
-        if (ftable[rnum-1] !=NULL) {
-          if (FreqTest(ftable[rnum-1],tfreq) == 1) {
+        if (ftable !=NULL) {
+          if (FreqTest(ftable,tfreq) == 1) {
             tfreq=0;
             noise=1e10;
           } else {
@@ -341,13 +358,6 @@ int main(int argc,char *argv[]) {
   unsigned char option=0;
   unsigned char version=0;
 
-  FILE *fp;
-  char *ststr=NULL;
-  char *envstr=NULL;;
-  char freq_filepath[100];
-  struct FreqTable *table;
-  int st_cnt=0;
-
   socklen_t length;
   socklen_t clength;
 
@@ -366,7 +376,6 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"-version",'x',&version);
   OptionAdd(&opt,"vb",'x',&vb);
   OptionAdd(&opt,"lp",'i',&port);
-  OptionAdd(&opt,"name",'t',&ststr);
 
   arg=OptionProcess(1,argc,argv,&opt,rst_opterr);
 
@@ -387,22 +396,6 @@ int main(int argc,char *argv[]) {
   if (version==1) {
     OptionVersion(stdout);
     exit(0);
-  }
-
-  envstr=getenv("SD_SITE_PATH");
-  if ((ststr !=NULL) && (envstr !=NULL)) {
-    char *tmp;
-    tmp=strtok(ststr,",");
-    do {
-      sprintf(freq_filepath,"%s/site.%s/restrict.dat.%s",envstr,tmp,tmp);
-      fp=fopen(freq_filepath,"r");
-      if (fp !=NULL) {
-        table=FreqLoadTable(fp);
-        fclose(fp);
-        ftable[st_cnt]=table;
-      }
-      st_cnt++;
-    } while ((tmp=strtok(NULL,",")) !=NULL);
   }
 
   signal(SIGCHLD,SIG_IGN);

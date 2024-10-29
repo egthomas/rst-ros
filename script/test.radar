@@ -4,7 +4,7 @@ east='cve'
 west='cvw'
 
 # dummy radar server
-radar -name ${east},${west} &
+radar &
 
 # critical tasks
 

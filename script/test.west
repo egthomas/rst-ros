@@ -3,7 +3,7 @@
 west='cvw'
 
 # dummy radar server
-radar -name $west &
+radar &
 
 # critical tasks
 

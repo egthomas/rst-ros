@@ -326,7 +326,7 @@ int SiteRosStart(char *host,char *ststr) {
 
 int SiteRosSetupRadar() {
 
-  int32 temp32,data_length;;
+  int32 temp32,data_length;
   char ini_entry_name[80];
   char requested_entry_type,returned_entry_type;
   struct ROSMsg smsg,rmsg;
@@ -334,6 +334,11 @@ int SiteRosSetupRadar() {
   if ((ros.sock=TCPIPMsgOpen(ros.host,ros.port)) == -1) return -1;
   smsg.type = SET_RADAR_CHAN;
   TCPIPMsgSend(ros.sock, &smsg,sizeof(struct ROSMsg));
+  temp32 = stid;
+  TCPIPMsgSend(ros.sock, &temp32, sizeof(int32));
+  data_length = strlen(station)+1;
+  TCPIPMsgSend(ros.sock, &data_length, sizeof(int32));
+  TCPIPMsgSend(ros.sock, &station, data_length*sizeof(char));
   temp32 = rnum;
   TCPIPMsgSend(ros.sock, &temp32, sizeof(int32));
   temp32 = cnum;
