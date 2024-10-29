@@ -114,7 +114,7 @@ int main(int argc,char *argv[]) {
 /*
   struct TCPIPMsgHost shell={"127.0.0.1",44101,-1};
 */
-  int tnum=4;      
+  int tnum=4;
 
   /* lists for parameters across a scan, need to send to usrp_server for swings to work.. */
   int32_t scan_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
@@ -247,7 +247,7 @@ int main(int argc,char *argv[]) {
   }
 
   /* print help */
-  if(help) {
+  if (help) {
     printf("UAFSOUND: : An attempt to get frequency sounding modes working for UAF USRP-style radars \n\n");
     usage();
     return 0;
@@ -295,14 +295,14 @@ int main(int argc,char *argv[]) {
  * This should be run before all options are parsed and before any task sockets are opened
  * arguments: host ip address, 3-letter station string
 */
-  
+
   status=SiteStart(roshost,ststr);
   if (status==-1) {
     fprintf(stderr,"SiteStart failure\n");
     exit(1);
   }
 
-/* load any provided argument values overriding default values provided by SiteStart */ 
+/* load any provided argument values overriding default values provided by SiteStart */
   arg = OptionProcess(1,argc,argv,&opt,NULL);
 
  /* ========= SET PARAMETER TO EMULATE OTHER CONTROL PROGRAMS ============= */
@@ -312,15 +312,15 @@ int main(int argc,char *argv[]) {
   nBeams_per_scan = abs(ebm-sbm)+1;
   current_beam = sbm;
 
-  /* defaults for normalsound, adjusted   */  
+  /* defaults for normalsound, adjusted   */
   cp=155;
   scnsc = 120;
   scnus = 0;
   snd_sc = 20;
 
-  sync_scan = 0; 
+  sync_scan = 0;
 
-  /* FAST option */  
+  /* FAST option */
   if (fast) {     /* If fast option selected use 1 minute scan boundaries */
     cp    = 157;
     scnsc = 60;
@@ -328,9 +328,9 @@ int main(int argc,char *argv[]) {
     snd_sc = 12;
     sprintf(modestr," (fast)");
     strncat(progname,modestr,sizeof(progname)-strlen(progname)-1);
-  } 
+  }
 
-  for (iBeam =0; iBeam < nBeams_per_scan; iBeam++){
+  for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
      scan_beam_number_list[iBeam] = current_beam;
      current_beam += backward ? -1:1;
   }
@@ -339,32 +339,32 @@ int main(int argc,char *argv[]) {
 
   /* Print out details of beams */ 
   fprintf(stderr, "Sequence details: \n");
-  for (iBeam =0; iBeam < nBeams_per_scan; iBeam++){
+  for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
     fprintf(stderr, "  sequence %2d: beam: %2d, \n",iBeam, scan_beam_number_list[iBeam] );
   }
 
 
 
-/* Open Connection to errorlog */  
-  if ((errlog.sock=TCPIPMsgOpen(errlog.host,errlog.port))==-1) {    
+/* Open Connection to errorlog */
+  if ((errlog.sock=TCPIPMsgOpen(errlog.host,errlog.port))==-1) {
     fprintf(stderr,"Error connecting to error log.\n Host: %s  Port: %d\n",errlog.host,errlog.port);
   }
-/* Open Connection to radar shell */  
-  if ((shell.sock=TCPIPMsgOpen(shell.host,shell.port))==-1) {    
+/* Open Connection to radar shell */
+  if ((shell.sock=TCPIPMsgOpen(shell.host,shell.port))==-1) {
     fprintf(stderr,"Error connecting to shell.\n");
   }
 
-/* Open Connection to helper utilities like fitacfwrite*/  
+/* Open Connection to helper utilities like fitacfwrite*/
   for (n=0;n<tnum;n++) task[n].port+=baseport;
 
-/* Prep command string for tasks */ 
-  strncpy(combf,progid,80);   
+/* Prep command string for tasks */
+  strncpy(combf,progid,80);
   OpsSetupCommand(argc,argv);
-  OpsLogStart(errlog.sock,progname,argc,argv);  
+  OpsLogStart(errlog.sock,progname,argc,argv);
   OpsSetupTask(tnum,task,errlog.sock,progname);
   for (n=0;n<tnum;n++) {
     RMsgSndReset(task[n].sock);
-    RMsgSndOpen(task[n].sock,strlen( (char *) command),command);     
+    RMsgSndOpen(task[n].sock,strlen( (char *) command),command);
   }
 
 
@@ -372,7 +372,7 @@ int main(int argc,char *argv[]) {
   elapsed_secs=0;
   gettimeofday(&t1,NULL);
   gettimeofday(&t0,NULL);
-  
+
   /* Automatically calculate the integration times */
   total_scan_usecs = (scnsc-snd_sc)*1E6 + scnus;
   total_integration_usecs = total_scan_usecs/nBeams_per_scan;
@@ -389,7 +389,7 @@ int main(int argc,char *argv[]) {
   OpsBuildPcode(nbaud,seq->mppul,pcode);
 
   /* Set special cpid if provided on commandline */
-  if(cpid > 0)
+  if (cpid > 0)
      cp=cpid;
 
   /* Set cp to negative value indication discretionary period */
@@ -408,7 +408,7 @@ int main(int argc,char *argv[]) {
     ErrLog(errlog.sock,progname,"Error: mpinc not multiple of txpl... checking to see if it can be adjusted");
     sprintf(logtxt,"Initial: mpinc: %d txpl: %d  nbaud: %d  rsep: %d", mpinc, txpl, nbaud, rsep);
     ErrLog(errlog.sock,progname,logtxt);
-    if((txpl % 10)==0) {
+    if ((txpl % 10)==0) {
 
       ErrLog(errlog.sock,progname, "Attempting to adjust mpinc to correct");
       if (mpinc < txpl) mpinc=txpl;
@@ -429,8 +429,8 @@ int main(int argc,char *argv[]) {
      SiteExit(0);
   }
 
-  if(test) {
-        
+  if (test) {
+
     fprintf(stdout,"Control Program Argument Parameters::\n");
     fprintf(stdout,"  xcf arg:: xcnt: %d\n",xcnt);
     fprintf(stdout,"  clrskip arg:: value: %d\n",clrskip);
@@ -439,56 +439,54 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"  txpl: %d mpinc: %d nbaud: %d rsep: %d\n",txpl,mpinc,nbaud,rsep);
     fprintf(stdout,"  intsc: %d intus: %d scnsc: %d scnus: %d\n",intsc,intus,scnsc,scnus);
     fprintf(stdout,"  sbm: %d ebm: %d  nBeams_per_scan: %d\n",sbm,ebm,nBeams_per_scan);
-    
+
     /* TODO: ADD PARAMETER CHECKING, SEE IF PCODE IS SANE AND WHATNOT */
-   if(nbaud >= 1) {
-        /* create tsgprm struct and pass to TSGMake, check if TSGMake makes something valid */
-        /* checking with SiteTimeSeq(ptab); would be easier, but that talks to hardware..*/
-        /* the job of aggregating a tsgprm from global variables should probably be a function in maketsg.c */
-        int flag = 0;
+    if (nbaud >= 1) {
+      /* create tsgprm struct and pass to TSGMake, check if TSGMake makes something valid */
+      /* checking with SiteTimeSeq(ptab); would be easier, but that talks to hardware..*/
+      /* the job of aggregating a tsgprm from global variables should probably be a function in maketsg.c */
+      int flag = 0;
 
-        if (tsgprm.pat !=NULL) free(tsgprm.pat);
-        if (tsgbuf !=NULL) TSGFree(tsgbuf);
+      if (tsgprm.pat !=NULL) free(tsgprm.pat);
+      if (tsgbuf !=NULL) TSGFree(tsgbuf);
 
-        memset(&tsgprm,0,sizeof(struct TSGprm));   
-        tsgprm.nrang   = nrang;
-        tsgprm.frang   = frang;
-        tsgprm.rsep    = rsep; 
-        tsgprm.smsep   = smsep;
-        tsgprm.txpl    = txpl;
-        tsgprm.mppul   = mppul;
-        tsgprm.mpinc   = mpinc;
-        tsgprm.mlag    = 0;
-        tsgprm.nbaud   = nbaud;
-        tsgprm.stdelay = 18 + 2;
-        tsgprm.gort    = 1;
-        tsgprm.rtoxmin = 0;
+      memset(&tsgprm,0,sizeof(struct TSGprm));
+      tsgprm.nrang   = nrang;
+      tsgprm.frang   = frang;
+      tsgprm.rsep    = rsep;
+      tsgprm.smsep   = smsep;
+      tsgprm.txpl    = txpl;
+      tsgprm.mppul   = mppul;
+      tsgprm.mpinc   = mpinc;
+      tsgprm.mlag    = 0;
+      tsgprm.nbaud   = nbaud;
+      tsgprm.stdelay = 18 + 2;
+      tsgprm.gort    = 1;
+      tsgprm.rtoxmin = 0;
 
-        tsgprm.pat  = malloc(sizeof(int)*mppul);
-        tsgprm.code = seq->ptab;
+      tsgprm.pat  = malloc(sizeof(int)*mppul);
+      tsgprm.code = seq->ptab;
 
-        for (i=0;i<tsgprm.mppul;i++) 
-           tsgprm.pat[i]=seq->ptab[i];
+      for (i=0;i<tsgprm.mppul;i++) 
+        tsgprm.pat[i]=seq->ptab[i];
 
-        tsgbuf=TSGMake(&tsgprm,&flag);
+      tsgbuf=TSGMake(&tsgprm,&flag);
+      fprintf(stdout,"Sequence Parameters::\n");
+      fprintf(stdout,"  lagfr: %d smsep: %d  txpl: %d\n",tsgprm.lagfr,tsgprm.smsep,tsgprm.txpl);
+
+      if (tsgprm.smsep == 0 || tsgprm.lagfr == 0) {
         fprintf(stdout,"Sequence Parameters::\n");
         fprintf(stdout,"  lagfr: %d smsep: %d  txpl: %d\n",tsgprm.lagfr,tsgprm.smsep,tsgprm.txpl);
-    
-        if(tsgprm.smsep == 0 || tsgprm.lagfr == 0) {
-            fprintf(stdout,"Sequence Parameters::\n");
-            fprintf(stdout,"  lagfr: %d smsep: %d  txpl: %d\n",tsgprm.lagfr,tsgprm.smsep,tsgprm.txpl);
-            fprintf(stdout,"WARNING: lagfr or smsep is zero, invalid timing sequence genrated from given baud/rsep/nrang/mpinc will confuse TSGMake and FitACF into segfaulting");
-        }
-
-        else {
-            fprintf(stdout,"The phase coded timing sequence looks good\n");
-        }
+        fprintf(stdout,"WARNING: lagfr or smsep is zero, invalid timing sequence genrated from given baud/rsep/nrang/mpinc will confuse TSGMake and FitACF into segfaulting");
+      } else {
+        fprintf(stdout,"The phase coded timing sequence looks good\n");
+      }
     } else {
-        fprintf(stdout,"WARNING: nbaud needs to be  > 0\n");
+      fprintf(stdout,"WARNING: nbaud needs to be > 0\n");
     }
 
     OpsFitACFStart();
- 
+
     fprintf(stdout,"Test option enabled, exiting\n");
     return 0;
   }
@@ -536,20 +534,22 @@ int main(int argc,char *argv[]) {
     }
 
     /* reset clearfreq paramaters, in case daytime changed */
-    for (iBeam =0; iBeam < nBeams_per_scan; iBeam++){
-      scan_clrfreq_fstart_list[iBeam] = (int32_t) (OpsDayNight() == 1 ? dfrq : nfrq); 
+    for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
+      scan_clrfreq_fstart_list[iBeam] = (int32_t) (OpsDayNight() == 1 ? dfrq : nfrq);
       scan_clrfreq_bandwidth_list[iBeam] = frqrng;
       current_beam += backward ? -1:1;
     }
 
-    /* Set iBeam for scan loop  */ 
+    /* Set iBeam for scan loop  */
     iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,nBeams_per_scan);
 
     /* send scan data to usrp_sever */
-    if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list, scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times, scnsc, scnus, intsc, intus, iBeam) !=0){
-         ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");  
-         sleep(1);
-         continue;
+    if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list,
+                      scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times,
+                      scnsc, scnus, intsc, intus, iBeam) !=0) {
+      ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");
+      sleep(1);
+      continue;
     }
 
     TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
@@ -557,13 +557,13 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,"Opening new files.");
       for (n=0;n<tnum;n++) {
         RMsgSndClose(task[n].sock);
-        RMsgSndOpen(task[n].sock,strlen( (char *) command),command);     
+        RMsgSndOpen(task[n].sock,strlen( (char *) command),command);
       }
     }
 
     scan=1;
     ErrLog(errlog.sock,progname,"Starting scan.");
-    if(clrscan) startup=1;
+    if (clrscan) startup=1;
     if (xcnt>0) {
       cnt++;
       if (cnt==xcnt) {
@@ -576,7 +576,7 @@ int main(int argc,char *argv[]) {
 
 
     /* Scan loop for sequences/beams  */
-    do {  
+    do {
       bmnum = scan_beam_number_list[iBeam];
 
       TimeReadClock( &yr, &mo, &dy, &hr, &mt, &sc, &us);
@@ -598,10 +598,10 @@ int main(int argc,char *argv[]) {
 
       /* TODO: JDS: You can not make any day night changes that impact TR gate timing at dual site locations. Care must be taken with day night operation*/ 
       stfrq = scan_clrfreq_fstart_list[iBeam];
-      if(fixfrq>0) {
+      if (fixfrq>0) {
         stfrq=fixfrq;
         tfreq=fixfrq;
-        noise=0; 
+        noise=0;
       }
 
       ErrLog(errlog.sock,progname,"Starting Integration.");
@@ -611,7 +611,7 @@ int main(int argc,char *argv[]) {
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum, intsc,intus,hr,mt,sc,us);
       ErrLog(errlog.sock,progname,logtxt);
-            
+
       printf("Entering Site Start Intt Station ID: %s  %d\n",ststr,stid);
       SiteStartIntt(intsc,intus);
       gettimeofday(&t1,NULL);
@@ -619,10 +619,10 @@ int main(int argc,char *argv[]) {
       if (elapsed_secs<0) elapsed_secs=0;
       if ((elapsed_secs >= clrskip) || (startup==1)) {
           startup = 0;
-          ErrLog(errlog.sock,progname,"Doing clear frequency search.");  
+          ErrLog(errlog.sock,progname,"Doing clear frequency search.");
           sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
           ErrLog(errlog.sock,progname, logtxt);
-  
+
           if (fixfrq<=0) {
               tfreq=SiteFCLR(stfrq,stfrq+frqrng);
           }
@@ -631,28 +631,28 @@ int main(int argc,char *argv[]) {
       }
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
-    
-      nave=SiteIntegrate(seq->lags);   
+
+      nave=SiteIntegrate(seq->lags);
       if (nave<0) {
         sprintf(logtxt,"Integration error: %d",nave);
-        ErrLog(errlog.sock,progname,logtxt); 
+        ErrLog(errlog.sock,progname,logtxt);
         continue;
       }
       sprintf(logtxt,"Number of sequences: %d",nave);
       ErrLog(errlog.sock,progname,logtxt);
 
-      /* Processing and sending data */ 
-      OpsBuildPrm(prm,seq->ptab,seq->lags);    
+      /* Processing and sending data */
+      OpsBuildPrm(prm,seq->ptab,seq->lags);
       OpsBuildIQ(iq,&badtr);
       OpsBuildRaw(raw);
       FitACF(prm,raw,fblk,fit,site,tdiff,-999);
       FitSetAlgorithm(fit,"fitacf2");
-      
+
       msg.num   = 0;
       msg.tsize = 0;
 
       tmpbuf = RadarParmFlatten(prm,&tmpsze);
-      RMsgSndAdd(&msg, tmpsze, tmpbuf, PRM_TYPE, 0); 
+      RMsgSndAdd(&msg, tmpsze, tmpbuf, PRM_TYPE, 0);
 
       tmpbuf=IQFlatten(iq, prm->nave, &tmpsze);
       RMsgSndAdd(&msg,tmpsze,tmpbuf,IQ_TYPE,0);
@@ -661,20 +661,20 @@ int main(int argc,char *argv[]) {
       RMsgSndAdd(&msg, strlen(sharedmemory)+1, (unsigned char *) sharedmemory, IQS_TYPE, 0);
 
       tmpbuf=RawFlatten(raw,prm->nrang,prm->mplgs,&tmpsze);
-      RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0); 
- 
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,RAW_TYPE,0);
+
       tmpbuf=FitFlatten(fit,prm->nrang,&tmpsze);
-      RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0); 
-     
-     
-      for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg); 
+      RMsgSndAdd(&msg,tmpsze,tmpbuf,FIT_TYPE,0);
+
+
+      for (n=0;n<tnum;n++) RMsgSndSend(task[n].sock,&msg);
 
       for (n=0;n<msg.num;n++) {
         if (msg.data[n].type==PRM_TYPE) free(msg.ptr[n]);
         if (msg.data[n].type==IQ_TYPE)  free(msg.ptr[n]);
         if (msg.data[n].type==RAW_TYPE) free(msg.ptr[n]);
-        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]); 
-      }          
+        if (msg.data[n].type==FIT_TYPE) free(msg.ptr[n]);
+      }
 
       scan = 0;
 
@@ -720,7 +720,7 @@ int main(int argc,char *argv[]) {
 
     /* Print out details of sounding beams */ 
     fprintf(stderr, "Sounding sequence details: \n");
-    for (snd_iBeam =0; snd_iBeam < snd_nBeams_per_scan; snd_iBeam++){
+    for (snd_iBeam =0; snd_iBeam < snd_nBeams_per_scan; snd_iBeam++) {
       fprintf(stderr, "  sequence %2d: beam: %2d freq: %5d, \n",snd_iBeam,
               snd_beam_number_list[snd_iBeam], snd_clrfreq_fstart_list[snd_iBeam] );
     }
@@ -728,10 +728,12 @@ int main(int argc,char *argv[]) {
     snd_iBeam = 0;
 
     /* send sounding scan data to usrp_sever */
-    if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list, snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_sc, 0, snd_intt_sc, snd_intt_us, snd_iBeam) !=0){
-         ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");  
-         sleep(1);
-         continue;
+    if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list,
+                      snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_sc, 0,
+                      snd_intt_sc, snd_intt_us, snd_iBeam) !=0) {
+      ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");
+      sleep(1);
+      continue;
     }
 
     /* make a new timing sequence for the sounding */
@@ -853,13 +855,13 @@ int main(int argc,char *argv[]) {
   /* free space allocated for arguements */
   free(ststr);
   free(roshost);
-  
+
   ErrLog(errlog.sock,progname,"Ending program.");
 
 
   SiteExit(0);
 
-  return 0;   
+  return 0;
 }
 
 
