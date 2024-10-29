@@ -65,8 +65,6 @@
 #include "tsg.h" 
 #include "maketsg.h"
 
-#define MAX_INTEGRATIONS_PER_SCAN 100
-
 int arg=0;
 struct OptionData opt;
 
@@ -115,18 +113,6 @@ int main(int argc,char *argv[]) {
   struct TCPIPMsgHost shell={"127.0.0.1",44101,-1};
 */
   int tnum=4;
-
-  /* lists for parameters across a scan, need to send to usrp_server for swings to work.. */
-  int32_t scan_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
-  int32_t scan_clrfreq_fstart_list[MAX_INTEGRATIONS_PER_SCAN];
-  int32_t scan_beam_number_list[MAX_INTEGRATIONS_PER_SCAN];
-  int32_t nBeams_per_scan = 0;
-  int current_beam, iBeam;
-
-  /* time sync of integration periods/ beams */
-  int sync_scan;
-  int time_now,  time_to_wait; /* times in ms for period synchronization */
-  int *scan_times;  /* scan times in ms */
 
 /* Integration period variables */
   int scnsc=120;

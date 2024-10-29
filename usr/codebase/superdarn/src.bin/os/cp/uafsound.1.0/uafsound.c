@@ -67,8 +67,6 @@
 #include "tsg.h" 
 #include "maketsg.h"
 
-#define MAX_INTEGRATIONS_PER_SCAN 100
-
 #define RT_TASK 3
 
 int arg=0;
@@ -116,13 +114,6 @@ int main(int argc,char *argv[]) {
 */
   int tnum=4;
 
-  /* lists for parameters across a scan, need to send to usrp_server for swings to work.. */
-  int32_t scan_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
-  int32_t scan_clrfreq_fstart_list[MAX_INTEGRATIONS_PER_SCAN];
-  int32_t scan_beam_number_list[MAX_INTEGRATIONS_PER_SCAN];
-  int32_t nBeams_per_scan = 0;
-  int current_beam, iBeam;
-
   /* lists for parameters across a sounding scan, need to send to usrp_server for swings to work.. */
   int32_t snd_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
   int32_t snd_clrfreq_fstart_list[MAX_INTEGRATIONS_PER_SCAN];
@@ -131,11 +122,6 @@ int main(int argc,char *argv[]) {
   int32_t snd_fc[MAX_INTEGRATIONS_PER_SCAN];
   int32_t snd_nBeams_per_scan = 0;
   int snd_iBeam;
-
-  /* time sync of integration periods/ beams */
-  int sync_scan;
-  int time_now,  time_to_wait; /* times in ms for period synchronization */
-  int *scan_times;  /* scan times in ms */
 
 /* Integration period variables */
   int scnsc=120;
@@ -154,7 +140,6 @@ int main(int argc,char *argv[]) {
   struct timeval t0,t1;
   int elapsed_secs=0;
   int clrskip=-1;
-  int default_clrskip_secs=30;
   int startup=1;
   int fixfrq=-1;
 
@@ -580,21 +565,6 @@ int main(int argc,char *argv[]) {
       bmnum = scan_beam_number_list[iBeam];
 
       TimeReadClock( &yr, &mo, &dy, &hr, &mt, &sc, &us);
-
-
-      /* THIS IS NOW IS USRP_SERVER */
-      /* SYNC periods/beams */ /*
-      if (sync_scan) {
-          time_now     = ( (mt*60 + sc)*1000 + us/1000 ) % (scnsc*1000 + scnus/1000);
-          time_to_wait = scan_times[iBeam] - time_now;
-          if (time_to_wait > 0){
-             printf("Sync periods: Waiting for %d ms ...", time_to_wait);
-             usleep(time_to_wait);
-             printf("done.\n");
-          } else {
-             printf("Sync periods: Not waiting, sinc periods is %d ms too late.", time_to_wait);
-          }
-      }  */
 
       /* TODO: JDS: You can not make any day night changes that impact TR gate timing at dual site locations. Care must be taken with day night operation*/ 
       stfrq = scan_clrfreq_fstart_list[iBeam];

@@ -34,4 +34,6 @@
 #define MAX_RANGE 700
 #define MAXNAVE 300
 
+#define MAX_INTEGRATIONS_PER_SCAN 100
+
 #endif

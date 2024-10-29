@@ -151,4 +151,15 @@ extern int nfrang;
 extern int stfrq;
 extern int frqrng;
 
+/* lists for parameters across a scan, need to send to usrp_server for swings to work.. */
+extern int32_t scan_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
+extern int32_t scan_clrfreq_fstart_list[MAX_INTEGRATIONS_PER_SCAN];
+extern int32_t scan_beam_number_list[MAX_INTEGRATIONS_PER_SCAN];
+extern int32_t nBeams_per_scan;
+extern int current_beam, iBeam;
+
+/* time sync of integration periods/ beams */
+extern int sync_scan;
+extern int *scan_times;  /* scan times in ms */
+
 #endif

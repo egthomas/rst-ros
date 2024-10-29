@@ -169,3 +169,14 @@ unsigned int *badtr;
 int shmemfd;
 char sharedmemory[256]="IQBuffer";
 
+/* lists for parameters across a scan, need to send to usrp_server for swings to work.. */
+int32_t scan_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
+int32_t scan_clrfreq_fstart_list[MAX_INTEGRATIONS_PER_SCAN];
+int32_t scan_beam_number_list[MAX_INTEGRATIONS_PER_SCAN];
+int32_t nBeams_per_scan = 0;
+int current_beam, iBeam;
+
+/* time sync of integration periods/ beams */
+int sync_scan;
+int *scan_times;  /* scan times in ms */
+
