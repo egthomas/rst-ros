@@ -253,9 +253,9 @@ int operate(pid_t parent,int sock) {
 
         if (badtrdat.start_usec !=NULL) free(badtrdat.start_usec);
         if (badtrdat.duration_usec !=NULL) free(badtrdat.duration_usec);
-        badtrdat.length=7;
-        badtrdat.start_usec= malloc(sizeof(unsigned int)*badtrdat.length);
-        badtrdat.duration_usec= malloc(sizeof(unsigned int)*badtrdat.length);
+        badtrdat.length = mppul;
+        badtrdat.start_usec = malloc(sizeof(unsigned int)*badtrdat.length);
+        badtrdat.duration_usec = malloc(sizeof(unsigned int)*badtrdat.length);
 
         usecs = (int)dprm.samples/rprm.baseband_samplerate*1e6;
         nave = (int)((int_sc*1e6+int_us)/usecs);
@@ -264,6 +264,11 @@ int operate(pid_t parent,int sock) {
         TCPIPMsgSend(sock, &nave, sizeof(uint32_t));
 
         if (dprm.status == 0) {
+          for (i=0; i<mppul; i++) {
+            badtrdat.start_usec[i] = 230 + tsgprm.pat[i]*smsep*nbaud*5;
+            badtrdat.duration_usec[i] = smsep*nbaud;
+          }
+
           TCPIPMsgSend(sock, &badtrdat.length, sizeof(badtrdat.length));
           TCPIPMsgSend(sock, badtrdat.start_usec,
                        sizeof(unsigned int)*badtrdat.length);
