@@ -26,7 +26,9 @@ program also writes the sounding output to a separate RAWACF-
 format file. The idea is to validate the quality of the end-of-scan
 sounding mode data processed using on-site FITACF software vs
 the output when post-procesing with fitting algorithms available
-in the Radar Software Toolkit (RST).
+in the Radar Software Toolkit (RST). The raw IQ samples can
+also be written to a separate IQDAT-format file using an
+optional command line flag (-iqdat).
 
 The control program requires a radar-specific sounding file called
 "sounder.dat.[rad]", where "[rad]" should be replaced by
@@ -51,4 +53,4 @@ power, spectral width, phi0) in dmap-format.
 
 Source:
 ======
-E.G. Thomas (20221025)
+E.G. Thomas (20241001)

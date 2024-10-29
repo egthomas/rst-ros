@@ -14,15 +14,18 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <zlib.h>
 #include "rtypes.h"
 #include "option.h"
 #include "rtime.h"
 #include "dmap.h"
+#include "shmem.h"
 #include "limit.h"
 #include "radar.h"
 #include "rprm.h"
 #include "iq.h"
+#include "iqwrite.h"
 #include "rawdata.h"
 #include "rawwrite.h"
 #include "fitblk.h"
@@ -50,6 +53,8 @@
 
 void write_raw_snd_record(char *progname, struct RadarParm *prm,
                           struct RawData *raw);
+void write_iq_snd_record(char *progname, struct RadarParm *prm,
+                         struct IQ *iq, unsigned int *badtr);
 
 #define RT_TASK 3
 
@@ -61,7 +66,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2023/09/18"};
+char progid[80]={"testsound 2024/10/01"};
 char progname[256];
 
 int arg=0;
@@ -104,6 +109,8 @@ int main(int argc,char *argv[])
   int def_nrang=0;
   int def_rsep=0;
   int def_txpl=0;
+
+  unsigned char iq_flg=0;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -164,6 +171,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "frqrng", 'i', &frqrng);     /* fix the FCLR window [kHz] */
   OptionAdd(&opt, "sfrqrng",'i', &snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt, "sndsc",  'i', &snd_sc);     /* sounding duration per scan [sec] */
+  OptionAdd(&opt, "iqdat",  'x', &iq_flg);     /* store IQ samples */
   OptionAdd(&opt, "c",      'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);    /* Set the roshost IP address */
   OptionAdd(&opt, "debug",  'x', &debug);
@@ -548,6 +556,11 @@ int main(int argc,char *argv[])
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
       write_raw_snd_record(progname, prm, raw);
 
+      if (iq_flg) {
+        OpsBuildIQ(iq,&badtr);
+        write_iq_snd_record(progname, prm, iq, badtr);
+      }
+
       ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       /* check for the end of a beam loop */
@@ -614,6 +627,7 @@ void usage(void)
     printf("-frqrng int : set the clear frequency search window (kHz)\n");
     printf("-sfrqrng int: set the sounding FCLR search window (kHz)\n");
     printf(" -sndsc int : set the sounding duration per scan (sec)\n");
+    printf(" -iqdat     : set for storing snd IQ samples\n");
     printf("     -c int : channel number for multi-channel radars.\n");
     printf("   -ros char: change the roshost IP address\n");
     printf(" --help     : print this message and quit.\n");
@@ -647,17 +661,17 @@ void write_raw_snd_record(char *progname, struct RadarParm *prm, struct RawData 
 
   /* make up the filename */
   /* YYYYMMDD.HH.rad.snd */
-  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/ 2)* 2, ststr);
+  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/2)*2, ststr);
 
   /* finally make the filename */
   sprintf(filename, "%s%s.snd.rawacf", data_path, data_filename);
 
   /* open the output file */
-  fprintf(stderr,"Sounding Data File: %s\n",filename);
+  fprintf(stderr,"Sounding Rawacf Data File: %s\n",filename);
   out = fopen(filename,"a");
   if (out == NULL) {
     /* crap. might as well go home */
-    sprintf(logtxt,"Unable to open sounding file:%s",filename);
+    sprintf(logtxt,"Unable to open sounding rawacf file: %s",filename);
     ErrLog(errlog.sock,progname,logtxt);
     return;
   }
@@ -665,10 +679,71 @@ void write_raw_snd_record(char *progname, struct RadarParm *prm, struct RawData 
   /* write the sounding record */
   status = RawFwrite(out, prm, raw);
   if (status == -1) {
-    ErrLog(errlog.sock,progname,"Error writing rawacf sounding record.");
+    ErrLog(errlog.sock,progname,"Error writing sounding rawacf record.");
   } else {
-    ErrLog(errlog.sock,progname,"Rawacf sounding record successfully written.");
+    ErrLog(errlog.sock,progname,"Sounding rawacf record successfully written.");
   }
+
+  fclose(out);
+}
+
+
+/********************** function write_iq_snd_record() ************************/
+/* changed the output to iqdat format */
+
+void write_iq_snd_record(char *progname, struct RadarParm *prm, struct IQ *iq,
+                         unsigned int *badtr) {
+
+  char data_path[60], data_filename[40], filename[110];
+
+  char *snd_dir;
+  FILE *out;
+
+  int fd,iqbufsize;
+  unsigned char *p;
+
+  char logtxt[1024]="";
+  int status;
+
+  /* set up the data directory */
+  /* get the snd data dir */
+  snd_dir = getenv("SD_SND_PATH");
+  if (snd_dir == NULL)
+    sprintf(data_path,"/data/ros/snd/");
+  else {
+    memcpy(data_path,snd_dir,strlen(snd_dir));
+    data_path[strlen(snd_dir)] = '/';
+    data_path[strlen(snd_dir)+1] = 0;
+  }
+
+  /* make up the filename */
+  /* YYYYMMDD.HH.rad.snd */
+  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy, (prm->time.hr/2)*2, ststr);
+
+  /* finally make the filename */
+  sprintf(filename, "%s%s.snd.iqdat", data_path, data_filename);
+
+  /* open the output file */
+  fprintf(stderr,"Sounding Iqdat Data File: %s\n",filename);
+  out = fopen(filename,"a");
+  if (out == NULL) {
+    /* crap. might as well go home */
+    sprintf(logtxt,"Unable to open sounding iqdat file: %s",filename);
+    ErrLog(errlog.sock,progname,logtxt);
+    return;
+  }
+
+  iqbufsize = ShMemSizeName(sharedmemory);
+  p = ShMemAlloc(sharedmemory,iqbufsize,O_RDWR,0,&fd);
+
+  /* write the sounding record */
+  status = IQFwrite(out, prm, iq, badtr, (int16 *)p);
+  if (status == -1) {
+    ErrLog(errlog.sock,progname,"Error writing sounding iqdat record.");
+  } else {
+    ErrLog(errlog.sock,progname,"Sounding iqdat record successfully written.");
+  }
+  ShMemFree(p,sharedmemory,iqbufsize,0,fd);
 
   fclose(out);
 }
