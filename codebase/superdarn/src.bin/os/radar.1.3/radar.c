@@ -81,6 +81,8 @@ int operate(pid_t parent,int sock) {
   char entry_name[80];
   char entry_type,return_type;
 
+  uint32 uI32,uQ32;
+
   int num_transmitters=16;
 
   int AGC[16],LOPWR[16];
@@ -308,6 +310,13 @@ int operate(pid_t parent,int sock) {
         }
 
         TCPIPMsgSend(sock, &rprm, sizeof(struct ControlPRM));
+
+        for (i=0; i<dprm.samples; i++) {
+          uI32 = ((uint32) i) & 0xFFFF;
+          uQ32 = ((uint32) -i) << 16;
+          rdata.main[i] = uQ32 | uI32;
+          rdata.back[i] = uQ32 | uI32;
+        }
 
         for (i=0; i<nave; i++) {
           usleep((int)(usecs*0.5));
