@@ -1047,6 +1047,8 @@ int SiteRosIntegrate(int (*lags)[2]) {
       if (debug) fprintf(stderr,"Sending ACK for seq %d\n", nave);
 
       TCPIPMsgSend(ros.sock, &nave, sizeof(int32_t));
+
+      iqoff = iqsze;  /* set the offset bytes for the next sequence */
     }
   } /* end of while loop */
 
