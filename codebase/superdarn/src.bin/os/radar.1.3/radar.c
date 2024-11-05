@@ -69,12 +69,14 @@ int operate(pid_t parent,int sock) {
   struct DataPRM dprm;
   struct TRTimes badtrdat;
 
-  int tfreq,dfreq,rnum,cnum,s;
+  int tfreq,dfreq,rnum,cnum,s,i;
   float noise=0.5;
 
   int32 temp_int32,data_length;
   char entry_name[80];
   char entry_type,return_type;
+
+  uint32 uI32,uQ32;
 
   int num_transmitters=16;
 
@@ -197,7 +199,13 @@ int operate(pid_t parent,int sock) {
         badtrdat.duration_usec= malloc(sizeof(unsigned int)*badtrdat.length);
 
         TCPIPMsgSend(sock,&dprm,sizeof(struct DataPRM));
-        if(dprm.status==0) {
+        if (dprm.status==0) {
+          for (i=0; i<dprm.samples; i++) {
+            uI32 = ((uint32) i) & 0xFFFF;
+            uQ32 = ((uint32) -i) << 16;
+            rdata.main[i] = uQ32 | uI32;
+            rdata.back[i] = uQ32 | uI32;
+          }
           TCPIPMsgSend(sock, rdata.main, 4*dprm.samples);
           TCPIPMsgSend(sock, rdata.back, 4*dprm.samples);
 
