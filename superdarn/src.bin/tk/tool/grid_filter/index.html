@@ -27,22 +27,25 @@
 <tr><td></td><td width=80% class="docbox" style="font-family: courier;">
 grid_filter --help<br>grid_filter [<em>gridname</em>]<br>grid_filter -old [<em>gridname</em>]<br></td></tr>
 <tr><td class="docsubtitle">Synopsis</td></tr>
-<tr><td></td><td><p>Supersample a grid format file in time.</p></td></tr>
+<tr><td></td><td><p>Removes grid vectors from a <code>grdmap</code> file using range and/or CPID criteria.</p></td></tr>
 
 <tr><td class="docsubtitle">Options</td></tr>
 <tr><td></td><td>
 <table width=100%><tr><td width="150" valign="top"><code>--help</code></td><td valign="top">print the help message and exit.</td></tr>
 <tr><td width="150" valign="top"><code>--version</code></td><td valign="top">print the RST version number and exit.</td></tr>
+<tr><td width="150" valign="top"><code>-cpid</code></td><td valign="top">exclude data according to control program ID (CPID).</td></tr>
+<tr><td width="150" valign="top"><code>-minrng <em>minrange</em></code></td><td valign="top">exclude data from slant ranges nearer than <em>minrange</em> km (default is 0 km).</td></tr>
+<tr><td width="150" valign="top"><code>-maxrng <em>maxrange</em></code></td><td valign="top">exclude data from slant ranges greater than <em>maxrange</em> km (default is 10,000 km).</td></tr>
 <tr><td width="150" valign="top"><code><em>gridname</em></code></td><td valign="top">filename of the <code>grdmap</code> format file. If this is omitted, the file will be read from standard input.</td></tr>
 <tr><td width="150" valign="top"><code>-old</code></td><td valign="top">the input file is a <code>grd</code> format file.</td></tr>
 </table></td></tr>
 <tr><td class="docsubtitle">Description</td></tr>
-<tr><td></td><td><p>Supersample a grid format file in time.</p>
-<p>The task supersamples by skipping over records in the output file for a fixed length of time. By default the task will write a record every 10 minutes</p></td></tr>
+<tr><td></td><td><p>Removes grid vectors from a grid file.</p>
+<p>The task searches for and removes grid vectors that do not meet user-defined slant range or control program ID (CPID) criteria. By default the task will not exclude any data.</p></td></tr>
 <tr><td class="docsubtitle">Examples</td></tr>
 <tr><td></td><td>
 <table ><tr><td class="docbox" ><pre width="80">grid_filter -old 20040830.grd &gt; 20040830.grd.s</pre></td></tr></table>
-<p>Supersample the <code>grd</code> format file "<code>20040830.grd</code>" to produce the file "<code>20040830.grd.s</code>".</p>
+<p>Filter the <code>grd</code> format file "<code>20040830.grd</code>" to produce the file "<code>20040830.grd.f</code>".</p>
 </td></tr>
 
 
