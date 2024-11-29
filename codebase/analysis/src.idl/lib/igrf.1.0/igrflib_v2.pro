@@ -18,6 +18,14 @@
 ; IGRF_SetNow
 ; IGRF_Tilt
 ;
+; Eccentric Dipole Functions:
+;
+; geod2ecdip
+; ecdip2geod
+; ecdip_mlt
+; inv_ecdip_mlt
+; ecdip_mlt_ref
+;
 ; Private Functions:
 ;
 ; init_common
@@ -65,15 +73,17 @@ pro init_common, err=err
   common IGRF_v2_Com, IGRF_datetime, IGRF_coef_set, IGRF_svs, IGRF_coefs, $
                       IGRF_file, IGRF_order, IGRF_maxnyr, IGRF_maxk, $
                       RE, DTOR, geopack, IGRF_FIRST_EPOCH, IGRF_LAST_EPOCH, $
-                      IGRF_nmx
+                      IGRF_nmx, ecdip
 
   ; initial globals
-; IGRF_file   = "igrf13coeffs.txt"    ; using environment variable in v2.3
+; IGRF_file   = "igrf14coeffs.txt"    ; using environment variable in v2.3
   IGRF_order  = 13
   IGRF_maxnyr = 100
   IGRF_maxk   = (IGRF_ORDER+1)*(IGRF_ORDER+1)
   geopack     = {ctcl:0.d, ctsl:0.d, stcl:0.d, stsl:0.d, ct0:0.d, st0:0.d, $
                   cl0:0.d, sl0:0.d}
+  ecdip       = {B0:0.d, B02:0.d, latref:0.d, lonref:0.d, g2m:dblarr(3,3), $
+                  L0:0.d, L1:0.d, L2:0.d, E:0.d, pos:dblarr(3)}
 ; DTOR        = !const.pi/180.d
   DTOR        = !dpi/180.d
   RE          = 6371.2d     ; magnetic reference spherical radius from IGRF
@@ -115,7 +125,7 @@ end
 ;     
 ;     Input Arguments:  
 ;       filename      - name of file which contains IGRF coefficients; default
-;                       is current IGRF model: igrf13coeffs.txt
+;                       is current IGRF model: igrf14coeffs.txt
 ;
 ;     Return Value:
 ;       error code
@@ -189,7 +199,7 @@ pro IGRF_loadcoeffs, file=file, debug=debug, err=err
 
   if (size(file_search(IGRF_file)))[0] eq 0 then begin
     print, ''
-    print, 'File '+strtrim(file,2)+' not found.'
+    print, 'File '+strtrim(IGRF_file,2)+' not found.'
     print, ''
     err = -1
     return
@@ -433,20 +443,17 @@ end
 ;       User function to compute IGRF magnetic field at lat/lon and distance.
 ;
 ; CALLING SEQUENCE:
-;       err = IGRF_compute(r, theta, phi, Br, Btheta, Bphi);
+;       brtp[3] = IGRF_compute(rtp[3], err=err, debug=debug)
 ;     
-;     Input Arguments: 
+;     Inputs: rtp[3]
 ;       r             - geocentric distance in km
 ;       theta         - co-latitude in radians
 ;       phi           - longitude in radians
 ;
-;     Output Arguments:
-;       Br            - pointer to field in radial direction
-;       Btheta        - pointer to field in co-latitude direction
-;       Bphi          - pointer to field in longtitude direction
-;
-;     Return Value:
-;       error code
+;     Return Value: brtp[3]
+;       Br            - field in radial direction
+;       Btheta        - field in co-latitude direction
+;       Bphi          - field in longtitude direction
 ;
 ;+-----------------------------------------------------------------------------
 
@@ -617,6 +624,79 @@ pro IGRF_interpolate_coefs, debug=debug, err=err
     print, "ctcl = ", geopack.ctcl
   endif
 
+  ; addition for eccentric dipole coorindates
+  Slm    = dblarr(IGRF_maxk)
+
+  ; factorial for un-normalization
+  fctrl = dblarr(2*IGRF_order+1)
+  fctrl[0] = 1.
+  fctrl[1] = 1.
+  for k=2, 2*IGRF_order do fctrl[k] = k*fctrl[k-1]
+
+  for l=0, IGRF_order do begin
+    for m=0, l do begin
+      k = l * (l+1) + m;      /* 1D index for l,m */
+      n = l * (l+1) - m;      /* 1D index for l,m */
+
+      if m eq 0 then fac = 1 else fac = 2
+      ;* Davis 2004; Wertz 1978 recursion
+      ;Slm[k] = Slm[n] = sqrt(fac*fctrl[l-m]/fctrl[l+m])*dfc[2*l-1]/fctrl[l-m];
+      ; Winch 2004
+      Slm[k] = sqrt(fac*fctrl[l-m]/fctrl[l+m])
+      Slm[n] = Slm[k]
+    endfor
+  endfor
+
+              ;* S_(1,-1)^2 + S_(1,0)^2 + S_(1,1)^2 */
+  ecdip.B02 = IGRF_coefs[1]*IGRF_coefs[1]/(Slm[1]*Slm[1]) + $
+              IGRF_coefs[2]*IGRF_coefs[2]/(Slm[2]*Slm[2]) + $
+              IGRF_coefs[3]*IGRF_coefs[3]/(Slm[3]*Slm[3])
+  ecdip.B0  = sqrt(ecdip.B02)
+
+  ecdip.latref = asin(-IGRF_coefs[2]/Slm[2]/ecdip.B0)/DTOR
+  ecdip.lonref = 180 + atan(IGRF_coefs[1]/Slm[1],IGRF_coefs[3]/Slm[3])/DTOR
+
+  ca = cos(ecdip.latref*DTOR)
+  sa = sin(ecdip.latref*DTOR)
+  cb = cos(ecdip.lonref*DTOR)
+  sb = sin(ecdip.lonref*DTOR)
+
+  ecdip.g2m[0,0] = sa*cb
+  ecdip.g2m[0,1] = sa*sb
+  ecdip.g2m[0,2] =   -ca
+  ecdip.g2m[1,0] =   -sb
+  ecdip.g2m[1,1] =    cb
+  ecdip.g2m[1,2] =    0.
+  ecdip.g2m[2,0] = cb*ca
+  ecdip.g2m[2,1] = ca*sb
+  ecdip.g2m[2,2] =    sa
+
+             ;*  2*S10*S20 + sqrt(3)*(S11*S21 + S1-1*S2-1)  */
+  ecdip.L0 = 2 * IGRF_coefs[2]/Slm[2] * IGRF_coefs[6]/Slm[6] + $
+             sqrt(3) * (IGRF_coefs[3]/Slm[3] * IGRF_coefs[7]/Slm[7] + $
+                        IGRF_coefs[1]/Slm[1] * IGRF_coefs[5]/Slm[5])
+
+            ;* -S11*S20 + sqrt(3)*(S10*S21 + S11*S30 + S1-1*S2-2) */
+  ecdip.L1 = -IGRF_coefs[3]/Slm[3] * IGRF_coefs[6]/Slm[6] + $
+             sqrt(3) * (IGRF_coefs[2]/Slm[2] * IGRF_coefs[7]/Slm[7] + $
+                        IGRF_coefs[3]/Slm[3] * IGRF_coefs[12]/Slm[12] + $
+                        IGRF_coefs[1]/Slm[1] * IGRF_coefs[4]/Slm[4])
+
+            ;* -S1-1*S20 + sqrt(3)*(S10*S2-1 - S1-1*S30 + S11*S2-2) */
+  ecdip.L2 = -IGRF_coefs[1]/Slm[1] * IGRF_coefs[6]/Slm[6] + $
+             sqrt(3) * (IGRF_coefs[2]/Slm[2] * IGRF_coefs[5]/Slm[5] - $
+                        IGRF_coefs[1]/Slm[1] * IGRF_coefs[12]/Slm[12] + $
+                        IGRF_coefs[3]/Slm[3] * IGRF_coefs[4]/Slm[4])
+
+            ;* (L0*S10 + L1*S11 + L2*S1-1)/4/B02 */
+  ecdip.E  = (ecdip.L0 * IGRF_coefs[2]/Slm[2] + $
+              ecdip.L1 * IGRF_coefs[3]/Slm[3] + $
+              ecdip.L2 * IGRF_coefs[1]/Slm[1])/4./ecdip.B02
+
+  ecdip.pos[0] = RE * (ecdip.L1 - IGRF_coefs[3]/Slm[3]*ecdip.E) /3./ecdip.B02
+  ecdip.pos[1] = RE * (ecdip.L2 - IGRF_coefs[1]/Slm[1]*ecdip.E) /3./ecdip.B02
+  ecdip.pos[2] = RE * (ecdip.L0 - IGRF_coefs[2]/Slm[2]*ecdip.E) /3./ecdip.B02
+
   err = 0
 
   return
@@ -635,7 +715,7 @@ end
 ;       err = IGRF_SetDateTime(year, month, day, hour, minute, second);
 ;     
 ;     Input Arguments:  
-;       year          - year [1900-2025)
+;       year          - year [1900-2030)
 ;       month         - month of year [01-12]
 ;       day           - day of month [01-31]
 ;       hour          - hour of day [00-24]
@@ -648,7 +728,6 @@ end
 ;+-----------------------------------------------------------------------------
 
 function IGRF_SetDateTime, year, month, day, hour, minute, second
-
   common IGRF_v2_Com
 
   err=0
@@ -675,7 +754,7 @@ function IGRF_SetDateTime, year, month, day, hour, minute, second
 
   if (fyear lt IGRF_FIRST_EPOCH or fyear gt IGRF_LAST_EPOCH+5) then begin
     print, ''
-    print, 'Date range for IGRF13 is '+strtrim(IGRF_FIRST_EPOCH,2)+'-'+$
+    print, 'Date range for IGRF14 is '+strtrim(IGRF_FIRST_EPOCH,2)+'-'+$
                                        strtrim(IGRF_LAST_EPOCH+5,2)
     print, ''
     return, -1
@@ -697,7 +776,6 @@ function IGRF_SetDateTime, year, month, day, hour, minute, second
   endif
 
   return, err
-
 end
 
 ;*-----------------------------------------------------------------------------
@@ -709,10 +787,13 @@ end
 ;       Function to get date and time.
 ;
 ; CALLING SEQUENCE:
-;       err = IGRF_GetDateTime(year, month, day, hour, minute, second, dayno);
+;       err = IGRF_GetDateTime(year, month, day, hour, minute, second, dayno, $
+;                              silent=silent)
 ;     
-;     Output Arguments (integer pointers):  
-;       year          - year [1900-2025)
+;     Arguments (output):
+;       year          - year [1900-2030)
+;
+;     Keywords:
 ;       month         - month of year [01-12]
 ;       day           - day of month [01-31]
 ;       hour          - hour of day [00-24]
@@ -728,25 +809,32 @@ end
 function IGRF_GetDateTime, year, month=month, day=day, $
                            hour=hour, minute=minute, second=second, $
                            dyno=dayno, silent=silent
-
   common IGRF_v2_Com
 
-  if (n_elements(igrf_v2_datetime) eq 0) then begin
+;  if (n_elements(igrf_v2_datetime) eq 0) then begin
+  if (n_elements(igrf_datetime) eq 0) then begin
     if not keyword_set(silent) then $
       print, "Date and Time are not currently set"
     return, -1
   endif
 
-  year   = igrf_date.year
-  month  = igrf_date.month
-  day    = igrf_date.day
-  hour   = igrf_date.hour
-  minute = igrf_date.minute
-  second = igrf_date.second
-  dyno   = igrf_date.dayno
+  year   = igrf_datetime.year
+  month  = igrf_datetime.month
+  day    = igrf_datetime.day
+  hour   = igrf_datetime.hour
+  minute = igrf_datetime.minute
+  second = igrf_datetime.second
+  dyno   = igrf_datetime.dayno
+
+  ;year   = igrf_date.year
+  ;month  = igrf_date.month
+  ;day    = igrf_date.day
+  ;hour   = igrf_date.hour
+  ;minute = igrf_date.minute
+  ;second = igrf_date.second
+  ;dyno   = igrf_date.dayno
 
   return, 0
-
 end
 
 ;*-----------------------------------------------------------------------------
@@ -781,9 +869,9 @@ function IGRF_SetNow
   fyear = double(year) + ((doy-1) + $ ; SGS: int year -> rounding errors
             (hour + (minute + second/60.)/60.)/24.) / days
 
-  if (fyear lt 1590. or fyear ge 2025.) then begin
+  if (fyear lt 1590. or fyear ge 2030.) then begin
     print, ''
-    print, 'Date range for GUFM1/IGRF13 is 1590-2025'
+    print, 'Date range for GUFM1/IGRF14 is 1590-2030'
     print, ''
     return, -1
   endif
@@ -804,7 +892,6 @@ function IGRF_SetNow
   endif
 
   return, err
-
 end
 
 ;*-----------------------------------------------------------------------------
@@ -907,7 +994,7 @@ pro IGRF_v2_errmsg, ecode
     1: begin  ; Date/Time out of bounds */
   print, "* IGRF ERROR: Date out of bounds                                     *"
   print,"*                                                                        *"
-  print,"* The current date range for GUFM1/IGRF13 is [1590-2025), which          *"
+  print,"* The current date range for GUFM1/IGRF14 is [1590-2030), which          *"
   print,"* includes the 5-year secular variation.                                 *"
   end
   endcase
@@ -925,20 +1012,15 @@ end
 ;       Converts spherical coordinates into Cartesian coordinates.
 ;
 ; CALLING SEQUENCE:
-;       err = sph2car(r,theta,phi, x,y,z);
+;       xyz = sph2car(rtp)
 ;     
 ;     Input Arguments:
-;       r             - geocentric distance [RE, where RE=6371.2 km]
-;       theta         - co-latitude [radians]
-;       phi           - longitude [radians]
-;
-;     Output Arguments (pointers to type double):  
-;       x             - Cartesian components
-;       y
-;       z
+;       rtp[]        - rtp[0] geocentric distance [RE, where RE=6371.2 km]
+;                    - rtp[1] co-latitude [radians]
+;                    - rtp[2] longitude [radians]
 ;
 ;     Return Value:
-;       error code
+;       xyz[]        - Cartesian components: x,y,z
 ;
 ;+-----------------------------------------------------------------------------
 
@@ -959,20 +1041,15 @@ end
 ;       Converts Cartesian coordinates into spherical coordinates.
 ;
 ; CALLING SEQUENCE:
-;       err = car2sph(x,y,z, r,theta,phi);
+;       rtp = car2sph(xyz)
 ;
 ;     Input Arguments
-;       x             - Cartesian components [RE]
-;       y
-;       z
-;
-;     Output Arguments:
-;       r             - geocentric distance [RE]
-;       theta         - co-latitude [radians]
-;       phi           - longitude [radians]
+;       xyz[]         - Cartesian components: x,y,z
 ;
 ;     Return Value:
-;       error code
+;       rtp[]         - rtp[0] geocentric distance [RE]
+;       theta         - rtp[1] co-latitude [radians]
+;       phi           - rtp[2] longitude [radians]
 ;
 ;     Note: at the poles (x=0 and y=0) it is assumed that phi=0
 ;
@@ -1007,22 +1084,17 @@ end
 ;       Converts spherical field components to Cartesian components.
 ;
 ; CALLING SEQUENCE:
-;       err = bspcar(theta,phi, br,btheta,bphi, bx,by,bz);
+;       bxyz = bspcar(theta,phi, brtp)
 ;
 ;     Input Arguments
 ;       theta         - colatitude of point [radians]
 ;       phi           - longitude of point [radians]
-;       br            - radial component [nT]; radially positive
-;       btheta        - colatitude component [nT]; southward positive
-;       bphi          - longitude component [nT]; eastward positive
+;       brtp[]        - brtp[0] radial component [nT]; radially positive
+;                     - brtp[1] colatitude component [nT]; southward positive
+;                     - brtp[2] longitude component [nT]; eastward positive
 ; 
-;     Output Arguments:
-;       bx            - Cartesian components [RE]
-;       by
-;       bz
-;
 ;     Return Value:
-;       error code
+;       bxyz[]        - Cartesian components [RE]: bx,by,bz
 ;
 ;+-----------------------------------------------------------------------------
 
@@ -1051,19 +1123,14 @@ end
 ;       Converts Cartesian field components into spherical components.
 ;
 ; CALLING SEQUENCE:
-;       err = bcarsp(theta,phi, bx,by,bz, br,btheta,bphi);
+;       brtp = bcarsp(xyz, bxyz);
 ;
 ;     Input Arguments
-;       x,y,z         - Cartesian components of point
-;       bx,by,bz      - Cartesian field components [nT]
-;
-;     Output Arguments:
-;       br            - spherical field components [nT]
-;       btheta
-;       bphi
+;       xyz[]         - Cartesian components of point
+;       bxyz[]        - Cartesian field components [nT]
 ;
 ;     Return Value:
-;       error code
+;       brtp[]        - spherical field components [nT]
 ;
 ;     Note: at the poles (theta=0 or pi) it is assumed that phi=0 and therefore
 ;           btheta=bx and bphi=by
@@ -1138,9 +1205,9 @@ end
 ;       alt           - distance above sea level [km]
 ;
 ;     Return Value:
-;       r             - radial distance from center of Earth [RE]
-;       theta         - angle from north pole [radians]
-;       phi           - azimuthal angle [radians]
+;       rtp[]         - rtp[0] radial distance from center of Earth [RE]
+;                     - rtp[1] angle from north pole [radians]
+;                     - rtp[2] azimuthal angle [radians]
 ;
 ;+-----------------------------------------------------------------------------
 
@@ -1399,7 +1466,7 @@ end
 ;       coordinates (RE = 6371.2 km) using an alternate method from wikipedia.
 ; 
 ; CALLING SEQUENCE:
-;       [r,theta,phi] = geod2geoc(lat,lon,alt)
+;       [r,theta,phi] = plh2xyz(lat,lon,alt)
 ;     
 ;     Input Arguments:  
 ;       lat,lon       - geodetic latitude and longitude [degrees N and E]
@@ -1505,5 +1572,252 @@ function geoc2geod, lat,lon,r
   h = sqrt(pp + z*z*kappa*kappa)/ee * (1.d/kappa - k0i)
 
   return, [dlat,lon,h]
+end
+
+;*-----------------------------------------------------------------------------
+;
+; NAME:
+;       geod2ecdip (translated from Pierre-Louis Blelly Matlab code)
+;
+; PURPOSE:
+;       Convert from geodetic coordinates (as specified by WGS84) to
+;       eccentric dipole coordinates.
+;
+; CALLING SEQUENCE:
+;       [lat,lon,r] = geod2ecdip(lat,lon,alt)
+;
+;     Input Arguments:
+;       lat,lon       - geodetic latitude and longitude [degrees N and E]
+;       alt           - distance above sea level [km]
+;
+;     Return Value:
+;       [lat,lon,r]   - eccentric latitude and longitude
+;                     - distance above sea level [km]
+;
+;+-----------------------------------------------------------------------------
+
+function geod2ecdip, lat,lon,alt
+  common IGRF_v2_Com
+
+  if (IGRF_datetime.year < 0) then begin
+    IGRF_v2_errmsg, 0
+    return, -128
+  endif
+
+  rtp = geod2geoc(lat,lon,alt)
+  rtp[0] *= RE
+  xyz = sph2car(rtp)
+
+  eXYZ = xyz - ecdip.pos
+
+  r = sqrt(eXYZ[0]*eXYZ[0] + eXYZ[1]*eXYZ[1] + eXYZ[2]*eXYZ[2])
+  eXYZ /= r
+
+  ; coord=vec*g2m'; 1x3 * 3x3 = 1x3
+  ; probably should figure out how to do # or ##
+  coord = dblarr(3)
+  for k=0,2 do $
+    for i=0,2 do $
+      coord[k] += eXYZ[i]*ecdip.g2m[k,i]
+
+  d = coord[0]*coord[0] + coord[1]*coord[1]
+  if (d eq 0) then begin
+    latmag = signum(coord[2])*90
+    lonmag = ecdip.lonref
+  endif else $
+  if (d gt 0) then begin
+    latmag = asin(coord[2])/DTOR
+    lonmag = atan(coord[1],coord[0])/DTOR
+  endif else begin
+    ; set to nans
+    latmag = !values.f_nan
+    lonmag = !values.f_nan
+  endelse
+
+  return, [latmag,lonmag,r]
+
+end
+
+;*-----------------------------------------------------------------------------
+;
+; NAME:
+;       ecdip2geod (translated from Pierre-Louis Blelly Matlab code)
+;
+; PURPOSE:
+;       Convert from eccentric diople coordinates to geodetic coordinates
+;       (as specified by WGS84).
+;
+; CALLING SEQUENCE:
+;       err = ecdip2geod(lat,lon,r, out);
+;
+;     Input Arguments:
+;       lat,lon       - eccentric dipole latitude and longitude [degrees N & E]
+;       r             - radial distance [km]
+;
+;     Return Value:
+;       out[3]        - geodetic latitude, longitude [deg] and altitude [km]
+;
+;+-----------------------------------------------------------------------------
+
+function ecdip2geod, elat, elon, r
+  common IGRF_v2_Com
+
+  ; no date/time set so bail
+  if (IGRF_datetime.year < 0) then begin
+    IGRF_v2_errmsg, 0
+    return, -128
+  endif
+
+  XYZ = dblarr(3)
+  XYZ[0] = r * cos(elon*DTOR) * cos(elat*DTOR)
+  XYZ[1] = r * sin(elon*DTOR) * cos(elat*DTOR)
+  XYZ[2] = r * sin(elat*DTOR)
+
+  ; coord=g2m'*vec; 3x3 * 3x1 = 3x1
+  ; probably should figure out how to do # or ##
+  coord = dblarr(3)
+  for k=0,2 do $
+    for i=0,2 do $
+      coord[k] += XYZ[i]*ecdip.g2m[i,k]
+
+  XYZ = coord + ecdip.pos
+
+  rtp = car2sph(XYZ)
+
+  lat = 90.-rtp[1]/DTOR
+  lon = rtp[2]/DTOR
+  if (lon gt  180) then lon -= 360
+  if (lon lt -180) then lon += 360
+
+  return, geoc2geod(lat,lon,rtp[0]/RE)
+
+end
+
+;*-----------------------------------------------------------------------------
+;
+; NAME:
+;       ecdip_mlt
+;
+; PURPOSE:
+;       Determine MLT for given date/time and eccentric dipole longitude.
+;
+; CALLING SEQUENCE:
+;       mlt = ecdip_mlt(yr,mo,dy, hr,mt,sc, elon);
+;
+;     Input Arguments:
+;       yr,mo,dy      - date as integers
+;       hr,mt,sc      - time as integers
+;       elon          - eccentric dipole longitude [degrees N]
+;
+;     Return Value:
+;       MLT in floating point hour
+;
+;+-----------------------------------------------------------------------------
+
+function ecdip_mlt, yr, mo, dy, hr, mt, sc, elon
+
+  lonmag_ref = ecdip_mlt_ref(yr,mo,dy, hr,mt,sc)
+  tmag = (48 + (elon-lonmag_ref)/15.) mod 24
+
+  return, tmag
+
+end
+
+;*-----------------------------------------------------------------------------
+;
+; NAME:
+;       inv_ecdip_mlt
+;
+; PURPOSE:
+;       Determine eccentric dipole longitude for given date/time and MLT (ecdip)
+;
+; CALLING SEQUENCE:
+;       elon = inv_ecdip_mlt(yr,mo,dy, hr,mt,sc, mlt);
+;
+;     Input Arguments:
+;       yr,mo,dy      - date as integers
+;       hr,mt,sc      - time as integers
+;       mlt           - eccentric dipole MLT
+;
+;     Return Value:
+;       eccentric dipole longitude of MLT [degrees E]
+;
+;+-----------------------------------------------------------------------------
+
+function inv_ecdip_mlt, yr, mo, dy, hr, mt, sc, mlt
+
+  lonmag_ref = ecdip_mlt_ref(yr,mo,dy, hr,mt,sc)
+  elon = (360 + lonmag_ref + 15*mlt) mod 360
+  if (elon gt  180) then elon -= 360
+  if (elon lt -180) then elon += 360
+
+  return, elon
+
+end
+
+;*-----------------------------------------------------------------------------
+;
+; NAME:
+;       ecdip_mlt_ref (translated from Pierre-Louis Blelly Matlab code)
+;
+; PURPOSE:
+;       Determine reference MLT location for given date/time. Used for
+;       eccentric dipole coordinates.
+;
+; CALLING SEQUENCE:
+;       mlt_ref = ecdip_mlt_ref(yr,mo,dy,hr,mt,sc);
+;
+;     Input Arguments:
+;       yr,mo,dy      - Date
+;       hr,mt,sc      - Time
+;
+;     Return Value:
+;       mlt           - mlt reference of given date/time
+;
+;+-----------------------------------------------------------------------------
+
+function ecdip_mlt_ref, yr, mo, dy, hr, mt, sc
+  common IGRF_v2_Com
+
+  fday = (hr + mt/60. + sc/3600.)/24.
+  julian = TimeYMDHMSToJulian(yr,mo,dy,hr,mt,sc) - $
+           TimeYMDHMSToJulian(1899,12,31,12,0,0)
+
+  lonmag_ref = 0.
+  tilt = 0.
+
+  t     = julian/36525.
+  L     = (279.696678 + 0.9856473354*julian) mod 360
+  gst   = (279.690983 + 0.9856473354*julian + 360.*fday + 180.) mod 360
+  M     = (358.475845 + 0.985600267*julian) mod 360
+  L    += (1.91946 - 0.004789*t)*sin(M*DTOR) + 0.020094*sin(2*M*DTOR)
+  obliq =  23.45229 - 0.0130125*t
+  slp   = L - (0.0055686 - 0.025e-4*t)
+
+  cgst = cos(gst*DTOR)
+  sgst = sin(gst*DTOR)
+  sob  = sin(obliq*DTOR)
+  cob  = cos(obliq*DTOR)
+  sslp = sin(slp*DTOR)
+  cslp = cos(slp*DTOR)
+
+  pos = dblarr(3)
+  pos[0] = -( cslp*cgst + sslp*sgst*cob) * RE
+  pos[1] = -(-cslp*sgst + sslp*cgst*cob) * RE
+  pos[2] = -( sslp*sob ) * RE
+
+  pos -= ecdip.pos
+
+  coord = dblarr(3)
+  for k=0,2 do $
+    for i=0,2  do $
+      coord[k] += ecdip.g2m[k,i]*pos[i]
+
+  lonmag_ref = (360 + atan(coord[1],coord[0])/DTOR) mod 360
+  R          = sqrt(coord[0]*coord[0] + coord[1]*coord[1] + coord[2]*coord[2])
+  tilt       = -asin(coord[2]/R)/DTOR
+
+  return, lonmag_ref
+
 end
 

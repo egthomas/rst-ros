@@ -986,11 +986,10 @@ pro AACGM_v2_Trace, lat_in,lon_in,height_in, lat_out,lon_out, error, $
   common AACGM_v2_Com
   common IGRF_v2_Com
 
-  IGRF_SetDateTime, aacgm_v2_datetime.year, aacgm_v2_datetime.month, $
+  err = IGRF_SetDateTime(aacgm_v2_datetime.year, aacgm_v2_datetime.month, $
                     aacgm_v2_datetime.day,  aacgm_v2_datetime.hour,  $
-                    aacgm_v2_datetime.minute, aacgm_v2_datetime.second, $
-                    err=error
-  if (error ne 0) then return
+                    aacgm_v2_datetime.minute, aacgm_v2_datetime.second)
+  if (err ne 0) then return
 
   if not keyword_set(ds) then $
     ds  = 1.                  ; 1 km default starting stepsize
@@ -1134,11 +1133,10 @@ pro AACGM_v2_Trace_inv, lat_in,lon_in,height_in, lat_out,lon_out, error, $
   common AACGM_v2_Com
   common IGRF_v2_Com
 
-  IGRF_SetDateTime, aacgm_v2_datetime.year, aacgm_v2_datetime.month, $
+  err = IGRF_SetDateTime(aacgm_v2_datetime.year, aacgm_v2_datetime.month, $
                     aacgm_v2_datetime.day,  aacgm_v2_datetime.hour,  $
-                    aacgm_v2_datetime.minute, aacgm_v2_datetime.second, $
-                    err=error
-  if (error ne 0) then return
+                    aacgm_v2_datetime.minute, aacgm_v2_datetime.second)
+  if (err ne 0) then return
 
   if not keyword_set(ds) then $
     ds  = 1.                  ; 1 km default starting stepsize
