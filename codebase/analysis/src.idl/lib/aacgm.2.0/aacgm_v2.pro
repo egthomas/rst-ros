@@ -49,7 +49,7 @@
 ;                                        [minute], [second])
 ;
 ;     Arguments:
-;       year          - year [1900-2025)
+;       year          - year [1900-2030)
 ;       month         - month [1-12]
 ;       day           - day [1-31]
 ;       hour          - hour [0-24]

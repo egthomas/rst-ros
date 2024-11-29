@@ -874,7 +874,7 @@ int AACGM_v2_LoadCoefs(int year)
 {
   char fname[256];
   char root[256];
-  char yrstr[5];  
+  char yrstr[11];
   int ret=0;
 
   #if DEBUG > 0
@@ -1061,7 +1061,7 @@ int AACGM_v2_Convert(double in_lat, double in_lon, double height,
 ;       err = AACGM_v2_SetDateTime(year, month, day, hour, minute, second);
 ;     
 ;     Input Arguments:  
-;       year          - year [1900-2025)
+;       year          - year [1900-2030)
 ;       month         - month of year [01-12]
 ;       day           - day of month [01-31]
 ;       hour          - hour of day [00-24]
@@ -1284,7 +1284,6 @@ int AACGM_v2_Locked(void)
   return (aacgm_date.locked);
 }
 
-
 /*-----------------------------------------------------------------------------
 ;
 ; NAME:
@@ -1331,8 +1330,8 @@ void AACGM_v2_errmsg(int ecode)
   fprintf(stderr,
   "* AACGM-v2 ERROR: Date out of bounds                                     *\n"
   "*                                                                        *\n"
-  "* The current date range for AACGM-v2 coordinates is [1990-2025), which  *\n"
-  "* corresponds to the date range for the IGRF13 model, including the      *\n"
+  "* The current date range for AACGM-v2 coordinates is [1990-2030), which  *\n"
+  "* corresponds to the date range for the IGRF14 model, including the      *\n"
   "* 5-year secular variation.                                              *"
   "\n");
     break;

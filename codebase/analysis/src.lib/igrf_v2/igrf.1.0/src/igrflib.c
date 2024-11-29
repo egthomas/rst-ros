@@ -82,7 +82,7 @@ void igrf_pause(void)
 ;     
 ;     Input Arguments:  
 ;       filename      - name of file which contains IGRF coefficients; default
-;                       is current IGRF model: igrf13coeffs.txt
+;                       is current IGRF model: igrf14coeffs.txt
 ;
 ;     Return Value:
 ;       error code
@@ -1320,7 +1320,6 @@ int geod2ecdip(double lat, double lon, double alt, double out[])
     /* set to nans? */
     latmag = NAN;
     lonmag = NAN;
-    return -1;
   }
 
   //rr   = RE/r;
