@@ -60,7 +60,7 @@ Installation
 Note: These instructions assume the software will be run from a user
 account called "radar_user".
 
-1. Install the required libraries (as of Ubuntu 22.04):
+1. Install the required libraries (as of Ubuntu 24.04):
 
     build-essential
     libconfig-dev
