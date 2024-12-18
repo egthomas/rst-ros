@@ -156,7 +156,7 @@ The format for the starting time is:  yr mo dy hr mn
 The first non-comment line of the schedule file should name the default
 control program to be run when no valid time has been reached, e.g.,
 
-    default normalscan -stid -cve -fast -sb 0 -eb 19
+    default normalscan -stid -cve -c 1 -fast -sb 0 -eb 19
 
 All subsequent lines should contain a valid time followed by a control
 program and its command line options, e.g.,
