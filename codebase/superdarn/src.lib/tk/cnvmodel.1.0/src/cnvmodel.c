@@ -341,8 +341,13 @@ int load_all_models(char *path, int imod, int ecdip)
     case TS18_Kp:  /********************************************************/
       for (i=0; i<TS18_Kp_nlev; i++) {
         for (j=0; j<TS18_Kp_nang; j++) {
-          sprintf(fname,"%s/ts18_kp/mod_%s_%s.spx",path,TS18_Kp_mod_lev[i],
-                         TS18_Kp_mod_ang[j]);
+          if (ecdip) {
+            sprintf(fname,"%s/ecdip/ts18_kp/mod_%s_%s.spx",path,TS18_Kp_mod_lev[i],
+                           TS18_Kp_mod_ang[j]);
+          } else {
+            sprintf(fname,"%s/ts18_kp/mod_%s_%s.spx",path,TS18_Kp_mod_lev[i],
+                           TS18_Kp_mod_ang[j]);
+          }
           fp = fopen(fname,"r");
           if (fp == NULL) continue;
           model[0][0][i][j] = load_model(fp,-1,i,j,-1,imod);
