@@ -53,7 +53,7 @@ char *dfststr="tst";
 char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
-char progid[80]={"interleavesound 2023/09/18"};
+char progid[80]={"interleavesound 2025/01/08"};
 char progname[256];
 int arg=0;
 struct OptionData opt;
@@ -91,6 +91,10 @@ int main(int argc,char *argv[]) {
   /* new variables for dynamically creating beam sequences */
   int *bms;           /* scanning beams                                     */
   int nintgs=20;      /* number of integration periods per scan; SGS 1-min  */
+
+  unsigned char iq_flg=0;
+  unsigned char raw_flg=0;
+
   unsigned char hlp=0;
   unsigned char option=0;
   unsigned char version=0;
@@ -163,6 +167,8 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);     /* fix the transmit frequency */
   OptionAdd(&opt,"frqrng",'i',&frqrng);     /* fix the FCLR window [kHz] */
   OptionAdd(&opt,"sfrqrng",'i',&snd_frqrng); /* sounding FCLR window [kHz] */
+  OptionAdd(&opt,"iqdat", 'x',&iq_flg);     /* store IQ samples */
+  OptionAdd(&opt,"rawacf",'x',&raw_flg);    /* store rawacf data */
   OptionAdd(&opt,"c",     'i',&cnum);
   OptionAdd(&opt,"ros",   't',&roshost);    /* Set the roshost IP address */
   OptionAdd(&opt,"debug", 'x',&debug);
@@ -522,6 +528,13 @@ int main(int argc,char *argv[]) {
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
+      if (iq_flg) {
+        OpsBuildIQ(iq,&badtr);
+        OpsWriteSndIQ(errlog.sock, progname, prm, iq, badtr, ststr);
+      }
+
+      if (raw_flg) OpsWriteSndRaw(errlog.sock, progname, prm, raw, ststr);
+
       ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       /* check for the end of a beam loop */
@@ -584,6 +597,8 @@ void usage(void)
     printf(" -fixfrq int : transmit on fixed frequency (kHz)\n");
     printf(" -frqrng int : set the clear frequency search window (kHz)\n");
     printf("-sfrqrng int : set the sounding FCLR search window (kHz)\n");
+    printf("  -iqdat     : set for storing snd IQ samples\n");
+    printf(" -rawacf     : set for writing snd rawacf files\n");
     printf("      -c int : channel number for multi-channel radars.\n");
     printf("    -ros char: change the roshost IP address\n");
     printf("  --help     : print this message and quit.\n");

@@ -84,7 +84,7 @@ int rst_opterr(char *txt) {
 
 
 int main(int argc,char *argv[]) {
-  char progid[80]={"uafsound 2023/09/18"};
+  char progid[80]={"uafsound 2025/01/08"};
   char progname[256]="uafsound";
   char modestr[32];
 
@@ -102,6 +102,9 @@ int main(int argc,char *argv[]) {
 
   unsigned char fast=0;
   unsigned char discretion=0;
+
+  unsigned char iq_flg=0;
+  unsigned char raw_flg=0;
 
   int status=0,n,i;
   int clrscan=0;
@@ -224,6 +227,9 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "c",'i',&cnum);
   OptionAdd(&opt, "clrskip", 'i', &clrskip);
   OptionAdd(&opt, "cpid", 'i', &cpid);
+
+  OptionAdd(&opt, "iqdat",  'x', &iq_flg);     /* store IQ samples */
+  OptionAdd(&opt, "rawacf", 'x', &raw_flg);    /* store rawacf data */
 
   OptionAdd(&opt, "ros", 't', &roshost);
   OptionAdd(&opt, "stid", 't', &ststr);
@@ -822,6 +828,13 @@ int main(int argc,char *argv[]) {
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
+      if (iq_flg) {
+        OpsBuildIQ(iq,&badtr);
+        OpsWriteSndIQ(errlog.sock, progname, prm, iq, badtr, ststr);
+      }
+
+      if (raw_flg) OpsWriteSndRaw(errlog.sock, progname, prm, raw, ststr);
+
       ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
       snd_iBeam++;
@@ -891,6 +904,8 @@ void usage(void)
   printf("     -c int : Radar Channel number, minimum value 1\n");
   printf("-clrskip int : Minimum number of seconds to skip between clear frequency search\n");
   printf("  -cpid int : Select control program ID number\n");
+  printf(" -iqdat     : set for storing snd IQ samples\n");
+  printf("-rawacf     : set for writing snd rawacf files\n");
   printf("  -ros char : IP address of ROS server process\n");
   printf(" -stid char : The station ID string. For example, use aze for azores east.\n");
   printf("-libstr char : The site library string. For example, use ros for common libsite.ros\n");

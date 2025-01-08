@@ -14,7 +14,7 @@ OBJS = uafsound.o
 SRC=uafsound.c
 DSTPATH = $(USR_BINPATH)
 OUTPUT = uafsound
-LIBS=-lops.1 -lsite.1 -lradarshell.1 -ltcpipmsg.1 -lrmsgsnd.1 \
+LIBS=-lops.1 -lshmem.1 -lsite.1 -lradarshell.1 -ltcpipmsg.1 -lrmsgsnd.1 \
      -lerrlog.1 -lfreq.1 -lfit.1 -lraw.1 -lcfit.1 -lrscan.1 \
      -lfitacf.1 -lsnd.1 -liqdata.1 -lradar.1 -ldmap.1 -lopt.1 \
 		 -lrtime.1 -lrcnv.1 -ltsg.1 -lelevation.1

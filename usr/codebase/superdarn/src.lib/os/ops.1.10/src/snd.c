@@ -9,13 +9,19 @@
 #include <sys/types.h>
 #include <string.h>
 #include <time.h>
+#include <fcntl.h>
 #include <zlib.h>
 #include "rtypes.h"
 #include "limit.h"
 #include "rtime.h"
 #include "dmap.h"
+#include "shmem.h"
 #include "rprm.h"
 #include "freq.h"
+#include "iq.h"
+#include "iqwrite.h"
+#include "rawdata.h"
+#include "rawwrite.h"
 #include "fitdata.h"
 #include "snddata.h"
 #include "fitsnd.h"
@@ -214,3 +220,113 @@ void OpsWriteSnd(int sock, char *progname, struct SndData *snd, char *ststr) {
   fclose(out);
 }
 
+
+void OpsWriteSndRaw(int sock, char *progname, struct RadarParm *prm,
+                    struct RawData *raw, char *ststr) {
+
+  char data_path[60], data_filename[40], filename[110];
+
+  char *snd_dir;
+  FILE *out;
+
+  char logtxt[1024]="";
+  int status;
+
+  /* set up the data directory */
+  /* get the snd data dir */
+  snd_dir = getenv("SD_SND_PATH");
+  if (snd_dir == NULL)
+    sprintf(data_path,"/data/ros/snd/");
+  else {
+    memcpy(data_path,snd_dir,strlen(snd_dir));
+    data_path[strlen(snd_dir)] = '/';
+    data_path[strlen(snd_dir)+1] = 0;
+  }
+
+  /* make up the filename */
+  /* YYYYMMDD.HH.rad.snd */
+  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy,
+                                                 (prm->time.hr/2)*2, ststr);
+
+  /* finally make the filename */
+  sprintf(filename, "%s%s.snd.rawacf", data_path, data_filename);
+
+  /* open the output file */
+  fprintf(stderr,"Sounding Rawacf Data File: %s\n",filename);
+  out = fopen(filename,"a");
+  if (out == NULL) {
+    /* crap. might as well go home */
+    sprintf(logtxt,"Unable to open sounding rawacf file: %s",filename);
+    ErrLog(sock,progname,logtxt);
+    return;
+  }
+
+  /* write the sounding record */
+  status = RawFwrite(out, prm, raw);
+  if (status == -1) {
+    ErrLog(sock,progname,"Error writing sounding rawacf record.");
+  } else {
+    ErrLog(sock,progname,"Sounding rawacf record successfully written.");
+  }
+
+  fclose(out);
+}
+
+
+void OpsWriteSndIQ(int sock, char *progname, struct RadarParm *prm,
+                   struct IQ *iq, unsigned int *badtr, char *ststr) {
+
+  char data_path[60], data_filename[40], filename[110];
+
+  char *snd_dir;
+  FILE *out;
+
+  int fd,iqbufsize;
+  unsigned char *p;
+
+  char logtxt[1024]="";
+  int status;
+
+  /* set up the data directory */
+  /* get the snd data dir */
+  snd_dir = getenv("SD_SND_PATH");
+  if (snd_dir == NULL)
+    sprintf(data_path,"/data/ros/snd/");
+  else {
+    memcpy(data_path,snd_dir,strlen(snd_dir));
+    data_path[strlen(snd_dir)] = '/';
+    data_path[strlen(snd_dir)+1] = 0;
+  }
+
+  /* make up the filename */
+  /* YYYYMMDD.HH.rad.snd */
+  sprintf(data_filename, "%04d%02d%02d.%02d.%s", prm->time.yr, prm->time.mo, prm->time.dy,
+                                                 (prm->time.hr/2)*2, ststr);
+
+  /* finally make the filename */
+  sprintf(filename, "%s%s.snd.iqdat", data_path, data_filename);
+
+  /* open the output file */
+  fprintf(stderr,"Sounding Iqdat Data File: %s\n",filename);
+  out = fopen(filename,"a");
+  if (out == NULL) {
+    /* crap. might as well go home */
+    sprintf(logtxt,"Unable to open sounding iqdat file: %s",filename);
+    ErrLog(sock,progname,logtxt);
+    return;
+  }
+
+  iqbufsize = ShMemSizeName(sharedmemory);
+  p = ShMemAlloc(sharedmemory,iqbufsize,O_RDWR,0,&fd);
+
+  /* write the sounding record */
+  status = IQFwrite(out, prm, iq, badtr, (int16 *)p);
+  if (status == -1) {
+    ErrLog(sock,progname,"Error writing sounding iqdat record.");
+  } else {
+    ErrLog(sock,progname,"Sounding iqdat record successfully written.");
+  }
+  ShMemFree(p,sharedmemory,iqbufsize,0,fd);
+
+  fclose(out);
+}

@@ -19,5 +19,9 @@ int OpsSndStart();
 void OpsFindSndSkip(char *ststr,int *snd_bms,int snd_bms_tot,int *snd_bm_cnt,int *odd_beams);
 void OpsBuildSnd(struct SndData *snd, struct RadarParm *prm, struct FitData *fit);
 void OpsWriteSnd(int sock, char *name, struct SndData *snd, char *ststr);
+void OpsWriteSndRaw(int sock, char *progname, struct RadarParm *prm,
+                    struct RawData *raw, char *ststr);
+void OpsWriteSndIQ(int sock, char *progname, struct RadarParm *prm,
+                   struct IQ *iq, unsigned int *badtr, char *ststr);
 
 #endif
