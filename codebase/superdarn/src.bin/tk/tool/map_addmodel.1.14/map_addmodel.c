@@ -228,8 +228,8 @@ int main(int argc,char *argv[]) {
   if (ts18_kp) imod = TS18_Kp;
   if (ts18)    imod = TS18;
 
-  if (ecdip && imod != TS18) {
-    fprintf(stderr,"Eccentric dipole coordinates are only valid for TS18 model.\n");
+  if (ecdip && imod != TS18 && imod != TS18_Kp) {
+    fprintf(stderr,"Eccentric dipole coordinates are only valid for TS18 or TS18-Kp model.\n");
     exit(-1);
   }
 

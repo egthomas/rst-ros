@@ -57,7 +57,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"campsound 2024/10/01"};
+char progid[80]={"campsound 2025/01/08"};
 char progname[256];
 
 int arg=0;
@@ -91,6 +91,9 @@ int main(int argc,char *argv[])
 
   int total_scan_usecs=0;
   int total_integration_usecs=0;
+
+  unsigned char iq_flg=0;
+  unsigned char raw_flg=0;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -152,6 +155,8 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "12beam", 'x', &ext_flg);    /* use 12 beams instead of 4 */
   OptionAdd(&opt, "fixfrq", 'x', &fixfrq);     /* fix the transmit frequency */
   OptionAdd(&opt, "frqrng", 'i', &snd_frqrng); /* fix the FCLR window [kHz] */
+  OptionAdd(&opt, "iqdat",  'x', &iq_flg);     /* store IQ samples */
+  OptionAdd(&opt, "rawacf", 'x', &raw_flg);    /* store rawacf data */
   OptionAdd(&opt, "c",      'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);    /* Set the roshost IP address */
   OptionAdd(&opt, "debug",  'x', &debug);
@@ -393,6 +398,13 @@ int main(int argc,char *argv[])
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
 
+      if (iq_flg) {
+        OpsBuildIQ(iq,&badtr);
+        OpsWriteSndIQ(errlog.sock, progname, prm, iq, badtr, ststr);
+      }
+
+      if (raw_flg) OpsWriteSndRaw(errlog.sock, progname, prm, raw, ststr);
+
       RadarShell(shell.sock,&rstable);
 
       scan = 0;
@@ -441,6 +453,8 @@ void usage(void)
     printf("-12beam     : use 12 beams instead of 4\n");
     printf("-fixfrq     : transmit on fixed frequencies\n");
     printf("-frqrng int : set the clear frequency search window (kHz)\n");
+    printf(" -iqdat     : set for storing snd IQ samples\n");
+    printf("-rawacf     : set for writing snd rawacf files\n");
     printf("     -c int : channel number for multi-channel radars.\n");
     printf("   -ros char: change the roshost IP address\n");
     printf(" --help     : print this message and quit.\n");

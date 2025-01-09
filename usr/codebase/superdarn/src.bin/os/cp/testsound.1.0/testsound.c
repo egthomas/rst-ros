@@ -66,7 +66,7 @@ char *libstr="ros";
 void *tmpbuf;
 size_t tmpsze;
 
-char progid[80]={"testsound 2024/10/01"};
+char progid[80]={"testsound 2025/01/08"};
 char progname[256];
 
 int arg=0;
@@ -111,6 +111,7 @@ int main(int argc,char *argv[])
   int def_txpl=0;
 
   unsigned char iq_flg=0;
+  unsigned char no_raw=0;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -172,6 +173,7 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "sfrqrng",'i', &snd_frqrng); /* sounding FCLR window [kHz] */
   OptionAdd(&opt, "sndsc",  'i', &snd_sc);     /* sounding duration per scan [sec] */
   OptionAdd(&opt, "iqdat",  'x', &iq_flg);     /* store IQ samples */
+  OptionAdd(&opt, "noraw",  'x', &no_raw);     /* do not store rawacf data */
   OptionAdd(&opt, "c",      'i', &cnum);
   OptionAdd(&opt, "ros",    't', &roshost);    /* Set the roshost IP address */
   OptionAdd(&opt, "debug",  'x', &debug);
@@ -554,7 +556,10 @@ int main(int argc,char *argv[])
 
       /* save the sounding mode data */
       OpsWriteSnd(errlog.sock, progname, snd, ststr);
-      write_raw_snd_record(progname, prm, raw);
+
+      if (!no_raw) {
+        write_raw_snd_record(progname, prm, raw);
+      }
 
       if (iq_flg) {
         OpsBuildIQ(iq,&badtr);
@@ -628,6 +633,7 @@ void usage(void)
     printf("-sfrqrng int: set the sounding FCLR search window (kHz)\n");
     printf(" -sndsc int : set the sounding duration per scan (sec)\n");
     printf(" -iqdat     : set for storing snd IQ samples\n");
+    printf(" -noraw     : do not write snd rawacf files\n");
     printf("     -c int : channel number for multi-channel radars.\n");
     printf("   -ros char: change the roshost IP address\n");
     printf(" --help     : print this message and quit.\n");
