@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <zlib.h>
 #include "rtypes.h"
@@ -75,19 +75,26 @@ int main(int argc,char *argv[])
 
   char logtxt[1024];
 
+  int nowait=0;
+
   int scnsc=120;    /* total scan period in seconds */
   int scnus=0;
-  int skip;
   int cnt=0;
 
   unsigned char fast=0;
   unsigned char discretion=0;
+
+  /* Variables for controlling clear frequency search */
+  struct timeval t0,t1;
+  int elapsed_secs=0;
+  int clrskip=-1;
+  int startup=1;
   int fixfrq=0;
+  int clrscan=0;
 
   int n;
   int status=0;
 
-  int beams=0;
   int total_scan_usecs=0;
   int total_integration_usecs=0;
 
@@ -127,6 +134,9 @@ int main(int argc,char *argv[])
   OptionAdd(&opt, "bp",     'i', &baseport);
   OptionAdd(&opt, "stid",   't', &ststr);
   OptionAdd(&opt, "fast",   'x', &fast);
+  OptionAdd(&opt, "nowait", 'x', &nowait);
+  OptionAdd(&opt, "clrscan",'x', &clrscan);
+  OptionAdd(&opt, "clrskip",'i', &clrskip);
   OptionAdd(&opt, "sb",     'i', &sbm);
   OptionAdd(&opt, "eb",     'i', &ebm);
   OptionAdd(&opt, "baud",   'i', &nbaud);
@@ -220,7 +230,9 @@ int main(int argc,char *argv[])
                   " frqrng l xcnt l", &sbm,&ebm, &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  beams=abs(ebm-sbm)+1;
+  nBeams_per_scan = abs(ebm-sbm)+1;
+  current_beam = sbm;
+
   if (fast) {
     cp    = 9101;
     scnsc = 60;
@@ -230,12 +242,17 @@ int main(int argc,char *argv[])
     scnus = 0;
   }
 
+  for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
+     scan_beam_number_list[iBeam] = current_beam;
+     current_beam += backward ? -1:1;
+  }
+
   /* Automatically calculate the integration times */
   /* Note that I have added a buffer here to account for things at the end
      of the scan. Traditionally this has been set to 3s, but I cannot find
      any justification of the need for it. -SGS */
   total_scan_usecs = scnsc*1e6 + scnus - (bufsc*1e6 + bufus);
-  total_integration_usecs = total_scan_usecs/beams;
+  total_integration_usecs = total_scan_usecs/nBeams_per_scan;
   intsc = total_integration_usecs/1e6;
   intus = total_integration_usecs - (intsc*1e6);
 
@@ -283,6 +300,11 @@ int main(int argc,char *argv[])
 
   printf("Initial Setup Complete: Station ID: %s  %d\n",ststr,stid);
 
+  /* Initialize timing variables */
+  elapsed_secs=0;
+  gettimeofday(&t1,NULL);
+  gettimeofday(&t0,NULL);
+
   if (discretion) cp = -cp;
 
   OpsLogStart(errlog.sock,progname,argc,argv);
@@ -301,21 +323,31 @@ int main(int argc,char *argv[])
 
   if (FreqTest(ftable,fixfrq) == 1) fixfrq = 0;
 
-  skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
-
-  if (backward) {
-    bmnum=sbm-skip;
-    if (bmnum<ebm) bmnum=sbm;
-  } else {
-    bmnum=sbm+skip;
-    if (bmnum>ebm) bmnum=sbm;
-  }
-
   printf("Entering Scan loop Station ID: %s  %d\n",ststr,stid);
   do {
 
+    /* reset clearfreq parameters, in case daytime changed */
+    for (iBeam=0; iBeam < nBeams_per_scan; iBeam++) {
+      scan_clrfreq_fstart_list[iBeam] = (int32_t) (OpsDayNight() == 1 ? dfrq : nfrq);
+      scan_clrfreq_bandwidth_list[iBeam] = frqrng;
+    }
+
+    /* set iBeam for scan loop */
+    if (nowait == 0) {
+      iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,nBeams_per_scan);
+    } else {
+      iBeam = 0;
+    }
+
+    /* send scan data to usrp_sever */
     printf("Entering Site Start Scan Station ID: %s  %d\n",ststr,stid);
-    if (SiteStartScan() !=0) continue;
+    if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list,
+                      scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times,
+                      scnsc, scnus, intsc, intus, iBeam) !=0) {
+      ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");
+      sleep(1);
+      continue;
+    }
 
     TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
@@ -329,6 +361,7 @@ int main(int argc,char *argv[])
     scan = 1;   /* scan flag */
 
     ErrLog(errlog.sock,progname,"Starting scan.");
+    if (clrscan) startup=1;
     if (xcnt>0) {
       cnt++;
       if (cnt==xcnt) {
@@ -339,12 +372,15 @@ int main(int argc,char *argv[])
 
     do {
 
+      bmnum = scan_beam_number_list[iBeam];
+
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
-      if (OpsDayNight()==1) {
-        stfrq=dfrq;
-      } else {
-        stfrq=nfrq;
+      stfrq = scan_clrfreq_fstart_list[iBeam];
+      if (fixfrq > 0) {
+        stfrq=fixfrq;
+        tfreq=fixfrq;
+        noise=0;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",
@@ -356,13 +392,21 @@ int main(int argc,char *argv[])
       SiteStartIntt(intsc,intus);
 
       /* clear frequency search business */
-      ErrLog(errlog.sock,progname,"Doing clear frequency search.");
-      sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
-      ErrLog(errlog.sock,progname, logtxt);
-      tfreq=SiteFCLR(stfrq,stfrq+frqrng);
+      gettimeofday(&t1,NULL);
+      elapsed_secs=t1.tv_sec-t0.tv_sec;
+      if (elapsed_secs<0) elapsed_secs=0;
+      if ((elapsed_secs >= clrskip) || (startup==1)) {
+          startup = 0;
+          ErrLog(errlog.sock,progname,"Doing clear frequency search.");
+          sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
+          ErrLog(errlog.sock,progname, logtxt);
 
-      if (fixfrq > 0) tfreq = fixfrq;
-
+          if (fixfrq<=0) {
+              tfreq=SiteFCLR(stfrq,stfrq+frqrng);
+          }
+          t0.tv_sec  = t1.tv_sec;
+          t0.tv_usec = t1.tv_usec;
+      }
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
@@ -415,16 +459,14 @@ int main(int argc,char *argv[])
       RadarShell(shell.sock,&rstable);
 
       scan = 0;
-      if (bmnum == ebm) break;
 
-      if (backward) bmnum--;
-      else bmnum++;
+      iBeam++;
+      if (iBeam >= nBeams_per_scan) break;
 
     } while (1);
 
-    bmnum = sbm;
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
-    SiteEndScan(scnsc,scnus,5000);
+    if (nowait==0) SiteEndScan(scnsc,scnus,5000);
 
   } while (1);
 
@@ -461,6 +503,9 @@ void usage(void)
     printf("    -sp int : shell port\n");
     printf("    -bp int : base port\n");
     printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
+    printf("-nowait     : do not wait at end of scan boundary.\n");
+    printf("-clrscan    : Force clear frequency search at start of scan\n");
+    printf("-clrskip int: Minimum number of seconds to skip between clear frequency search\n");
     printf("-frqrng int : set the clear frequency search window (kHz)\n");
     printf("     -c int : channel number for multi-channel radars.\n");
     printf("   -ros char: change the roshost IP address\n");
