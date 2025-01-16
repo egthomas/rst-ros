@@ -508,7 +508,7 @@ void usage(void)
   printf("    -bp int : base port\n");
   printf("-nowait     : Do not wait for minute scan boundary\n");
   printf("-clrscan    : Force clear frequency search at start of scan\n");
-  printf("-clrskip int : Minimum number of seconds to skip between clear frequency search\n");
+  printf("-clrskip int: Minimum number of seconds to skip between clear frequency search\n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
   printf("     -c int : channel number for multi-channel radars.\n");
   printf("   -ros char: change the roshost IP address.\n");
