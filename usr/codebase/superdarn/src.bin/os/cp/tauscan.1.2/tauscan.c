@@ -112,6 +112,7 @@ int main(int argc,char *argv[]) {
   mpinc=seq->mpinc;
   rsep=45;
   txpl=300;
+  nbaud=1;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 

@@ -140,6 +140,7 @@ int main(int argc,char *argv[]) {
   mpinc  = seq->mpinc;  /* multi-pulse increment [us] */
   rsep   = 45;          /* same for the range separation */
   txpl   = 300;         /* pulse length [us]; gets redefined below... */
+  nbaud  = 1;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
 
