@@ -98,7 +98,7 @@ int operate(pid_t parent,int sock) {
   int32_t sbeam_list[100];
   int32_t clrfrq_fstart[100];
   int32_t clrfrq_bw[100];
-  int32_t *beam_times;
+  int32_t beam_times[100];
 
   memset(&rprm,0,sizeof(struct ControlPRM));
   memset(&fprm,0,sizeof(struct CLRFreqPRM));
@@ -170,8 +170,6 @@ int operate(pid_t parent,int sock) {
 
         TCPIPMsgRecv(sock, &start_period, sizeof(int32_t));
         if (sync_scan == 1) {
-          if (beam_times !=NULL) free(beam_times);
-          beam_times = malloc(periods_per_scan*sizeof(int));
           TCPIPMsgRecv(sock, &beam_times, periods_per_scan*sizeof(int32_t));
         }
 
