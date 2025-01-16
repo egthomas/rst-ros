@@ -232,18 +232,18 @@ int main(int argc,char *argv[]) {
 
   nBeams_per_scan = nintgs;
 
-  /* Automatically calculate the integration times */
-  total_scan_usecs = (scnsc-3)*1E6 + scnus;
-  total_integration_usecs = total_scan_usecs/nBeams_per_scan;
-  intsc = total_integration_usecs/1E6;
-  intus = total_integration_usecs - (intsc*1E6);
-
   sync_scan = 1;
   scan_times = malloc(nBeams_per_scan*sizeof(int));
   for (iBeam = 0; iBeam < nBeams_per_scan; iBeam++) {
     scan_beam_number_list[iBeam] = bms[iBeam];
     scan_times[iBeam] = iBeam * (intsc*1000 + intus/1000); /* in ms */
   }
+
+  /* Automatically calculate the integration times */
+  total_scan_usecs = (scnsc-3)*1E6 + scnus;
+  total_integration_usecs = total_scan_usecs/nBeams_per_scan;
+  intsc = total_integration_usecs/1E6;
+  intus = total_integration_usecs - (intsc*1E6);
 
   /* Configure phasecoded operation if nbaud > 1 */
   pcode=(int *)malloc((size_t)sizeof(int)*seq->mppul*nbaud);
