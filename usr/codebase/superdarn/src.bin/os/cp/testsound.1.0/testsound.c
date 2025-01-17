@@ -309,8 +309,8 @@ int main(int argc,char *argv[])
   sync_scan = 0;
 
   for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
-     scan_beam_number_list[iBeam] = current_beam;
-     current_beam += backward ? -1:1;
+    scan_beam_number_list[iBeam] = current_beam;
+    current_beam += backward ? -1:1;
   }
 
   snd_nBeams_per_scan = (snd_sc-time_needed)/(snd_intt_sc + snd_intt_us*1e-6);

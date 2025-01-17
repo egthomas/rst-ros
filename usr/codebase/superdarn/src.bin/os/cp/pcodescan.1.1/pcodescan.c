@@ -274,9 +274,9 @@ int main(int argc,char *argv[]) {
   }
 
   for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
-     scan_beam_number_list[iBeam] = current_beam;
-     current_beam += backward ? -1:1;
-     if (bm_sync) scan_times[iBeam] = iBeam * (bmsc*1000 + bmus/1000); /* in ms*/
+    scan_beam_number_list[iBeam] = current_beam;
+    current_beam += backward ? -1:1;
+    if (bm_sync) scan_times[iBeam] = iBeam * (bmsc*1000 + bmus/1000); /* in ms*/
   }
 
   if ((nowait==0) && (setintt==0)) {

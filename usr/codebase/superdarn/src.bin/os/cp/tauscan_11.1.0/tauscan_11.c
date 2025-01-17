@@ -224,8 +224,8 @@ int main(int argc,char *argv[]) {
   }
 
   for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
-     scan_beam_number_list[iBeam] = current_beam;
-     current_beam += backward ? -1:1;
+    scan_beam_number_list[iBeam] = current_beam;
+    current_beam += backward ? -1:1;
   }
 
   /* some trickery to get integration time from beams and total scan time */
