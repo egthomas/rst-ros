@@ -528,7 +528,6 @@ int main(int argc,char *argv[]) {
     for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
       scan_clrfreq_fstart_list[iBeam] = (int32_t) (OpsDayNight() == 1 ? dfrq : nfrq);
       scan_clrfreq_bandwidth_list[iBeam] = frqrng;
-      current_beam += backward ? -1:1;
     }
 
     /* Set iBeam for scan loop  */
