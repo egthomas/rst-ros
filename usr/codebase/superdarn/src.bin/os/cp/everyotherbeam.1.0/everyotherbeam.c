@@ -156,6 +156,9 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt,"sp",    'i',&shell.port);
   OptionAdd(&opt,"bp",    'i',&baseport);
   OptionAdd(&opt,"stid",  't',&ststr);
+  OptionAdd(&opt,"nowait",'x',&nowait);
+  OptionAdd(&opt,"clrscan",'x',&clrscan);
+  OptionAdd(&opt,"clrskip",'i',&clrskip);
   OptionAdd(&opt,"fixfrq",'i',&fixfrq);   /* fix the transmit frequency */
   OptionAdd(&opt,"ros",   't',&roshost);  /* Set the roshost IP address */
   OptionAdd(&opt,"c",     'i',&cnum);
