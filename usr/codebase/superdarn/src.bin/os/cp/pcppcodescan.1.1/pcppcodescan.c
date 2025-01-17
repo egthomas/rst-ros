@@ -22,7 +22,7 @@ declaration.
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <zlib.h>
 #include "rtypes.h"
@@ -95,11 +95,29 @@ int main(int argc,char *argv[]) {
 
   int scnsc=60;
   int scnus=0;
-  int skip;
 /*  int cnt=0; */
+
+  /* Variables for controlling clear frequency search */
+  struct timeval t0,t1;
+  int elapsed_secs=0;
+  int clrskip=-1;
+  int startup=1;
+  int fixfrq=0;
+  int clrscan=0;
+
+  int total_scan_usecs=0;
+  int total_integration_usecs=0;
+  int def_intt_sc=0;
+  int def_intt_us=0;
 
   unsigned char fast=0;
   unsigned char discretion=0;
+
+  int32_t snd_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_clrfreq_fstart_list[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_beam_number_list[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_nBeams_per_scan = 0;
+  int snd_sc = 10;
 
   unsigned char option=0;
   unsigned char version=0;
@@ -149,6 +167,8 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "bp",  'i', &baseport);
   OptionAdd(&opt, "stid",'t', &ststr);
   OptionAdd(&opt, "fast",'x', &fast);
+  OptionAdd(&opt, "clrscan",'x', &clrscan);
+  OptionAdd(&opt, "clrskip",'i', &clrskip);
   OptionAdd(&opt, "c",   'i', &cnum);
   OptionAdd(&opt, "ros", 't', &roshost);  /* Set the roshost IP address */
   OptionAdd(&opt, "debug",'x', &debug);
@@ -223,10 +243,29 @@ int main(int argc,char *argv[]) {
                   &dfrq,&nfrq,
                   &frqrng,&xcnt);
 
-  scnsc=60;
-  scnus=0;
-  intsc=2;
-  intus=0;
+  sync_scan = 0;
+  nBeams_per_scan = abs(ebm-sbm)+1;
+  current_beam = sbm;
+
+  for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
+    scan_beam_number_list[iBeam] = current_beam;
+    current_beam += backward ? -1:1;
+  }
+
+  total_scan_usecs = (scnsc-snd_sc-3)*1e6 + scnus;
+  total_integration_usecs = total_scan_usecs/nBeams_per_scan;
+  def_intt_sc = total_integration_usecs/1e6;
+  def_intt_us = total_integration_usecs - (def_intt_sc*1e6);
+
+  intsc = def_intt_sc;
+  intus = def_intt_us;
+
+  snd_nBeams_per_scan = PCPFNUM;
+  for (pcpcnt = 0; pcpcnt < snd_nBeams_per_scan; pcpcnt++) {
+    snd_beam_number_list[pcpcnt] = PCPBEAM;
+    snd_clrfreq_fstart_list[pcpcnt] = pcpfreqs[pcpcnt];
+    snd_clrfreq_bandwidth_list[pcpcnt] = frqrng;
+  }
 
   txpl=(nbaud*rsep*20)/3;
 
@@ -270,6 +309,11 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
+  /* Initialize timing variables */
+  elapsed_secs=0;
+  gettimeofday(&t1,NULL);
+  gettimeofday(&t0,NULL);
+
   cp=PCPCPID;    /* why do we need this block? SGS */
 
   if (discretion) cp= -cp;
@@ -299,13 +343,24 @@ int main(int argc,char *argv[]) {
 
   do {
 
-     cp=PCPCPID;    /* does the cp ever change? SGS */
-     scnsc=60;      /* this never changes and is defined 3 times... SGS */
-     scnus=0;       /* this one too... SGS */
-     intsc=2;
-     intus=500000;
+    /* reset clearfreq parameters, in case daytime changed */
+    for (iBeam=0; iBeam < nBeams_per_scan; iBeam++) {
+      scan_clrfreq_fstart_list[iBeam] = (int32_t) (OpsDayNight() == 1 ? dfrq : nfrq);
+      scan_clrfreq_bandwidth_list[iBeam] = frqrng;
+    }
 
-    if (SiteStartScan() !=0) continue;
+    /* set iBeam for scan loop */
+    iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,nBeams_per_scan);
+
+    /* send scan data to usrp_sever */
+    printf("Entering Site Start Scan Station ID: %s  %d\n",ststr,stid);
+    if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list,
+                      scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times,
+                      scnsc, scnus, intsc, intus, iBeam) !=0) {
+      ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");
+      sleep(1);
+      continue;
+    }
 
     TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
@@ -323,24 +378,19 @@ int main(int argc,char *argv[]) {
     xcf=1;      /*  FHR unable to do xcf at this time  21Dec2011  */
                 /* who cannot do xcfs? should this be turned on? SGS */
 
-    skip=OpsFindSkip(scnsc,scnus,intsc,intus,0);
-
-    if (backward) {
-      bmnum=sbm-skip;
-      if (bmnum<ebm) bmnum=sbm;
-    } else {
-      bmnum=sbm+skip;
-      if (bmnum>ebm) bmnum=sbm;
-    }
+    if (clrscan) startup=1;
 
     do {
 
+      bmnum = scan_beam_number_list[iBeam];
+
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
-      if (OpsDayNight()==1) {
-        stfrq=dfrq;
-      } else {
-        stfrq=nfrq;
+      stfrq = scan_clrfreq_fstart_list[iBeam];
+      if (fixfrq > 0) {
+        stfrq=fixfrq;
+        tfreq=fixfrq;
+        noise=0;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,
@@ -350,12 +400,22 @@ int main(int argc,char *argv[]) {
 
       SiteStartIntt(intsc,intus);
 
-      ErrLog(errlog.sock,progname,"Doing clear frequency search.");
-      sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
-      ErrLog(errlog.sock,progname, logtxt);
+      /* clear frequency search business */
+      gettimeofday(&t1,NULL);
+      elapsed_secs=t1.tv_sec-t0.tv_sec;
+      if (elapsed_secs<0) elapsed_secs=0;
+      if ((elapsed_secs >= clrskip) || (startup==1)) {
+          startup = 0;
+          ErrLog(errlog.sock,progname,"Doing clear frequency search.");
+          sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
+          ErrLog(errlog.sock,progname, logtxt);
 
-      tfreq=SiteFCLR(stfrq,stfrq+frqrng);
-
+          if (fixfrq<=0) {
+              tfreq=SiteFCLR(stfrq,stfrq+frqrng);
+          }
+          t0.tv_sec  = t1.tv_sec;
+          t0.tv_usec = t1.tv_usec;
+      }
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
 
@@ -404,21 +464,34 @@ int main(int argc,char *argv[]) {
 
       RadarShell(shell.sock,&rstable);
 
-      scan=0;
-      if (bmnum==ebm) break;        /* it seems that it is critical that the
-                                       number of beams must fit within the
-                                       integration time, no? SGS */
-      if (backward) bmnum--;
-      else bmnum++;
+      scan = 0;
+
+      iBeam++;
+      if (iBeam >= nBeams_per_scan) break;
 
     } while (1);
+
     /* ** Single beam sounding to fill remaining time ******************* */
     scan=-2;
-    bmnum=PCPBEAM;
     intsc=1;
     intus=0;
-    for (pcpcnt=0;pcpcnt<PCPFNUM;pcpcnt++) {
-      stfrq=pcpfreqs[pcpcnt];
+
+    pcpcnt = 0;
+
+    /* send sounding scan data to usrp_sever */
+    if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list,
+                      snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_sc, 0,
+                      intsc, intus, pcpcnt) !=0) {
+      ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");
+      sleep(1);
+      continue;
+    }
+
+    for (pcpcnt=0; pcpcnt<PCPFNUM; pcpcnt++) {
+
+      bmnum = snd_beam_number_list[pcpcnt];
+      stfrq = snd_clrfreq_fstart_list[pcpcnt];
+
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
       sprintf(logtxt,"Sounding beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,
@@ -480,6 +553,10 @@ int main(int argc,char *argv[]) {
       }
     }
     /* ************************** END Single beam sounding to fill remaining time ******************* */
+
+    intsc = def_intt_sc;
+    intus = def_intt_us;
+
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
     SiteEndScan(scnsc,scnus,5000);
 
