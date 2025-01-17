@@ -1,6 +1,6 @@
 /* eclipsesound.c
- ================
- Author: E.G.Thomas
+   ==============
+   Author: E.G.Thomas
 
  */
 
@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <zlib.h>
 #include "rtypes.h"
@@ -76,17 +76,25 @@ int main(int argc,char *argv[]) {
 
   int scnsc=60;
   int scnus=0;
+  int total_scan_usecs=0;
+  int total_integration_usecs=0;
 
-  int skip;
   int cnt=0;
   int i,n;
   unsigned char discretion=0;
   int status=0;
-  int fixfrq=0;
 
   int def_nrang=0;
   int def_rsep=0;
   int def_txpl=0;
+
+  /* Variables for controlling clear frequency search */
+  struct timeval t0,t1;
+  int elapsed_secs=0;
+  int clrskip=-1;
+  int startup=1;
+  int fixfrq=0;
+  int clrscan=0;
 
   /* new variables for dynamically creating beam sequences */
   int *bms;           /* scanning beams                         */
@@ -94,6 +102,14 @@ int main(int argc,char *argv[]) {
 
   unsigned char iq_flg=0;
   unsigned char raw_flg=0;
+
+  int32_t snd_clrfreq_bandwidth_list[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_clrfreq_fstart_list[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_beam_number_list[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_bc[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_fc[MAX_INTEGRATIONS_PER_SCAN];
+  int32_t snd_nBeams_per_scan = 0;
+  int snd_iBeam;
 
   unsigned char hlp=0;
   unsigned char option=0;
@@ -118,6 +134,7 @@ int main(int argc,char *argv[]) {
   int snd_nrang=100;
   int snd_rsep=45;
   int snd_txpl=300;
+  int snd_sc=30;
   int fast_intt_sc=2;
   int fast_intt_us=500000;
   int snd_intt_sc=1;
@@ -137,6 +154,7 @@ int main(int argc,char *argv[]) {
   mpinc  = seq->mpinc;
   rsep   = 45;
   txpl   = 300;     /* note: recomputed below */
+  nbaud  = 1;
 
   /* ========= PROCESS COMMAND LINE ARGUMENTS ============= */
   OptionAdd(&opt,"di",    'x',&discretion);
@@ -226,15 +244,34 @@ int main(int argc,char *argv[]) {
     return (-1);
   }
 
+  nBeams_per_scan = nintgs;
+  sync_scan = 0;
+
+  for (iBeam = 0; iBeam < nBeams_per_scan; iBeam++) {
+    scan_beam_number_list[iBeam] = bms[iBeam];
+  }
+
+  /* Automatically calculate the integration times */
+  total_scan_usecs = (scnsc-snd_sc-3)*1E6 + scnus;
+  total_integration_usecs = total_scan_usecs/nBeams_per_scan;
+  fast_intt_sc = total_integration_usecs/1E6;
+  fast_intt_us = total_integration_usecs - (fast_intt_sc*1e6);
+
   intsc = fast_intt_sc;
   intus = fast_intt_us;
 
   snd_intt = snd_intt_sc + snd_intt_us*1e-6;
 
+  /* Configure phasecoded operation if nbaud > 1 */
+  pcode=(int *)malloc((size_t)sizeof(int)*seq->mppul*nbaud);
+  OpsBuildPcode(nbaud,seq->mppul,pcode);
+
   OpsStart(ststr);
 
   /* Load the sounding frequencies */
   OpsLoadSndFreqs(ststr);
+
+  snd_nBeams_per_scan = snd_bms_tot*snd_freqs_tot;
 
   status=SiteBuild(libstr);
   if (status==-1) {
@@ -290,9 +327,14 @@ int main(int argc,char *argv[]) {
     exit(1);
   }
 
+  /* Initialize timing variables */
+  elapsed_secs=0;
+  gettimeofday(&t1,NULL);
+  gettimeofday(&t0,NULL);
+
   if (discretion) cp = -cp;
 
-  txpl=(rsep*20)/3;     /* computing TX pulse length */
+  txpl=(nbaud*rsep*20)/3;     /* computing TX pulse length */
 
   def_nrang = nrang;
   def_rsep = rsep;
@@ -321,7 +363,23 @@ int main(int argc,char *argv[]) {
       tsgid=SiteTimeSeq(seq->ptab);  /* get the timing sequence */
     }
 
-    if (SiteStartScan() !=0) continue;
+    /* reset clearfreq paramaters, in case daytime changed */
+    for (iBeam =0; iBeam < nBeams_per_scan; iBeam++) {
+      scan_clrfreq_fstart_list[iBeam] = (int32_t) (OpsDayNight() == 1 ? dfrq : nfrq);
+      scan_clrfreq_bandwidth_list[iBeam] = frqrng;
+    }
+
+    /* Set iBeam for scan loop  */
+    iBeam = OpsFindSkip(scnsc,scnus,intsc,intus,nBeams_per_scan);
+
+    /* send scan data to usrp_sever */
+    if (SiteStartScan(nBeams_per_scan, scan_beam_number_list, scan_clrfreq_fstart_list,
+                      scan_clrfreq_bandwidth_list, fixfrq, sync_scan, scan_times,
+                      scnsc, scnus, intsc, intus, iBeam) !=0) {
+      ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");
+      sleep(1);
+      continue;
+    }
 
     TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
     if (OpsReOpen(2,0,0) !=0) {
@@ -336,6 +394,7 @@ int main(int argc,char *argv[]) {
 
     ErrLog(errlog.sock,progname,"Starting scan.");
 
+    if (clrscan) startup=1;
     if (xcnt>0) {
       cnt++;
       if (cnt==xcnt) {
@@ -344,18 +403,17 @@ int main(int argc,char *argv[]) {
       } else xcf=0;
     } else xcf=0;
 
-    skip = OpsFindSkip(scnsc,scnus,intsc,intus,nintgs);
-
-    bmnum = bms[skip];      /* no longer need forward and backward arrays... */
-
     do {
+
+      bmnum = scan_beam_number_list[iBeam];
 
       TimeReadClock(&yr,&mo,&dy,&hr,&mt,&sc,&us);
 
-      if (OpsDayNight()==1) {
-        stfrq=dfrq;
-      } else {
-        stfrq=nfrq;
+      stfrq = scan_clrfreq_fstart_list[iBeam];
+      if (fixfrq > 0) {
+        stfrq=fixfrq;
+        tfreq=fixfrq;
+        noise=0;
       }
 
       sprintf(logtxt,"Integrating beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,
@@ -365,15 +423,24 @@ int main(int argc,char *argv[]) {
       ErrLog(errlog.sock,progname,"Starting Integration.");
       SiteStartIntt(intsc,intus);
 
-      ErrLog(errlog.sock,progname,"Doing clear frequency search.");
-      sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
-      ErrLog(errlog.sock,progname, logtxt);
-      tfreq=SiteFCLR(stfrq,stfrq+frqrng);
+      gettimeofday(&t1,NULL);
+      elapsed_secs=t1.tv_sec-t0.tv_sec;
+      if (elapsed_secs<0) elapsed_secs=0;
+      if ((elapsed_secs >= clrskip) || (startup==1)) {
+          startup = 0;
+          ErrLog(errlog.sock,progname,"Doing clear frequency search.");
+          sprintf(logtxt, "FRQ: %d %d", stfrq, frqrng);
+          ErrLog(errlog.sock,progname, logtxt);
 
-      if (fixfrq > 0) tfreq = fixfrq;
-
+          if (fixfrq<=0) {
+              tfreq=SiteFCLR(stfrq,stfrq+frqrng);
+          }
+          t0.tv_sec  = t1.tv_sec;
+          t0.tv_usec = t1.tv_usec;
+      }
       sprintf(logtxt,"Transmitting on: %d (Noise=%g)",tfreq,noise);
       ErrLog(errlog.sock,progname,logtxt);
+
       nave=SiteIntegrate(seq->lags);
       if (nave<0) {
         sprintf(logtxt,"Integration error: %d",nave);
@@ -423,9 +490,9 @@ int main(int argc,char *argv[]) {
       RadarShell(shell.sock,&rstable);
 
       scan = 0;
-      if (skip == (nintgs-1)) break;
-      skip++;
-      bmnum = bms[skip];
+
+      iBeam++;
+      if (iBeam >= nBeams_per_scan) break;
 
     } while (1);
 
@@ -445,6 +512,43 @@ int main(int argc,char *argv[]) {
     rsep = snd_rsep;
     txpl = snd_txpl;
 
+    for (snd_iBeam=0; snd_iBeam < snd_nBeams_per_scan; snd_iBeam++) {
+      snd_beam_number_list[snd_iBeam] = snd_bms[snd_bm_cnt];
+      snd_clrfreq_fstart_list[snd_iBeam] = snd_freqs[snd_freq_cnt];
+      snd_clrfreq_bandwidth_list[snd_iBeam] = snd_frqrng;
+      snd_bc[snd_iBeam] = snd_bm_cnt;
+      snd_fc[snd_iBeam] = snd_freq_cnt;
+
+      snd_freq_cnt++;
+      if (snd_freq_cnt >= snd_freqs_tot) {
+        /* reset the freq counter and increment the beam counter */
+        snd_freq_cnt = 0;
+        snd_bm_cnt++;
+        if (snd_bm_cnt >= snd_bms_tot) {
+          snd_bm_cnt = 0;
+        }
+      }
+    }
+
+    /* Print out details of sounding beams */
+    fprintf(stderr, "Sounding sequence details: \n");
+    for (snd_iBeam =0; snd_iBeam < snd_nBeams_per_scan; snd_iBeam++) {
+      fprintf(stderr, "  sequence %2d: beam: %2d freq: %5d, \n",snd_iBeam,
+              snd_beam_number_list[snd_iBeam], snd_clrfreq_fstart_list[snd_iBeam] );
+    }
+
+    snd_iBeam = 0;
+    sync_scan = 0;
+
+    /* send sounding scan data to usrp_sever */
+    if (SiteStartScan(snd_nBeams_per_scan, snd_beam_number_list, snd_clrfreq_fstart_list,
+                      snd_clrfreq_bandwidth_list, 0, sync_scan, scan_times, snd_sc, 0,
+                      snd_intt_sc, snd_intt_us, snd_iBeam) !=0) {
+      ErrLog(errlog.sock,progname,"Received error from usrp_server in ROS:SiteStartScan. Probably channel frequency issue in SetActiveHandler.");
+      sleep(1);
+      continue;
+    }
+
     /* make a new timing sequence for the sounding */
     if ((def_nrang != snd_nrang) || (def_rsep != snd_rsep)) {
       tsgid = SiteTimeSeq(seq->ptab);
@@ -458,10 +562,10 @@ int main(int argc,char *argv[]) {
     while (snd_time-snd_intt > time_needed) {
 
       /* set the beam */
-      bmnum = snd_bms[snd_bm_cnt];
+      bmnum = snd_beam_number_list[snd_iBeam];
 
       /* snd_freq will be an array of frequencies to step through */
-      snd_freq = snd_freqs[snd_freq_cnt];
+      snd_freq = snd_clrfreq_fstart_list[snd_iBeam];
 
       /* the scanning code is here */
       sprintf(logtxt,"Integrating SND beam:%d intt:%ds.%dus (%02d:%02d:%02d:%06d)",bmnum,intsc,intus,hr,mt,sc,us);
@@ -505,7 +609,7 @@ int main(int argc,char *argv[]) {
              (msg.data[n].type == FIT_TYPE) )  free(msg.ptr[n]);
       }
 
-      sprintf(logtxt, "SBC: %d  SFC: %d", snd_bm_cnt, snd_freq_cnt);
+      sprintf(logtxt, "SBC: %d  SFC: %d", snd_bc[snd_iBeam], snd_fc[snd_iBeam]);
       ErrLog(errlog.sock, progname, logtxt);
 
       /* set the scan variable for the sounding mode data file only */
@@ -529,17 +633,8 @@ int main(int argc,char *argv[]) {
 
       ErrLog(errlog.sock, progname, "Polling SND for exit.");
 
-      /* check for the end of a beam loop */
-      snd_freq_cnt++;
-      if (snd_freq_cnt >= snd_freqs_tot) {
-        /* reset the freq counter and increment the beam counter */
-        snd_freq_cnt = 0;
-        snd_bm_cnt++;
-        if (snd_bm_cnt >= snd_bms_tot) {
-          snd_bm_cnt = 0;
-          break;
-        }
-      }
+      snd_iBeam++;
+      if (snd_iBeam >= snd_nBeams_per_scan) break;
 
       /* see if we have enough time for another go round */
       TimeReadClock(&yr, &mo, &dy, &hr, &mt, &sc, &us);
@@ -548,6 +643,9 @@ int main(int argc,char *argv[]) {
 
     /* now wait for the next scan */
     ErrLog(errlog.sock,progname,"Waiting for scan boundary.");
+
+    snd_bm_cnt = 0;
+    snd_freq_cnt = 0;
 
     intsc = fast_intt_sc;
     intus = fast_intt_us;
