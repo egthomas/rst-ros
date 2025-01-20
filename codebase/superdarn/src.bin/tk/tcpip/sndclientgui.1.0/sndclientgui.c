@@ -123,7 +123,7 @@ void draw_colorbar(struct PlotOptions *plot);
 
 int rst_opterr(char *txt) {
   fprintf(stderr,"Option not recognized: %s\n",txt);
-  fprintf(stderr,"Please try: fitacfclientgui --help\n");
+  fprintf(stderr,"Please try: sndclientgui --help\n");
   return(-1);
 }
 
