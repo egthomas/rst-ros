@@ -1,5 +1,5 @@
-# Makefile for normalsound_cv
-# ===========================
+# Makefile for normalsound
+# ========================
 #
 
 include $(MAKECFG).$(SYSTEM)
