@@ -1,15 +1,15 @@
-# Makefile for normalsound
-# ========================
+# Makefile for pcodesound
+# =======================
 #
 
 include $(MAKECFG).$(SYSTEM)
 
 INCLUDE=-I$(IPATH)/base -I$(IPATH)/general -I$(IPATH)/superdarn \
         -I$(USR_IPATH)/superdarn
-OBJS = normalsound.o
-SRC=normalsound.c
+OBJS = pcodesound.o
+SRC=pcodesound.c
 DSTPATH = $(USR_BINPATH)
-OUTPUT = normalsound
+OUTPUT = pcodesound
 LIBS= -lsite.1 -lradarshell.1 -lops.1 -lshmem.1 \
       -lrmsgsnd.1 -ltcpipmsg.1 -lerrlog.1 -lfreq.1 -lacfex.1 -lacf.1 \
       -lfit.1 -lraw.1 -lfitacf.1 -lsnd.1 -lcfit.1 -lrscan.1 -liqdata.1 -ltsg.1 \
