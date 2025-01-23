@@ -11,14 +11,14 @@ Parameters:
 nbeams: 16+
 intt: 6 s / 3 s
 scan: 1 min
-ngates: 75+
+ngates: 225+
 frang: 180 km
-rsep: 45 km
+rsep: 15 km
 
 Description:
 ===========
-pcodesound is a variant on the pcodescan radar control
-program that performs a 1- or 2-min scan in a sequential manner.
+pcodesound is a variant on the pcodescan and normalsound radar control
+programs that performs a 1- or 2-min scan in a sequential manner.
 In the remaining time until the end of the minute it performs
 scans through a set of up to 12 frequencies and through all
 beams [even/odd]. Note that unlike previous versions of normalsound,
