@@ -661,10 +661,10 @@ void usage(void)
     printf("  -stid char: radar string (required)\n");
     printf("    -di     : indicates running during discretionary time\n");
     printf(" -frang int : delay to first range (km) [180]\n");
-    printf("  -rsep int : range separation (km) [45]\n");
-    printf(" -nrang int : number of range gates\n");
+    printf("  -rsep int : range separation (km) [15]\n");
+    printf(" -nrang int : number of range gates [300]\n");
     printf("  -baud int : baud to use for Barker phase coded sequence (1,2,3,4,5,7,11,13) [5]\n");
-    printf("   -tau int : lag spacing in usecs\n");
+    printf("   -tau int : lag spacing in usecs [1500]\n");
     printf("    -dt int : hour when day freq. is used\n");
     printf("    -nt int : hour when night freq. is used\n");
     printf("    -df int : daytime frequency (kHz)\n");
