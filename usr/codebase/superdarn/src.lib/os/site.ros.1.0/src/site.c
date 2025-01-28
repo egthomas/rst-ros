@@ -598,6 +598,10 @@ int SiteRosTimeSeq(int *ptab) {
     else return -1;
   }
 
+  lagfr = tsgprm.lagfr;
+  smsep = tsgprm.smsep;
+  txpl  = tsgprm.txpl;
+
   tprm.index   = index;
 /*  memcpy(&tprm.buf,tsgbuf,sizeof(struct TSGbuf));*/
   tprm.len     = tsgbuf->len;
@@ -638,10 +642,6 @@ int SiteRosTimeSeq(int *ptab) {
   }
 
   if (rmsg.status != 0) return -2;
-
-  lagfr = tsgprm.lagfr;
-  smsep = tsgprm.smsep;
-  txpl  = tsgprm.txpl;
 
   return index;
 }
