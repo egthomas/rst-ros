@@ -13,8 +13,8 @@ default=11110   # Ray suggested 10800-11200
 #
 #    The following bands are defined by the license
 #
-0000  8970     # no transmissions below 9 MHz
-9965 10180     # 10 MHz time signal
+0000 8970       # no transmissions below 9 MHz
+9965 10180      # 10 MHz time signal
 11245 11430     # Air Emergency band
 13230 13440     # Second Air Emergency Band and Radio Astronomy Band
 13970 14380     # Amature Radar and Satellite Band
