@@ -102,7 +102,7 @@ int main(int argc,char *argv[]) {
   int status=0;
 
   int obm=10;
-  int nbm = 20;    /* default number of "beams" */
+  int nbm = 16;    /* default number of "beams" */
   int total_scan_usecs = 0;
   int total_integration_usecs = 0;
 
@@ -466,6 +466,7 @@ void usage(void)
   printf("-clrskip int: Minimum number of seconds to skip between clear frequency search\n");
   printf("-nowait     : do not wait at end of scan boundary.\n");
   printf("    -ob int : THE one beam\n");
+  printf("    -nb int : number of beams per scan [16]\n");
   printf("     -c int : channel number for multi-channel radars.\n");
   printf("   -ros char: change the roshost IP address\n");
   printf(" --help     : print this message and quit.\n");
