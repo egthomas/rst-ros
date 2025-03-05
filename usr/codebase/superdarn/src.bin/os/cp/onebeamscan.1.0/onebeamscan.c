@@ -154,9 +154,7 @@ int main(int argc,char *argv[]) {
   OptionAdd(&opt, "clrscan",'x', &clrscan);
   OptionAdd(&opt, "clrskip",'i', &clrskip);
   OptionAdd(&opt, "ob",     'i', &obm); /* one beam: i.e., THE beam */
-  OptionAdd(&opt, "nb",     'i', &nbm); /* number of beams per "scan"; default is 20 */
-  /*OptionAdd(&opt, "sb",     'i', &sbm);*/
-  /*OptionAdd(&opt, "eb",     'i', &ebm);*/
+  OptionAdd(&opt, "nb",     'i', &nbm); /* number of beams per "scan"; default is 16 */
   OptionAdd(&opt, "fixfrq", 'i', &fixfrq);   /* fix the transmit frequency */
   OptionAdd(&opt, "cpid",   'i', &cpid);     /* allow user to specify CPID */
   OptionAdd(&opt, "bm_sync",'x', &bm_sync);  /* flag to enable beam sync    */
@@ -515,7 +513,6 @@ void usage(void)
   printf("    -bp int : base port\n");
   printf("  -cpid int : set to override control program id\n");
   printf("-fixfrq int : transmit on fixed frequency (kHz)\n");
-  printf("-nowait     : Do not wait for minute scan boundary\n");
   printf("-clrscan    : Force clear frequency search at start of scan\n");
   printf("-clrskip int: Minimum number of seconds to skip between clear frequency search\n");
   printf("-nowait     : do not wait at end of scan boundary.\n");
