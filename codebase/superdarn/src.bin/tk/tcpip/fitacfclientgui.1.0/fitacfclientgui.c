@@ -32,6 +32,7 @@ Modifications:
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <zlib.h>
@@ -40,6 +41,7 @@ Modifications:
 #include "rtypes.h"
 #include "option.h"
 #include "dmap.h"
+#include "radar.h"
 #include "rprm.h"
 #include "fitdata.h"
 #include "connex.h"
@@ -111,10 +113,43 @@ int main(int argc,char *argv[]) {
   struct RadarParm *prm;
   struct FitData *fit;
 
+  struct RadarNetwork *network;
+
+  char *envstr=NULL;
+  FILE *fp;
+
   int c=0;
 
   prm=RadarParmMake();
   fit=FitMake();
+
+  envstr=getenv("SD_RADAR");
+  if (envstr==NULL) {
+    fprintf(stderr,"Environment variable 'SD_RADAR' must be defined.\n");
+    exit(-1);
+  }
+
+  fp=fopen(envstr,"r");
+
+  if (fp==NULL) {
+    fprintf(stderr,"Could not locate radar information file.\n");
+    exit(-1);
+  }
+
+  network=RadarLoad(fp);
+  fclose(fp);
+  if (network==NULL) {
+    fprintf(stderr,"Failed to read radar information.\n");
+    exit(-1);
+  }
+
+  envstr=getenv("SD_HDWPATH");
+  if (envstr==NULL) {
+    fprintf(stderr,"Environment variable 'SD_HDWPATH' must be defined.\n");
+    exit(-1);
+  }
+
+  RadarLoadHardware(envstr,network);
 
   OptionAdd(&opt,"-help",'x',&help);
   OptionAdd(&opt,"-option",'x',&option);
@@ -364,9 +399,11 @@ int main(int argc,char *argv[]) {
       /* Print date/time and radar operating parameters */
       move(0, 0);
       clrtoeol();
-      printw("%04d-%02d-%02d %02d:%02d:%02d\n",
+      printw("%04d-%02d-%02d %02d:%02d:%02d  %s (%s)\n",
              prm->time.yr,prm->time.mo,prm->time.dy,
-             prm->time.hr,prm->time.mt,prm->time.sc);
+             prm->time.hr,prm->time.mt,prm->time.sc,
+             RadarGetName(network,prm->stid),
+             RadarGetCode(network,prm->stid,0));
       clrtoeol();
       printw("stid  = %3d  cpid  = %d  channel = %d\n", prm->stid,prm->cp,prm->channel);
       clrtoeol();

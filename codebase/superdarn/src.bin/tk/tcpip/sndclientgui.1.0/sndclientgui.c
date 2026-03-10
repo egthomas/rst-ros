@@ -32,6 +32,7 @@ Modifications:
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <zlib.h>
@@ -40,6 +41,7 @@ Modifications:
 #include "rtypes.h"
 #include "option.h"
 #include "dmap.h"
+#include "radar.h"
 #include "rtime.h"
 #include "rprm.h"
 #include "fitdata.h"
@@ -114,7 +116,7 @@ void init_plot(struct PlotOptions *plot);
 int check_key(int c, struct PlotOptions *plot);
 void read_fit_data(struct RadarParm *prm, struct FitData *fit, struct FitBuffer *fbuf, struct PlotOptions *plot);
 void read_snd_data(struct RadarParm *prm, struct FitData *fit, struct SndBuffer *sbuf, struct PlotOptions *plot);
-void print_radar_param(struct RadarParm *prm, struct FitData *fit);
+void print_radar_param(struct RadarParm *prm, struct FitData *fit, struct RadarNetwork *network);
 void draw_menu(struct PlotOptions *plot);
 void draw_snd_data(struct RadarParm *prm, struct SndBuffer *sbuf, struct PlotOptions *plot);
 void draw_fit_data(struct RadarParm *prm, struct FitBuffer *fbuf, struct PlotOptions *plot);
@@ -144,6 +146,11 @@ int main(int argc,char *argv[]) {
   struct RadarParm *prm;
   struct FitData *fit;
 
+  struct RadarNetwork *network;
+
+  char *envstr=NULL;
+  FILE *fp;
+
   int c=0;
   int ret=0;
 
@@ -152,6 +159,34 @@ int main(int argc,char *argv[]) {
 
   prm=RadarParmMake();
   fit=FitMake();
+
+  envstr=getenv("SD_RADAR");
+  if (envstr==NULL) {
+    fprintf(stderr,"Environment variable 'SD_RADAR' must be defined.\n");
+    exit(-1);
+  }
+
+  fp=fopen(envstr,"r");
+
+  if (fp==NULL) {
+    fprintf(stderr,"Could not locate radar information file.\n");
+    exit(-1);
+  }
+
+  network=RadarLoad(fp);
+  fclose(fp);
+  if (network==NULL) {
+    fprintf(stderr,"Failed to read radar information.\n");
+    exit(-1);
+  }
+
+  envstr=getenv("SD_HDWPATH");
+  if (envstr==NULL) {
+    fprintf(stderr,"Environment variable 'SD_HDWPATH' must be defined.\n");
+    exit(-1);
+  }
+
+  RadarLoadHardware(envstr,network);
 
   init_plot(&plot);
 
@@ -293,7 +328,7 @@ int main(int argc,char *argv[]) {
       else                 read_fit_data(prm,fit,&fbuf,&plot);
 
       /* Print date/time and radar operating parameters */
-      print_radar_param(prm,fit);
+      print_radar_param(prm,fit,network);
 
       /* Draw a menu explaining the keyboard controls */
       draw_menu(&plot);
@@ -551,13 +586,15 @@ void read_snd_data(struct RadarParm *prm, struct FitData *fit,
 
 
 /* Print date/time and radar operating parameters */
-void print_radar_param(struct RadarParm *prm, struct FitData *fit) {
+void print_radar_param(struct RadarParm *prm, struct FitData *fit, struct RadarNetwork *network) {
 
   move(0, 0);
   clrtoeol();
-  printw("%04d-%02d-%02d %02d:%02d:%02d\n",
+  printw("%04d-%02d-%02d %02d:%02d:%02d  %s (%s)\n",
          prm->time.yr,prm->time.mo,prm->time.dy,
-         prm->time.hr,prm->time.mt,prm->time.sc);
+         prm->time.hr,prm->time.mt,prm->time.sc,
+         RadarGetName(network,prm->stid),
+         RadarGetCode(network,prm->stid,0));
   clrtoeol();
   printw("stid  = %3d  cpid  = %d  channel = %d\n", prm->stid,prm->cp,prm->channel);
   clrtoeol();
